@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+CLAUDE.local.md
+data/
+__pycache__/
+.venv/
+node_modules/
+dist/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+.claude/settings.local.json
+.claude/active_task
+.claude/version_seen

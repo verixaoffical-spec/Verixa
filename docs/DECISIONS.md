@@ -1,0 +1,34 @@
+# Decision Log
+
+## Template
+### D-XXX Title (date)
+- Context:
+- Options:
+- Decision:
+- Consequences:
+- Owner:
+
+### D-001 Config-driven model router, models undecided (2026-10-04)
+- Context: free tiers change often, proposal names Gemini + Groq, priority table prefers Groq/OpenRouter.
+- Options: hardcode one model; config-driven router with eval-based ordering.
+- Decision: router with config.yaml, final order decided after evals.
+- Consequences: need eval sets early, need ADK non-Gemini wrapper (T-017).
+- Owner: Farheen
+
+### D-002 Three human gates instead of two (2026-10-04)
+- Context: proposal text names run and filing gates, proposal diagram also shows test-case approval.
+- Decision: implement three gates. Confirm with supervisor.
+- Consequences: approvals table has gate column; extra UI step after drafting.
+- Owner: Both
+
+### D-003 Dependency gate and mandatory verification (2026-10-04)
+- Context: with two people and Claude Code, status drifts and work gets built on unfinished parts.
+- Decision: a hook blocks code edits unless the active task's dependencies are DONE and verified. DONE needs a PASS written by scripts/verify/run.py. Hooks, runner and verification files are protected from Claude edits.
+- Consequences: slower starts, fewer integration surprises. Bash-based writes are not blocked by the hook, so the rule in CLAUDE.md and code review cover that gap.
+- Owner: Both
+
+### D-004 Version tracking, v1.0 = FYP-1 complete (2026-10-04)
+- Context: we need an unambiguous point where FYP-1 is finished and FYP-2 may start.
+- Decision: v1.0 is reached only when every FYP-1 task (except recurring T-093) is DONE and verified. FYP-2 tasks are locked by the gate until then. Claude announces it in bold capitals: FYP-1 IS COMPLETED. NOW FYP-2.
+- Consequences: FYP-2 cannot start early even if FYP-1 has leftover small tasks. Close or re-scope them before the demo.
+- Owner: Both

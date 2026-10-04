@@ -1,0 +1,13 @@
+# Glossary
+- **Agent**: an LLM-driven worker with one job and a schema-checked output.
+- **Manager Agent**: supervisor that assigns, validates and retries workers. "Four agents" in the proposal = Manager + Analysis + Test + Report.
+- **Gate**: a point where a human must click before the run continues.
+- **deployment_pending**: test targets code not yet on staging, so it is not run and not counted as a failure.
+- **real_bug / timeout**: failure classes. Timeout is retried once.
+- **Coverage gap**: changed code with no matching test in the uploaded suite.
+- **Test Library**: parsed uploaded Playwright specs and Postman collection.
+- **Evidence**: screenshots, traces, console and network logs for a failed test.
+- **Eval set**: 20-30 labeled cases used to compare models per agent.
+- **Router**: llm/router.py, picks a model per agent from config with fallback.
+- **ADK**: Google Agent Development Kit.
+- **Newman**: command line runner for Postman collections.

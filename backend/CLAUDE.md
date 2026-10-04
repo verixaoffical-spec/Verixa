@@ -1,0 +1,11 @@
+# Backend rules (Python)
+- Layout: agents/, llm/, integrations/, api/, db/, evidence/.
+- All agent inputs and outputs are pydantic models. Labels are enums.
+- Agents never call a provider directly. Always go through llm/router.py.
+- Integrations hide behind small interfaces in integrations/ so the Jira community fallback can swap in.
+- Newman and Playwright run as subprocesses with timeouts and captured output.
+- Redact secrets in evidence/redaction.py before any LLM call.
+- Tests: pytest, in tests/. Eval cases in tests/evals/<agent>/.
+- Run: `ruff check . && mypy . && pytest`
+- Work only inside an active task (see root CLAUDE.md). Blocked tasks are not started.
+- Verify with scripts/verify/T-xxx.py using pytest, httpx and psql. Record via `python3 scripts/verify/run.py T-xxx`.

@@ -1,0 +1,1 @@
+One file per work session: `YYYY-MM-DD-name.md`. Created by /end-session from docs/templates/session.md. The newest dated file is read by /start-session. If the folder only has this README, there is no previous session.
