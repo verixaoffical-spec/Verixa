@@ -13,6 +13,21 @@ test-results/
 # verification logs are evidence: the gate checks their SHA256, so they must be committed
 !docs/verification-logs/*.log
 .DS_Store
+# from mid (T-010)
+*.py[cod]
+venv/
+*.db
+screenshots/
+logs/
+Thumbs.db
+*.docx
+*.doc
+*.pdf
+*.pptx
+*.xlsx
+~$*
+tests.txt
+frontend/dist/
 .claude/settings.local.json
 .claude/active_task
 .claude/version_seen

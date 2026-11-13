@@ -27,10 +27,10 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 ## Phases
 | Phase | Item | Backlog task | Status |
 |---|---|---|---|
-| P1 | Import mid code (no .md), keep its layout | T-010 (Arisha lead) | TODO, blocked |
-| P1 | Copy `.env` (done by the user, Claude never reads it); merge var names into `.env.example` | T-010 | TODO |
+| P1 | Import mid code (no .md), keep its layout | T-010 (Arisha lead) | DONE in code; task waits on branch protection |
+| P1 | Copy `.env` (done by the user, Claude never reads it); merge var names into `.env.example` | T-010 | DONE |
 | P1 | New database via `DATABASE_URL`, same 8 tables, schema-compare script | T-011, T-012 | TODO, waiting on "Spring" |
-| P1 | Run mid's existing tests in the new location | T-010 | TODO |
+| P1 | Run mid's existing tests in the new location | T-010 | DONE: 455 pass |
 | P2 | Analysis moved out of the API process into a worker using the DB as queue | new task needed | TODO |
 | P2 | Executor sandbox design (no secrets, staging-only egress, gVisor in prod) | new task needed | TODO |
 | P2 | Fetch diff by commit (`compare/base...head`) instead of two live calls | new task needed | TODO |
@@ -49,8 +49,8 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 ## Test cases needed
 | ID | What it proves | Kind | Status |
 |---|---|---|---|
-| TC-01 | Imported app starts and mid's existing pytest suite passes in Verixa | pytest | TODO |
-| TC-02 | No `.md` file from mid was imported; no `.env` is tracked by git | script | TODO |
+| TC-01 | Imported app starts and mid's existing test suite passes in Verixa | unittest | PASSING (in scripts/verify/T-010.py) |
+| TC-02 | No `.md` file from mid was imported; no `.env` is tracked by git | script | PASSING (in scripts/verify/T-010.py) |
 | TC-03 | New database has the same tables, columns and foreign keys as mid's | schema compare | TODO |
 | TC-04 | Diff is fetched by commit: a push between calls cannot mix two commits | pytest, mocked GitHub | TODO |
 | TC-05 | A result for an old commit is marked superseded, never posted as current | pytest | TODO |
@@ -77,3 +77,5 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 |---|---|---|
 | 2026-11-14 | Found and fixed the `*.log` ignore rule that made every verification invalid | `.gitignore` |
 | 2026-11-14 | Architecture review of mid and production plan agreed | this file |
+| 2026-11-14 | T-002 DONE and verified, committed on feat/T-002-project-setup | VERIFICATION.md |
+| 2026-11-14 | T-010: 169 mid files imported (no .md), .env copied by Farheen, 455 tests pass, frontend builds. Verify FAILS only on GitHub branch protection (owner must enable) | docs/verification-logs/T-010-2026-11-14-020521.log |

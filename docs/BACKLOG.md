@@ -24,7 +24,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 ## Phase 1: Environment (wk 3-4)
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
-| T-010 | Repo init, layout, branch protection | Arisha | Farheen | T-002 | TODO |
+| T-010 | Repo init, layout, branch protection | Arisha | Farheen | T-002 | IN PROGRESS |
 | T-011 | PostgreSQL + pgvector via docker compose | Farheen | Arisha | T-010 | TODO |
 | T-012 | Initial schema and migrations (DATA_MODEL.md) | Farheen | Arisha | T-011 | TODO |
 | T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | IN REVIEW |
