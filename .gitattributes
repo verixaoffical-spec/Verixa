@@ -1,0 +1,2 @@
+# Verification logs are hashed (SHA256) by the dependency gate: store them byte-for-byte, never convert line endings
+docs/verification-logs/*.log -text

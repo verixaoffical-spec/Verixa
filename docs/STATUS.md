@@ -1,8 +1,9 @@
 # Project Status
 
-Last updated: 2026-10-04 by: Farheen
+Last updated: 2026-11-14 by: Farheen (via Claude)
 Version: v0.0 (FYP-1 in progress). **v1.0 = FYP-1 COMPLETE.** Check with /version.
-Phase: Pre-build (Claude Code setup). Next: week 3-4 environment.
+Phase: D1 built, D2 risk scoring built and consolidated. Next: a verification run with real
+credentials, then the T-037 eval set.
 
 ## State legend
 - NOT STARTED
@@ -11,18 +12,42 @@ Phase: Pre-build (Claude Code setup). Next: week 3-4 environment.
 - WORKING : verified by scripts/verify/run.py with a PASS row in docs/VERIFICATION.md. Record date and command.
 - BROKEN : was working or built, now failing. Add note.
 
+## Consolidation, 2026-11-02
+
+D1 and the completed part of D2 now live as one working application in the **`mid/`** folder,
+outside this repository. The two source folders (`official_ui-main`, `multi-agents`) were treated
+as read-only and are byte-identical to before the merge (SHA256 over 87 and 40 files).
+
+Nothing is marked WORKING below, because **WORKING needs a PASS row in docs/VERIFICATION.md** and
+no verification script has been run for any of this work. "BUILT, UNVERIFIED" here is stronger than
+usual: the code exists, has 190 passing tests of its own, and has been exercised live against the
+shared Neon database, the real GitHub API and a real model — it simply has not been through
+`scripts/verify/run.py`. Writing `scripts/verify/T-0xx.py` for T-030 to T-033 and T-035 is the next
+step, and most of the assertions can be lifted from `mid/tests/` and `mid/scripts/live_check.py`.
+
+Live checks run on 2026-11-02 from `mid/`:
+- `python -m unittest tests.*` — 190 passed (SQLite)
+- `python -m scripts.check_database` — all checks passed on the shared Neon database; the Test
+  Agent's 8 runs / 195 results / 3 drafts fingerprinted unchanged
+- `python scripts/live_check.py` — 20/20 passed: signed webhook -> Analysis Agent -> Neon ->
+  dashboard API, then cleaned up. Wrong signature refused with 401 before any processing
+- a live analysis of `psf/requests#6500`: rules scored it Medium (5) using 21 real bug-fix commits
+  found in the touched module, and `groq/openai/gpt-oss-20b` wrote the reasoning and five test
+  areas, accepted by the Manager on attempt 1
+
 ## Feature status (FYP-I)
 | Feature | State | Tasks | Last verified | Verify with | Notes |
 |---|---|---|---|---|---|
-| Environment (DB, API, CI) | NOT STARTED | T-010..T-019 | | | |
-| D1 Connect GitHub + Jira, webhook | NOT STARTED | T-020..T-022 | | | |
-| D1 Upload + Test Library | NOT STARTED | T-023..T-025 | | | |
-| LLM router + fallback | NOT STARTED | T-026 | | | |
-| D2 Analysis Agent (risk) | NOT STARTED | T-030..T-037 | | | |
-| Manager Agent (built in wk 5-6) | NOT STARTED | T-035 | | | |
+| Environment (DB, API, CI) | IN PROGRESS | T-010..T-019 | | | FastAPI and the schema are built. No Alembic migrations, no CI, ADK session state is in memory not Postgres |
+| D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
+| D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
+| D1 Accounts + 2FA | BUILT, UNVERIFIED | (not in backlog) | 2026-11-02 live | mid: -m scripts.check_database | Email/password sign-in, password rotation, authenticator enrolment with an encrypted secret and 10 hashed recovery codes, cascading delete. GitHub sign-in untested (no OAuth app) |
+| LLM router + fallback | IN PROGRESS | T-026 | 2026-11-02 live | mid: scripts/live_check.py | The chain picks a model and a live Groq call succeeded. No config.yaml and no model_calls logging, so the task is not met as written |
+| D2 Analysis Agent (risk) | BUILT, UNVERIFIED | T-030..T-037 | 2026-11-02 live | mid: scripts/live_check.py | T-030..T-033 built and verified live against real GitHub. T-034 and T-037 not implemented. T-036 still Arisha's |
+| Manager Agent (built in wk 5-6) | BUILT, UNVERIFIED | T-035 | 2026-11-02 live | mid: tests/test_analysis_integration.py | Validation, feedback retry, cap at 3, escalation asserted end to end; a live run was accepted on attempt 1 |
 | D3 Test selection | NOT STARTED | T-040 | | | |
-| D3 Runners (Playwright, Newman) | NOT STARTED | T-041, T-042 | | | |
-| D3 Failure classification | NOT STARTED | T-043..T-045 | | | |
+| D3 Runners (Playwright, Newman) | NOT STARTED | T-041, T-042 | | | Exists in multi-agents/test_agent, still in its testing phase. Not consolidated |
+| D3 Failure classification | NOT STARTED | T-043..T-045 | | | As above |
 | D3 One-click run (gate 1) | NOT STARTED | T-046 | | | |
 | D3 Coverage gap drafting + gate 2 | NOT STARTED | T-047..T-049 | | | |
 | D4 Evidence capture + view | NOT STARTED | T-060..T-064 | | | |
@@ -34,24 +59,41 @@ Phase: Pre-build (Claude Code setup). Next: week 3-4 environment.
 ## Components health
 | Component | State | Notes |
 |---|---|---|
-| PostgreSQL + pgvector | NOT STARTED | |
-| FastAPI backend | NOT STARTED | |
-| React dashboard | NOT STARTED | |
-| GitHub webhook | NOT STARTED | |
-| Jira connection | NOT STARTED | |
+| PostgreSQL + pgvector | BUILT, UNVERIFIED | Shared Neon database, connected to and exercised live. Holds 3 users, 1 project, and the Test Agent's 8 runs / 195 results / 3 drafts. `risk_assessments` created, additive, empty. Still no Alembic migrations |
+| FastAPI backend | BUILT, UNVERIFIED | Boots, serves the API and the built frontend, 401 on protected routes, 401 on an unsigned webhook |
+| React dashboard | BUILT, UNVERIFIED | Integrations, Test Library, Security and the new Risk Analysis screen. typecheck and build clean. Not yet driven by Playwright |
+| Risk Analysis screen | BUILT, UNVERIFIED | New in `mid/`. Renders real stored agent output; no hardcoded risk values. The API behind it is verified live; the rendering itself has no UI test yet |
+| GitHub webhook | BUILT, UNVERIFIED | Signature verified first (wrong signature -> 401 before processing, verified live), 202 immediately, analysis in a background task, repeat deliveries filtered by (project, PR, head sha) |
+| Jira connection | BUILT, UNVERIFIED | OAuth and project listing in code. Client credentials missing, so never exercised for real |
+| Analysis Agent | BUILT, UNVERIFIED | Rule-based label verified by 24 unit tests and one live run on a real pull request. The model step ran live on Groq and was accepted on attempt 1 |
 | Playwright runner | NOT STARTED | |
 | Newman runner | NOT STARTED | |
-| Groq / OpenRouter / Gemini keys | NOT STARTED | check limits |
+| Groq / OpenRouter / Gemini keys | BUILT, UNVERIFIED | Groq and OpenRouter keys are configured in `mid/.env` and a live Groq call succeeded. Free-tier limits still unchecked (INTEGRATIONS.md). Gemini deliberately unset |
+| GitHub / Atlassian OAuth apps | IN PROGRESS | GitHub App set up by Farheen (2026-11-14), not yet verified: T-014 needs a human `run.py T-014 --manual`. Atlassian credentials still placeholders |
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE: 1 | IN PROGRESS: 1 | TODO: rest
+DONE and verified: T-001, T-002 (2026-11-14, `python3 scripts/verify/run.py T-002`). Thirteen are IN REVIEW
+(code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues
-(none)
+- Fixed 2026-11-14: `*.log` in .gitignore meant no verification log was ever kept, so every PASS
+  row was invalid and the whole backlog was blocked. T-001 re-verified by hand, T-002 re-run (D-006).
+- The GitHub and Atlassian OAuth client credentials are missing, so the one-login flow and
+  automatic webhook creation cannot be exercised. Everything else in D1 is verified live.
+- The existing account's GitHub/Atlassian token and two-step secret were encrypted with the
+  original official_ui-main SECRET_KEY and TOTP_ENCRYPTION_KEY, which were never committed. With
+  the newly generated keys in `mid/.env` that account must re-link and re-enrol. No data is lost,
+  only unreadable. Needs a DECISIONS.md entry.
+- No Alembic migrations (T-012). `risk_assessments` references `projects`, so from now on dropping
+  the app tables requires dropping the agent table first.
+- ADK session state is in memory, so a crash loses an in-flight analysis (T-016).
+- `/api/analysis/analyse` runs the agent inline and holds the request open for the length of the
+  model chain.
 
 ## Open questions
-- Final model choice per agent (T-090)
+- Final model choice per agent (T-090): a Groq key works; needs the T-037 eval set first
 - Which test repo and staging app for the demo (T-018)
 - Confirm three human gates with supervisor (T-092)
-- Retry cap value (default 2)
+- T-036: does Arisha's dashboard design replace the Risk Analysis screen built in `mid/`, or build
+  on it?

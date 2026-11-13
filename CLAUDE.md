@@ -64,7 +64,7 @@ Google ADK (Python), FastAPI, React + TypeScript, PostgreSQL + pgvector, Playwri
 
 ## Hard product rules
 - Three human gates, never bypass: (1) Run Now, (2) approve drafted tests, (3) approve ticket before Jira filing.
-- Manager Agent validates every worker output. Retry cap default 2, then escalate to human.
+- Manager Agent validates every worker output. Retry cap default 3 (D-005), then escalate to human.
 - `deployment_pending` is never reported as a failure. Timeouts retry once. Only real bugs reach the Report Agent.
 - Strip secrets from logs before any LLM call or ticket attachment.
 - Every claim in a ticket cites a log line or artifact.

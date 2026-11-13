@@ -10,6 +10,8 @@ dist/
 playwright-report/
 test-results/
 *.log
+# verification logs are evidence: the gate checks their SHA256, so they must be committed
+!docs/verification-logs/*.log
 .DS_Store
 .claude/settings.local.json
 .claude/active_task

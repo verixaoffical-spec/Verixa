@@ -32,3 +32,15 @@
 - Decision: v1.0 is reached only when every FYP-1 task (except recurring T-093) is DONE and verified. FYP-2 tasks are locked by the gate until then. Claude announces it in bold capitals: FYP-1 IS COMPLETED. NOW FYP-2.
 - Consequences: FYP-2 cannot start early even if FYP-1 has leftover small tasks. Close or re-scope them before the demo.
 - Owner: Both
+
+### D-005 Manager retry cap is 3 (2026-11-14)
+- Context: CLAUDE.md said default 2, the built Manager in mid uses MAX_ATTEMPTS = 3.
+- Decision: keep 3 attempts, then escalate to human review. CLAUDE.md updated to match.
+- Consequences: one extra model call in the worst case before escalation.
+- Owner: Farheen
+
+### D-006 Backlog cleanup and work order after the mid consolidation (2026-11-14)
+- Context: T-011, T-012, T-016 and T-026 were IN PROGRESS from the mid consolidation while T-002 was also open, breaking "one active task per person". Their code is partial (see BACKLOG consolidation notes).
+- Decision: set them back to TODO; the partial code in mid is reused when each task is started in order. Farheen instructed Claude to work through FYP-1 tasks in numbering order for both people, including Arisha-led tasks (starting with T-010, importing mid without .md files). Ownership in CONTRIBUTIONS.md is unchanged; the owner reviews the work.
+- Consequences: Arisha must review the Arisha-led tasks Claude completes. Root cause found: `*.log` in .gitignore meant no verification log was ever kept, so every PASS was invalid; fixed with a .gitignore exception and .gitattributes `-text`.
+- Owner: Farheen

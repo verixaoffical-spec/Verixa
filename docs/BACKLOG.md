@@ -6,14 +6,20 @@ Dep = task that must be DONE **and verified** first. Claude Code blocks work on 
 Never set DONE by hand: use /finish-task after a PASS in docs/VERIFICATION.md.
 **Version 1.0 = FYP-1 COMPLETE** = every FYP-1 task (T-001 to T-092) DONE and verified. T-093 is RECURRING and does not count. FYP-2 tasks (T-100+) stay locked until v1.0. Progress: `python3 .claude/hooks/version_status.py` or /version.
 
-Last updated: 2026-10-04
+Last updated: 2026-11-14
 Weights used for the fairness check are in CONTRIBUTIONS.md.
+
+**2026-11-02 consolidation.** D1 (official_ui-main) and the completed part of D2 (multi-agents)
+were merged into one working application in the `mid/` folder, with 190 passing tests. Tasks whose
+code exists and passes tests there are set to **IN REVIEW**, not DONE: DONE needs a PASS row written
+by `scripts/verify/run.py` in docs/VERIFICATION.md, and none of this work has one yet. Ownership is
+unchanged. See "Consolidation status" below for exactly what was verified and what was not.
 
 ## Phase 0: Proposal (wk 1-2)
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
 | T-001 | Proposal written and submitted | Both | | | DONE |
-| T-002 | Claude Code project docs set up (CLAUDE.md, docs, .claude) | Farheen | Arisha | T-001 | IN PROGRESS |
+| T-002 | Claude Code project docs set up (CLAUDE.md, docs, .claude) | Farheen | Arisha | T-001 | DONE |
 
 ## Phase 1: Environment (wk 3-4)
 | ID | Task | Lead | Support | Dep | Status |
@@ -21,36 +27,112 @@ Weights used for the fairness check are in CONTRIBUTIONS.md.
 | T-010 | Repo init, layout, branch protection | Arisha | Farheen | T-002 | TODO |
 | T-011 | PostgreSQL + pgvector via docker compose | Farheen | Arisha | T-010 | TODO |
 | T-012 | Initial schema and migrations (DATA_MODEL.md) | Farheen | Arisha | T-011 | TODO |
-| T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | TODO |
+| T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | IN REVIEW |
 | T-014 | Register GitHub OAuth App | Arisha | | | TODO |
 | T-015 | Create Jira Cloud project and API token | Arisha | | | TODO |
 | T-016 | ADK skeleton, hello agent, session state in Postgres | Farheen | | T-011 | TODO |
-| T-017 | Spike: ADK with Groq and OpenRouter models (LiteLLM or wrapper) | Farheen | | T-016 | TODO |
+| T-017 | Spike: ADK with Groq and OpenRouter models (LiteLLM or wrapper) | Farheen | | T-016 | IN REVIEW |
 | T-018 | Choose and deploy demo staging app and test repo | Arisha | Farheen | | TODO |
 | T-019 | CI: lint, type check, tests on PR | Arisha | | T-010 | TODO |
 
 ## Phase 2: D1 Connect + upload, plus agent core (wk 5-6)
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
-| T-020 | GitHub + Jira login flow (one login) | Arisha | Farheen | T-014, T-015 | TODO |
-| T-021 | Automatic webhook provisioning | Arisha | | T-020 | TODO |
-| T-022 | Webhook receiver with signature verification | Arisha | Farheen | T-013 | TODO |
-| T-023 | Parser for TS Playwright specs and Postman collection | Arisha | | T-013 | TODO |
-| T-024 | Upload widget with live preview | Farheen | Arisha | T-023 | TODO |
-| T-025 | Test Library storage and listing | Arisha | | T-012, T-023 | TODO |
+| T-020 | GitHub + Jira login flow (one login) | Arisha | Farheen | T-014, T-015 | IN REVIEW |
+| T-021 | Automatic webhook provisioning | Arisha | | T-020 | IN REVIEW |
+| T-022 | Webhook receiver with signature verification | Arisha | Farheen | T-013 | IN REVIEW |
+| T-023 | Parser for TS Playwright specs and Postman collection | Arisha | | T-013 | IN REVIEW |
+| T-024 | Upload widget with live preview | Farheen | Arisha | T-023 | IN REVIEW |
+| T-025 | Test Library storage and listing | Arisha | | T-012, T-023 | IN REVIEW |
 | T-026 | LLM router, config.yaml, fallback, model_calls logging | Farheen | | T-017 | TODO |
-| T-035 | Manager Agent: validation, retry cap, escalation | Farheen | Arisha | T-016 | TODO |
+| T-035 | Manager Agent: validation, retry cap, escalation | Farheen | Arisha | T-016 | IN REVIEW |
 
 ## Phase 3: D2 Risk scoring (wk 7-8)
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
-| T-030 | GitHub PR diff fetch via integration | Arisha | Farheen | T-022 | TODO |
-| T-031 | Analysis Agent: rule-based risk score | Farheen | | T-030, T-026 | TODO |
-| T-032 | Module defect history query | Arisha | Farheen | T-012 | TODO |
-| T-033 | New-module size-based scoring | Farheen | | T-031 | TODO |
+| T-030 | GitHub PR diff fetch via integration | Arisha | Farheen | T-022 | IN REVIEW |
+| T-031 | Analysis Agent: rule-based risk score | Farheen | | T-030, T-026 | IN REVIEW |
+| T-032 | Module defect history query | Arisha | Farheen | T-012 | IN REVIEW |
+| T-033 | New-module size-based scoring | Farheen | | T-031 | IN REVIEW |
 | T-034 | Yes/no risk questions + majority vote of 3 | Farheen | | T-031 | TODO |
 | T-036 | PR and risk dashboard screen | Arisha | Farheen | T-031 | TODO |
 | T-037 | Analysis eval set (20-30 cases) | Arisha | Farheen | T-031 | TODO |
+
+### Consolidation status, 2026-11-02 (`mid/` folder)
+
+What the code actually does, checked against both source folders and against 190 passing tests.
+This section records evidence; it does not change any status above.
+
+**Implemented and tested**
+- T-031, T-033 — `mid/agents/risk_rules.py`, `mid/agents/analysis.py`. Rules decide the label
+  (size + defect history + sensitive areas, then minimum labels); a module with no history is
+  scored by change size. 24 unit tests in `mid/tests/test_risk_rules.py`.
+- T-035 — `mid/agents/manager.py`. Validation in plain code, feedback retry, cap at 3 attempts,
+  escalation to `needs_human_review`. The retry cap and escalation are asserted end to end, and a
+  live run was accepted on the first attempt.
+- T-030, T-032 — `mid/agents/github_client.py`. Verified against the real GitHub API: a live run on
+  `psf/requests#6500` fetched the changed files and found 21 past bug-fix commits in the touched
+  module, which moved the score to 5 (Medium).
+- T-020 to T-025 — the D1 app, consolidated unchanged, with its own five test suites passing, plus
+  a full pass of `scripts/check_database.py` against the shared Neon database (accounts, 2FA,
+  connect, Test Library CRUD, cascading delete; the Test Agent's 8 runs / 195 results / 3 drafts
+  fingerprinted unchanged).
+- Webhook → agent → database → dashboard integration: 26 tests in
+  `mid/tests/test_analysis_integration.py`, plus a live 20/20 pass of `mid/scripts/live_check.py`
+  on the real Neon database with the real agent and a real model
+  (`groq/openai/gpt-oss-20b`). A wrongly signed delivery is refused with 401 and never reaches the
+  agent. The database held exactly its original rows afterwards.
+
+None of this is DONE or WORKING yet: that needs a PASS row from `scripts/verify/run.py`, and the
+per-task verification scripts (`scripts/verify/T-030.py` and friends) have not been written.
+
+**Implemented but not fully tested**
+- T-020 — email/password sign-in and 2FA are verified against real PostgreSQL, but the GitHub and
+  Atlassian OAuth halves are not: `GITHUB_CLIENT_ID/SECRET` and `ATLASSIAN_CLIENT_ID/SECRET` are
+  still placeholders in `mid/.env` (they were not in the multi-agents `.env`, and official_ui-main
+  has no `.env` at all). Tested only with the OAuth calls faked.
+- T-026 — a working model chain with per-task priority and skip-on-no-key exists in
+  `mid/agents/llm.py`, but it is **not** the task as written: there is no `config.yaml` and no
+  `model_calls` logging table. Left IN PROGRESS for that reason.
+- T-016 — the ADK skeleton and the real manager/worker graph exist, but session state is held by
+  `InMemorySessionService`, not Postgres, so runs do not survive a restart. IN PROGRESS.
+- T-017 — the non-Gemini wrapper is real: `mid/agents/models.py` routes groq and openrouter through
+  LiteLLM and strips the `reasoning_content` field Groq rejects. Never run against a live provider
+  from the consolidated folder.
+- T-011, T-012 — tables are created by SQLAlchemy `create_all` plus a small column-adding step, and
+  pgvector is enabled on startup. There are no Alembic migrations, which T-012 asks for, and the
+  docker compose database was not started. Both IN PROGRESS.
+- T-021, T-022 — signature verification is verified live (correct signature accepted, wrong one
+  refused with 401 before any processing). Webhook *creation* on a real repository is not: that
+  needs the GitHub OAuth app and a running tunnel, so no delivery from github.com has reached the
+  consolidated folder.
+
+**Not implemented**
+- T-034 — no yes/no risk questions and no majority vote of 3 anywhere in multi-agents. The agent
+  makes one model call, for the explanation only, and the label never depends on it. Still TODO.
+- T-036 — no PR or risk screen exists in official_ui-main; the rail shows "Pull Requests" as a
+  disabled Coming Soon button and the only risk UI is the hardcoded marketing mockup on the landing
+  page. `mid/frontend/src/dashboard/RiskView.tsx` is the integration needed to display the agent's
+  output at all, built from the mockup's design. It is **not** a delivery of T-036, which stays
+  TODO and Arisha's.
+- T-037 — no eval set, so there is no recorded accuracy for the risk labels. docs/TESTING.md
+  requires it before D2 can be accepted.
+
+**Blocked by missing configuration**
+- The GitHub and Atlassian OAuth client credentials are missing, so the one-login flow (T-020) and
+  automatic webhook creation (T-021) cannot be exercised for real.
+- The shared database already holds one account whose GitHub/Atlassian token and one whose two-step
+  secret were encrypted under the *original* official_ui-main `SECRET_KEY` and
+  `TOTP_ENCRYPTION_KEY`. Those keys were never committed and are not available, so `mid/.env` uses
+  newly generated ones. That account must re-link GitHub and Atlassian and re-enrol two-step
+  verification unless the original keys turn up. No row is damaged; the ciphertext is simply
+  unreadable. Worth recording in DECISIONS.md.
+- T-037 cannot start until someone labels 20-30 cases. The model side is no longer a blocker: a
+  live Groq call succeeded from the consolidated folder.
+
+**Out of scope, deliberately left alone**
+- The Test & Execution Agent (`multi-agents/test_agent/`, `manager_agent/test_phase.py`) is still
+  in its testing phase and belongs to Phase 4. It was not consolidated.
 
 ## Phase 4: D3 Test execution + gap drafting (wk 9-11)
 | ID | Task | Lead | Support | Dep | Status |
