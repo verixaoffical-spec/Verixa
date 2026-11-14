@@ -90,10 +90,10 @@ test('the live view shows a saved run: stages, log, filter, checks and decision'
   await expect(steps).toHaveCount(8);
   await expect(page.locator('.stepper .step.d')).toHaveCount(5);  // received, changes, rules, manager, saved
   await expect(steps.filter({ hasText: 'Model' })).toHaveClass(/\bw\b/);  // no model step arrived, so not marked done
-  await expect(page.locator('.console .ln')).toHaveCount(6);
+  await expect(page.locator('.console .rl-line')).toHaveCount(6);
   await expect(page.locator('.console')).toContainText('Risk rules scored it High (7 points)');
   await page.getByRole('group', { name: 'Filter log' }).getByRole('button', { name: 'Rules' }).click();
-  await expect(page.locator('.console .ln')).toHaveCount(1);
+  await expect(page.locator('.console .rl-line')).toHaveCount(1);
   await expect(page.getByText('Test before merging')).toBeVisible();
   await expect(page.locator('.checks li').first()).toContainText('size: 4 file(s)');
   expect(problems).toEqual([]);

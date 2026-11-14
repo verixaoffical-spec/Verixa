@@ -46,7 +46,7 @@ export default function RiskLive({ items, live, pick }: { items: Assessment[]; l
   shown.forEach(m => { if (m.stage && !(m.stage in seen)) seen[m.stage] = m.at; });
   const last = shown[shown.length - 1];
   const now = run && !run.done ? last?.stage : null;
-  const rules = !!seen.rules || (run?.done && !!row?.risk_factors.length);
+  const rules = !!seen.rules || ((!run || run.done) && !!row?.risk_factors.length);  // a saved result has its checks even when its log is gone
   const list = shown.filter(m => !GROUPS[filter] || GROUPS[filter]!.includes(m.stage));
   const errorsMsg = row?.errors.join(' · ');
 
@@ -97,11 +97,11 @@ export default function RiskLive({ items, live, pick }: { items: Assessment[]; l
               : !past && !current ? <p className="console-note">Reading the saved log</p>
               : !shown.length ? <p className="console-note">No saved steps for this pull request. The trace log keeps the most recent runs only.</p>
               : list.map((m, i) => (
-                <div key={m.at + m.event + i} className={'ln ' + m.level}>
-                  <time>{time(m.at)}</time><span className={'tag ' + m.stage}>{m.stage}</span><span className="x">{m.text}</span>
+                <div key={m.at + m.event + i} className={'rl-line ' + m.level}>
+                  <time>{time(m.at)}</time><span className={'rl-tag ' + m.stage}>{m.stage}</span><span className="rl-text">{m.text}</span>
                 </div>
               ))}
-            {run && !run.done && <div className="ln"><span></span><span></span><span className="cursor" aria-hidden="true"></span></div>}
+            {run && !run.done && <div className="rl-line"><span></span><span></span><span className="cursor" aria-hidden="true"></span></div>}
           </div>
         </section>
 
@@ -133,7 +133,7 @@ export default function RiskLive({ items, live, pick }: { items: Assessment[]; l
 
           <section className="rchart">
             <header><h2>Tests</h2></header>
-            {!!row?.test_areas.length && <div className="chips">{row.test_areas.map((t, i) => <span key={i} className="tchip">{t}</span>)}</div>}
+            {!!row?.test_areas.length && <div className="rl-chips">{row.test_areas.map((t, i) => <span key={i} className="tchip">{t}</span>)}</div>}
             <div className="pending">Test execution is not built yet (Deliverable 3). Run status appears here once the Test Agent exists.</div>
           </section>
         </div>
