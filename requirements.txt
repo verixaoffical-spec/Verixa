@@ -10,6 +10,9 @@ cryptography>=43
 pyotp>=2.9
 segno>=1.6
 
+# --- Database migrations (T-012) ---
+alembic>=1.14
+
 # --- Deliverable 2: the Analysis Agent (from multi-agents/requirements.txt) ---
 google-adk
 litellm

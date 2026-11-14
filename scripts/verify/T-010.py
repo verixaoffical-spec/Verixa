@@ -45,9 +45,23 @@ def venv_python() -> str | None:
 
 m = json.load(open(os.path.join(ROOT, "scripts/verify/T-010.manifest.json"), encoding="utf-8"))
 
-# 1. byte-identical import
-bad = hash_mismatches(m["imported"], ROOT)
-check(f"all {len(m['imported'])} mid files imported byte-identical ({m['source']})", not bad, ", ".join(bad[:5]))
+# 1. byte-identical import. Files a later task changed on purpose are listed here with that task and are checked
+#    in the import commit instead; every other imported file must still be byte-identical in the working tree.
+IMPORT_COMMIT = "aec9c6d"
+CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_database.py": "T-012 follows the email-verified sign-up"}
+
+
+def committed_sha(f: str) -> str | None:
+    r = subprocess.run(["git", "show", f"{IMPORT_COMMIT}:{f}"], cwd=ROOT, capture_output=True)
+    return None if r.returncode else hashlib.sha256(r.stdout.replace(b"\r\n", b"\n")).hexdigest()
+
+
+unchanged = {f: h for f, h in m["imported"].items() if f not in CHANGED_LATER}
+bad = hash_mismatches(unchanged, ROOT)
+check(f"{len(unchanged)} mid files still byte-identical in the working tree ({m['source']})", not bad, ", ".join(bad[:5]))
+bad = [f for f in CHANGED_LATER if committed_sha(f) != m["imported"][f]]
+check(f"{len(CHANGED_LATER)} files changed by later tasks were byte-identical when imported ({IMPORT_COMMIT})",
+      not bad, ", ".join(bad))
 
 # 2. no mid .md files
 check(f"none of mid's {len(m['excluded_md'])} .md files imported", not md_violations(m["excluded_md"], ROOT))

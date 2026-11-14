@@ -52,7 +52,7 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 |---|---|---|---|
 | TC-01 | Imported app starts and mid's existing test suite passes in Verixa | unittest | PASSING (in scripts/verify/T-010.py) |
 | TC-02 | No `.md` file from mid was imported; no `.env` is tracked by git | script | PASSING (in scripts/verify/T-010.py) |
-| TC-03 | New database has the same tables, columns and foreign keys as mid's | schema compare | TODO |
+| TC-03 | New database has the same tables, columns and foreign keys as mid's | schema compare | PASSING (in scripts/verify/T-012.py) |
 | TC-04 | Diff is fetched by commit: a push between calls cannot mix two commits | pytest, mocked GitHub | TODO |
 | TC-05 | A result for an old commit is marked superseded, never posted as current | pytest | TODO |
 | TC-06 | Lost webhook: reconciler re-queues an open PR with no finished row | pytest | TODO |

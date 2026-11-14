@@ -1,15 +1,15 @@
-"""Checks the real database in .env through the real app: creates one temporary account, checks every row it
+r"""Checks the real database in .env through the real app: creates one temporary account, checks every row it
 writes (account, project, specs, collection, two-step), then deletes it. Agent tables must not change.
 
 Run from the repo root:  .venv\Scripts\python.exe -m scripts.check_database
 GitHub and Jira are faked, so no webhook is created. Safe to run on the shared Neon database."""
-import json, uuid
+import json, re, uuid
 from unittest import mock
 import pyotp
 from fastapi.testclient import TestClient
 from sqlalchemy import select, text
 from backend.agent_db import agent_tables
-from backend.db import Collection, Project, RecoveryCode, SessionLocal, SpecFile, User, engine
+from backend.db import Collection, PendingSignup, Project, RecoveryCode, SessionLocal, SpecFile, User, engine
 from backend.main import app, mark_verified
 from backend.security import seal, unseal_totp
 
@@ -44,14 +44,21 @@ COL = lambda *r: json.dumps({"info": {"name": "API", "schema": "https://schema.g
                              "item": [{"name": x, "request": {"method": "GET", "url": f"http://x/{x}"}} for x in r]})
 patches = [mock.patch("backend.api.list_jira_projects", return_value=[{"key": "QA", "name": "QA Board"}]),
            mock.patch("backend.api.ensure_webhook", return_value=111), mock.patch("backend.api.delete_webhook"),
-           mock.patch("backend.api.ping_webhook", side_effect=lambda t, repo, h: mark_verified(repo))]
+           mock.patch("backend.api.ping_webhook", side_effect=lambda t, repo, h: mark_verified(repo)),
+           # sign-up now verifies the email first: keep the message instead of sending it, to read the link
+           mock.patch("backend.email_verify.send_email", side_effect=lambda to, subject, body: mails.append(body))]
+mails: list[str] = []
 for p in patches: p.start()
 uid = None
 try:
     with TestClient(app, base_url="https://testserver", follow_redirects=False) as c:
         print("accounts")
-        r = c.post("/auth/signup", json={"name": "Smoke Test", "email": EMAIL, "password": PW}); ok(r.status_code == 201, f"signup 201 ({r.status_code})")
+        r = c.post("/auth/signup", json={"name": "Smoke Test", "email": EMAIL, "password": PW}); ok(r.status_code == 202, f"signup 202 ({r.status_code})")
+        ok(n(PendingSignup, email=EMAIL) == 1 and n(User, email=EMAIL) == 0, "pending sign-up row, no account yet")
+        token = re.search(r"#token=(\S+)", mails[-1]).group(1)
+        r = c.post("/auth/verify-email", json={"token": token}); ok(r.status_code == 200, f"verify email 200 ({r.status_code})")
         u = one(User, email=EMAIL); uid = u.id
+        ok(n(PendingSignup, email=EMAIL) == 0, "pending row consumed by verification")
         ok(u.password_hash.startswith("scrypt$") and PW not in u.password_hash, "password stored hashed")
         ok(c.post("/auth/logout").status_code == 204, "logout")
         ok(c.post("/auth/login", json={"email": EMAIL.upper(), "password": PW}).status_code == 200, "login reads the account")
@@ -88,6 +95,8 @@ try:
         uid = None
 finally:
     for p in patches: p.stop()
+    with SessionLocal() as db:  # a sign-up that never got verified
+        db.query(PendingSignup).filter_by(email=EMAIL).delete(); db.commit()
     if uid:  # a failed step leaves the account behind: remove only what this script made
         with SessionLocal() as db:
             pr = db.scalar(select(Project).where(Project.user_id == uid))

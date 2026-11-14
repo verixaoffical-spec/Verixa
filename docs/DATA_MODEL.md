@@ -18,3 +18,23 @@
 | model_calls | id, agent, model, provider, tokens, latency_ms, ok, at | quota tracking and evals |
 | adk_sessions | managed by ADK | |
 | memory_embeddings | id, ticket_id, embedding vector | FYP-II |
+
+## In the database now (T-012, 2026-11-14)
+Created by Alembic migration `backend/migrations/versions/0001_baseline_the_eight_tables_from_mid.py` on the Neon
+database in .env (D-009). These are mid's eight tables, unchanged; the planned tables above arrive with their tasks.
+
+| Table | Owner (models) | Notes |
+|---|---|---|
+| users | backend/db.py | email or GitHub sign-in, tokens sealed, TOTP, session_version |
+| recovery_codes | backend/db.py | 10 hashed 2FA recovery codes per user |
+| password_resets | backend/db.py | hashed reset tokens |
+| pending_signups | backend/db.py | email verification before an account exists |
+| projects | backend/db.py | one repo + Jira project per user, webhook id |
+| spec_files | backend/db.py | Test Library Playwright specs, revision for conflicts |
+| collections | backend/db.py | Test Library Postman collection |
+| risk_assessments | backend/agent_db.py | one row per (project, PR, head commit); folds in the pull_requests facts |
+
+Schema changes go through a new Alembic revision (`.venv\Scripts\python.exe -m alembic revision --autogenerate -m "..."`,
+then `alembic upgrade head`). The app's startup create_all only fills gaps and never alters a table.
+Order matters on a new, empty database: run `alembic upgrade head` before the first app start. A database that the
+app's create_all already built (no `alembic_version` row) is adopted with `alembic stamp head` instead.
