@@ -19,3 +19,11 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-011 | 2026-11-14 | auto | scripts\verify\T-011.py | PASS | docs/verification-logs/T-011-2026-11-14-173917.log | 2e9b51d678492c971f01ad72723314e4693301c1a5a9ea14eef4d5eea35cab0f |
 | T-012 | 2026-11-14 | auto | scripts\verify\T-012.py | PASS | docs/verification-logs/T-012-2026-11-14-174452.log | ce622cc336c4ed51ac62d2a29ad8745d0d6f68064739d9fd5478bfbc6b4620a9 |
 | T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-14-174838.log | 7ab065751913adeebfce613601fcac1f8eab5d1733580fdf9932051c40ea68b1 |
+| T-013 | 2026-11-14 | auto | scripts\verify\T-013.py | PASS | docs/verification-logs/T-013-2026-11-14-175356.log | 47121e3a5e2c56d9053a888afc9731049dad06f7d3421e81beffce8cd46761d8 |
+| T-013 | 2026-11-14 | auto | scripts\verify\T-013.py | FAIL | docs/verification-logs/T-013-2026-11-14-175509.log | 2795d639649905cb54e56ec2ba493e41b084186d76d5363d67828b6ff55197c9 |
+| T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | FAIL | docs/verification-logs/T-010-2026-11-14-175424.log | 74020f628a2d7c4cb69220e9a5a7e6bf5fc5fbac83f167eb288299f26b633bda |
+| T-013 | 2026-11-14 | auto | scripts\verify\T-013.py | FAIL | docs/verification-logs/T-013-2026-11-14-175842.log | 3ddcad7b97963a11a50f5ef99a7970d7861511458a715ad3f9886526bd8f1fd6 |
+| T-013 | 2026-11-14 | auto | scripts\verify\T-013.py | FAIL | docs/verification-logs/T-013-2026-11-14-175854.log | 3ddcad7b97963a11a50f5ef99a7970d7861511458a715ad3f9886526bd8f1fd6 |
+| T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-14-175919.log | 22896ce3f15a04cd3cffe621889a3f57471ac838e571b777d9ce967118f31b9c |
+| T-013 | 2026-11-14 | auto | scripts\verify\T-013.py | PASS | docs/verification-logs/T-013-2026-11-14-180336.log | b879e41feeb4ea38b0fbadf2957d65cb1341dbfda0576d3c23d7984289393f01 |
+| T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-14-180401.log | 21f6f4662ff291663dd4f98783224bcf8dc0cc67ab351bbcaacaeb7f1ec9eba7 |

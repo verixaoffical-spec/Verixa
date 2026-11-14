@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import urllib.parse as up
 from contextlib import asynccontextmanager
@@ -9,7 +10,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.sessions import SessionMiddleware
@@ -146,6 +147,19 @@ def auth_file():
     return RedirectResponse(auth.LOGIN)
 app.include_router(api.router)
 app.include_router(analysis_api.router)
+
+
+@app.get("/health", response_model=None)  # the union return type is for mypy; FastAPI must not build a model from it
+def health() -> dict | JSONResponse:
+    """For uptime checks and the deploy step (T-013): 200 when the app and its database answer, 503 when the
+    database does not. Public, so it says nothing beyond up or down; the reason goes to the server log only."""
+    try:
+        with SessionLocal() as db:
+            db.execute(text("SELECT 1"))
+    except Exception as exc:
+        logging.getLogger(__name__).warning("health check: database unreachable (%s)", type(exc).__name__)
+        return JSONResponse({"status": "degraded", "database": "unreachable"}, status_code=503)
+    return {"status": "ok", "database": "ok"}
 
 
 def mark_verified(repo: str) -> None:

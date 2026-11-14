@@ -1,0 +1,27 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-010.py
+ok   166 mid files still byte-identical in the working tree (mid @ 5559f9c)
+ok   3 files changed by later tasks were byte-identical when imported (aec9c6d)
+ok   none of mid's 12 .md files imported
+ok   .env is not tracked by git
+ok   .env is ignored by git
+ok   .gitignore keeps all of mid's patterns
+ok   verification logs stay committable
+ok   .env.example lists mid's variable names
+ok   negative: untouched copy passes the hash check
+ok   negative: tampered copy is caught by the hash check
+ok   negative: a different file at a mid .md path is not flagged
+ok   negative: md check flags an identical copy
+ok   virtualenv exists (.venv, from requirements.txt)
+     Ran 455 tests in 224.022s |  | OK
+ok   imported unit test suite passes
+FAIL negative: unsigned webhook refused with 401 - ing a return type annotation that is not a valid Pydantic field (e.g. Union[Response, dict, None]) you can disable generating the response model from the type annotation with the path operation decorator parameter response_model=None. Read more: https://fastapi.tiangolo.com/tutorial/response-model/
+
+FAIL negative: wrongly signed webhook refused with 401 - ing a return type annotation that is not a valid Pydantic field (e.g. Union[Response, dict, None]) you can disable generating the response model from the type annotation with the path operation decorator parameter response_model=None. Read more: https://fastapi.tiangolo.com/tutorial/response-model/
+
+ok   npm available
+ok   frontend builds (npm run build)
+
+FAIL: 2 failed (negative: unsigned webhook refused with 401, negative: wrongly signed webhook refused with 401)
+
+
+exit code: 1

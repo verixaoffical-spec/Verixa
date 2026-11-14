@@ -1,0 +1,14 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-013.py
+ok   config loads from .env (secret key, webhook secret, OAuth ids present)
+ok   database URL comes from .env, not the localhost default
+ok   negative: a too-short SECRET_KEY is refused
+ok   server starts and /health answers 200 ok with the database up
+ok   /login serves the frontend page
+ok   API router mounted and protected: no session -> 401
+ok   negative: /health answers 503 when the database is unreachable
+
+PASS: 0 failed
+
+health check: database unreachable (OSError)
+
+exit code: 0

@@ -48,7 +48,8 @@ m = json.load(open(os.path.join(ROOT, "scripts/verify/T-010.manifest.json"), enc
 # 1. byte-identical import. Files a later task changed on purpose are listed here with that task and are checked
 #    in the import commit instead; every other imported file must still be byte-identical in the working tree.
 IMPORT_COMMIT = "aec9c6d"
-CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_database.py": "T-012 follows the email-verified sign-up"}
+CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_database.py": "T-012 follows the email-verified sign-up",
+                 "backend/main.py": "T-013 adds the /health route"}
 
 
 def committed_sha(f: str) -> str | None:

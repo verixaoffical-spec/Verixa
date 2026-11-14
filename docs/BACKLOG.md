@@ -27,7 +27,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | T-010 | Repo init, layout (branch protection dropped, D-008) | Arisha | Farheen | T-002 | DONE |
 | T-011 | PostgreSQL + pgvector (Neon, D-009; docker compose kept as local fallback) | Farheen | Arisha | T-010 | DONE |
 | T-012 | Initial schema and migrations (DATA_MODEL.md) | Farheen | Arisha | T-011 | DONE |
-| T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | IN REVIEW |
+| T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | DONE |
 | T-014 | Register GitHub OAuth App | Arisha | | | TODO |
 | T-015 | Create Jira Cloud project and API token | Arisha | | | TODO |
 | T-016 | ADK skeleton, hello agent, session state in Postgres | Farheen | | T-011 | TODO |
