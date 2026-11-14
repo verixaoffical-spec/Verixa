@@ -3,6 +3,7 @@ exactly once, only to write the explanation and the suggested test areas. Models
 priority chain, if one fails the next one is tried."""
 import asyncio
 import os
+import threading
 import time
 from collections import defaultdict
 from typing import AsyncGenerator
@@ -21,8 +22,31 @@ from .redact import HIDDEN, hide_secrets
 from .risk_rules import assess, module_of
 from .trace import PREVIEW, fingerprint, mask, trace
 
-ANALYSES: dict[str, dict] = {}  # pr_id -> {"facts", "feedback", "raw", "model", "error", "result", "token"}
-_CACHE: dict[str, dict] = {}    # pr_id -> score result, so the manager and the agent use the same data
+class Bounded(dict):
+    """T-094: a dict that forgets its oldest entries past `cap`, so a long-running server does not keep every pull
+    request (and its GitHub token) in memory forever. The saved result lives in the database, not here."""
+    def __init__(self, cap: int):
+        super().__init__()
+        self.cap = cap
+        self._lock = threading.Lock()  # scoring runs in worker threads
+
+    def __setitem__(self, key, value):
+        with self._lock:
+            dict.pop(self, key, None)  # re-inserting moves it to the newest end
+            dict.__setitem__(self, key, value)
+            while len(self) > self.cap:
+                dict.__delitem__(self, next(iter(self)))
+
+    def setdefault(self, key, default=None):
+        with self._lock:
+            if key in self:
+                return dict.__getitem__(self, key)
+        self[key] = default
+        return default
+
+
+ANALYSES: dict[str, dict] = Bounded(256)  # pr_id -> {"facts", "feedback", "raw", "model", "error", "result", "token"}
+_CACHE: dict[str, dict] = Bounded(256)    # pr_id -> score result, so the manager and the agent use the same data
 DATA_TAG = "pull_request_data"  # wraps everything in the prompt that the author of the pull request controls
 
 

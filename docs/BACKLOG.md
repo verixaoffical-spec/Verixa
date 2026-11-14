@@ -184,6 +184,7 @@ per-task verification scripts (`scripts/verify/T-030.py` and friends) have not b
 | T-090 | Final model choice per agent from eval results | Farheen | Arisha | T-037, T-050, T-051, T-075 | TODO |
 | T-091 | Align proposal 5.2 with chosen models | Farheen | | T-090 | TODO |
 | T-092 | Confirm three gates with supervisor | Both | | | TODO |
+| T-094 | Persist analysis artifacts: PR file snapshots and agent run steps in Postgres, feed index, bounded agent cache (D-013) | Farheen | Arisha | T-038 | DONE |
 | T-093 | Weekly Friday review of STATUS and RISKS | Both | | | RECURRING |
 
 ## FYP-II (LOCKED until FYP-1 IS COMPLETED, version 1.0)

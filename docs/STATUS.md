@@ -53,6 +53,7 @@ Live checks run on 2026-11-02 from `mid/`:
 | Manager Agent: validation, retry cap, escalation | WORKING | T-035 | 2026-11-14 | `python3 scripts/verify/run.py T-035` | Real Manager loop: pydantic answer schema + content checks, feedback reaches the prompt, cap 3 then human review, unreadable PR not retried. Judgment check deferred to T-039 (D-012) |
 | PR and risk dashboard (charts + history) | WORKING | T-036 | 2026-11-14 | `python3 scripts/verify/run.py T-036` | Risk distribution and status donuts, analyses per day (hover + table), issues by type, per-PR history; real API data only; browser-tested with the 33 existing Risk screen tests |
 | Dependency graph + live runs and logs | WORKING | T-038 | 2026-11-15 | `python3 scripts/verify/run.py T-038` | Risk Analysis tabs: black-canvas file graph (per-file risk, imports, search, focus, Hide Low) read from GitHub on request; live stage stepper, run log with filters, checks, decision; past runs from the trace log. Not built: minimap, group-by-folder toggle |
+| Saved analysis artifacts (D-013) | WORKING | T-094 | 2026-11-15 | `python3 scripts/verify/run.py T-094` | Graph files read from GitHub once per analysed commit (pr_file_snapshots); every run step saved in agent_steps; Risk feed index; agents' in-memory caches capped at 256. Migration 0003 applied on Neon. No Redis/GraphQL (D-013) |
 | Webhook receiver + signature check | WORKING | T-022 | 2026-11-14 | `python3 scripts/verify/run.py T-022` | Real server on Neon: signed deliveries accepted, unsigned/wrong/tampered refused 401, bad bodies 400, unconnected repos start no analysis. No body size cap yet (put one at the proxy) |
 | D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
 | D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
@@ -88,7 +89,7 @@ Live checks run on 2026-11-02 from `mid/`:
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017, T-022, T-026, T-030, T-031, T-032, T-033, T-034, T-035, T-036, T-038 (2026-11-14/15, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
+DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017, T-022, T-026, T-030, T-031, T-032, T-033, T-034, T-035, T-036, T-038, T-094 (2026-11-14/15, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
 (code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues

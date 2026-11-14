@@ -80,3 +80,13 @@
 - Decision: T-035 closes on validation (now with a pydantic answer schema), the retry cap of 3 and escalation. The judgment check becomes T-039, after T-035, to be built when the Report Agent gives it claims to judge.
 - Consequences: until T-039, no second-opinion check runs; every Analysis answer still passes the plain-code validation. The TESTING.md safety check "disagreement routes to human" is open until then.
 - Owner: Farheen
+
+### D-013 Save analysis artifacts in Postgres; no Redis or GraphQL for now (2026-11-15)
+- Context: the Dependency graph called GitHub up to ~71 times on every open, run logs lived only in a log file that rotates at 5 MB, the agents' in-memory caches grew without limit, and the Risk feed had no index matching its query. Farheen asked for data to be saved so a refresh never redoes work, and asked about Redis and GraphQL.
+- Options: Redis cache; GraphQL API; Postgres tables + indexes.
+- Decision: T-094 adds pr_file_snapshots (one per analysed commit, immutable, served from the database after the first read) and agent_steps (every run step, indexed by repo, PR and time), a composite index on risk_assessments, and a size cap on the agents' in-memory caches. No Redis (one app server, no Docker, memory is tight; Postgres rows survive restarts) and no GraphQL (the REST routes already return one screen's data each). Approved by Farheen.
+- Consequences: a shared schema change through Alembic migration 0003; Arisha must be told. Redis can come back if the app runs on more than one server.
+  - The first graph read decides: a PR still on its analysed commit is saved and always shown at that commit; one that had already moved on is shown at its newer commit and read again each time. Snapshots carry a rules version (SNAPSHOT_VERSION) and are read again when the rules change.
+  - Once a PR has steps in agent_steps, its log shows only those; runs from before T-094 stay in the rotating trace file. Reading both would re-read the file on every open.
+  - agent_steps has no retention and no link to a project, so steps stay after a project is deleted. Fine at FYP size; add cleanup if it grows.
+- Owner: Farheen

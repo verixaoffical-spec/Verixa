@@ -4,6 +4,7 @@ Reads the rows the Analysis Agent wrote and, on request, asks it to score a pull
 Every route needs an account, through the same `current_user` dependency the rest of the dashboard
 uses, so the session cookie and the 401 contract ("the session is gone") are unchanged.
 """
+import json
 import logging
 
 import httpx
@@ -13,22 +14,24 @@ from cryptography.fernet import InvalidToken
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from pydantic import BaseModel, Field
 from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
-from .agent_db import RiskAssessment, to_json
+from .agent_db import AgentStep, PrFileSnapshot, RiskAssessment, _iso, to_json
 from .analysis_service import AgentUnavailable, analyse_now
 from .api import MAX_INT, current_user, project_of
 from .auth import _check_origin
 from .db import User, get_db
 from .integrations import github_access_token
 from .live import describe
-from .pr_files import pr_files, pr_log
+from .pr_files import SNAPSHOT_VERSION, group_runs, pr_files, pr_log
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/analysis")
 
 LABELS = ("High", "Medium", "Low")
+LOG_STEPS = 2000  # newest steps of one PR shown in its log
 
 
 @router.get("/pull-requests")
@@ -100,6 +103,12 @@ async def changed_files(assessment_id: int = Path(ge=1, le=MAX_INT), user: User 
                         db: Session = Depends(get_db)):
     """T-038: the pull request's changed files with a risk each and the imports between them, read from GitHub now."""
     row = _own_row(db, user, assessment_id)
+    saved = db.scalar(select(PrFileSnapshot).where(PrFileSnapshot.assessment_id == row.id))
+    # T-094: a commit never changes, so its files are read from GitHub only once. The first read decides: a PR still on
+    # the analysed commit is saved; one that already moved on is shown at its newer commit and never saved.
+    cached = json.loads(saved.data) if saved else None
+    if cached and cached.get("version") == SNAPSHOT_VERSION:  # older rules: read again and replace
+        return {**cached, "cached": True}
     if not user.github_token:
         raise HTTPException(409, "Link GitHub first, so Verixa can read the pull request")
     try:
@@ -107,21 +116,40 @@ async def changed_files(assessment_id: int = Path(ge=1, le=MAX_INT), user: User 
     except InvalidToken:
         raise HTTPException(409, "Your stored GitHub token could not be read. Link GitHub again")
     try:
-        return await run_in_threadpool(pr_files, row.repo, row.pr_number, row.head_sha, token)
+        data = await run_in_threadpool(pr_files, row.repo, row.pr_number, row.head_sha, token)
     except httpx.HTTPStatusError as exc:
         code = exc.response.status_code
         raise HTTPException(502, "GitHub has no such pull request any more" if code == 404 else
                             f"GitHub refused to list the changed files ({code})")
     except httpx.HTTPError:
         raise HTTPException(502, "Could not reach GitHub")
+    data["version"] = SNAPSHOT_VERSION
+    if data["same_commit"]:  # only the analysed commit is fixed; a PR that moved on may move again
+        try:
+            if saved:
+                saved.data, saved.head_sha = json.dumps(data), row.head_sha
+            else:
+                db.add(PrFileSnapshot(assessment_id=row.id, head_sha=row.head_sha, data=json.dumps(data)))
+            db.commit()
+        except SQLAlchemyError as exc:  # two tabs saved it at once, or the database hiccuped: the answer is still good
+            db.rollback()
+            log.info("pr_file_snapshots: not saved for %s (%s)", row.id, type(exc).__name__)
+    return {**data, "cached": False}
 
 
 @router.get("/pull-requests/{assessment_id}/log")
 def past_log(assessment_id: int = Path(ge=1, le=MAX_INT), user: User = Depends(current_user),
              db: Session = Depends(get_db)):
-    """T-038: every saved run of this pull request from the trace log, newest first."""
+    """Every saved run of this pull request, newest first: from agent_steps (T-094), or from the trace log for runs
+    from before agent_steps existed."""
     row = _own_row(db, user, assessment_id)
-    return {"runs": pr_log(row.repo, row.pr_number, describe)}
+    steps = db.scalars(select(AgentStep).where(AgentStep.repo == row.repo, AgentStep.pr_number == row.pr_number)
+                       .order_by(AgentStep.at.desc(), AgentStep.id.desc()).limit(LOG_STEPS)).all()[::-1]  # the newest
+    if not steps:  # runs from before agent_steps existed (D-013: once a PR has saved steps, only those are shown)
+        return {"runs": pr_log(row.repo, row.pr_number, describe)}
+    return {"runs": group_runs([{"type": "agent", "repo": s.repo, "pr": s.pr_number, "run_id": s.run_id, "at": _iso(s.at),
+                                 "event": s.event, "text": s.text, "level": s.level, "done": s.done, "stage": s.stage}
+                                for s in steps])}
 
 
 class AnalyseIn(BaseModel):

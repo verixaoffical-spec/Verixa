@@ -36,6 +36,7 @@ async def lifespan(app: FastAPI):
     init_agent_db()  # risk_assessments, owned by the Analysis Agent
     add_listener(live.hub.publish)  # agent steps are pushed to the dashboard over a WebSocket
     add_listener(model_calls.record)  # T-026: one model_calls row per model attempt
+    add_listener(model_calls.record_step)  # T-094: every run step kept in agent_steps
     yield
 
 

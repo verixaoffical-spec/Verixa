@@ -16,6 +16,7 @@ from agents.github_client import API, _headers, fetch_pr
 from agents.risk_rules import is_test_or_doc, module_of, risky_removals, sensitivity
 from agents.trace import DEFAULT_FILE
 
+SNAPSHOT_VERSION = 1  # bump when file_risk or imports_of change, so saved snapshots are read again
 MAX_FILES = 300        # drawn in the graph; GitHub can list up to 3000
 MAX_READ = 40          # files whose content is read to find imports
 MAX_BYTES = 200_000    # bigger files are not scanned for imports
@@ -124,17 +125,18 @@ def pr_log(repo: str, number: int, describe, limit: int = 2000) -> list[dict]:
                     continue
                 if isinstance(line, dict) and line.get("pr_id") == pr_id:
                     lines.append(line)
-    # Service lines (delivery, saved) carry no run_id, so a run is: a delivery or the first line, then
-    # everything until the next delivery or a different run_id.
+    return group_runs([m for m in map(describe, lines) if m])
+
+
+def group_runs(messages: list[dict]) -> list[dict]:
+    """Live-view messages, oldest first, as runs, newest first. Service steps (delivery, saved) carry no run_id, so a
+    run is: a delivery or the first step, then everything until the next delivery or a different run_id."""
     runs: list[dict] = []
-    for line in lines:
-        message = describe(line)
-        if not message:
-            continue
-        rid, cur = line.get("run_id"), runs[-1] if runs else None
-        if cur is None or line.get("event") == "service.delivery" or (rid and cur["run_id"] and rid != cur["run_id"]):
-            cur = {"run_id": rid, "started": line.get("at"), "messages": []}
+    for m in messages:
+        rid, cur = m.get("run_id"), runs[-1] if runs else None
+        if cur is None or m.get("event") == "service.delivery" or (rid and cur["run_id"] and rid != cur["run_id"]):
+            cur = {"run_id": rid, "started": m.get("at"), "messages": []}
             runs.append(cur)
         cur["run_id"] = cur["run_id"] or rid
-        cur["messages"].append(message)
+        cur["messages"].append(m)
     return runs[::-1]

@@ -34,6 +34,10 @@ database in .env (D-009). These are mid's eight tables, unchanged; the planned t
 | collections | backend/db.py | Test Library Postman collection |
 | risk_assessments | backend/agent_db.py | one row per (project, PR, head commit); folds in the pull_requests facts |
 | model_calls | backend/agent_db.py | added by migration 0002 (T-026): one row per model attempt, written from the agents' trace |
+| pr_file_snapshots | backend/agent_db.py | added by migration 0003 (T-094): one per analysed commit (unique assessment_id, cascades), the Dependency graph's files, risks and imports as JSON with a rules version; read from GitHub once |
+| agent_steps | backend/agent_db.py | added by migration 0003 (T-094): every run step the live view shows, written from the trace by backend/model_calls.py (record_step); index ix_agent_steps_pr (repo, pr_number, at) |
+
+Migration 0003 also adds `ix_risk_feed` on risk_assessments (project_id, repo, created_at), the Risk feed's query (D-013).
 
 Schema changes go through a new Alembic revision (`.venv\Scripts\python.exe -m alembic revision --autogenerate -m "..."`,
 then `alembic upgrade head`). The app's startup create_all only fills gaps and never alters a table.

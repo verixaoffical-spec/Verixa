@@ -85,3 +85,12 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-038 | 2026-11-15 | auto | scripts\verify\T-038.py | PASS | docs/verification-logs/T-038-2026-11-15-013804.log | 70aae52a05f4bdae2de9c8eae7e7c39b1de8ff3eb2a9a7afef75479b05c93e13 |
 | T-010 | 2026-11-15 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-15-014156.log | 33e4dcdc43b8496d9d35c17454361cb71f6e401c8e330d4ff92ef5ef9c8e376d |
 | T-038 | 2026-11-15 | auto | scripts\verify\T-038.py | PASS | docs/verification-logs/T-038-2026-11-15-023351.log | 7eace30c80a5ffca1864d59118623985b6c533506843daa03238cd4ee1dcc8a4 |
+| T-094 | 2026-11-15 | auto | scripts\verify\T-094.py | PASS | docs/verification-logs/T-094-2026-11-15-030129.log | aea899deef5f9a83c03c3073ea0e4a4501ae97416a440a041df8041f221c2700 |
+| T-012 | 2026-11-15 | auto | scripts\verify\T-012.py | PASS | docs/verification-logs/T-012-2026-11-15-030403.log | 2ccbcbbe7b294a57d465a8c6768ce96cbb2631aa92ccf956be85f3b41ef483a0 |
+| T-026 | 2026-11-15 | auto | scripts\verify\T-026.py | PASS | docs/verification-logs/T-026-2026-11-15-030753.log | e034644301915a96dce686c75cbe31d78ab8b800f1e3f0d9baf809739e7f714e |
+| T-094 | 2026-11-15 | auto | scripts\verify\T-094.py | PASS | docs/verification-logs/T-094-2026-11-15-031236.log | 2fc34f58d05463f065105823165f6714898eee849ecd4b1b0ea78d31f4b3210a |
+| T-010 | 2026-11-15 | auto | scripts\verify\T-010.py | FAIL | docs/verification-logs/T-010-2026-11-15-031433.log | 1bd0e6a88c667d5b676361394660519203dfdb4dca9e864984b11a263b5a10c2 |
+| T-094 | 2026-11-15 | auto | scripts\verify\T-094.py | PASS | docs/verification-logs/T-094-2026-11-15-033030.log | efb251fb2356af29c060110315c501de6f434ab8ad3b7efb9fd5a520c125576c |
+| T-010 | 2026-11-15 | auto | scripts\verify\T-010.py | FAIL | docs/verification-logs/T-010-2026-11-15-033228.log | 366f52bd6b5fd4336351879140c4afa600a708151f524fd9bd2d91e08449fd8a |
+| T-010 | 2026-11-15 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-15-035414.log | 199f7f836eebb5ce92614dcde054af5dfa756ad2ff1f11ab06349538af1c39e8 |
+| T-094 | 2026-11-15 | auto | scripts\verify\T-094.py | PASS | docs/verification-logs/T-094-2026-11-15-040054.log | c18d9d6b6f3221bb7f51dc77b2b4897840927f9146b9712e5014b221151ad84c |

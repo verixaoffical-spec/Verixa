@@ -1,0 +1,11 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-094.py
+     Ran 15 tests in 17.168s |  | OK
+ok   snapshots, saved steps, indexes, bounded cache, and T-038's routes (unittest)
+ok   Neon: Alembic is at 0003 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: both tables and both indexes exist
+
+PASS: 0 failed
+
+
+exit code: 0

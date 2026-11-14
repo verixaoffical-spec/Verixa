@@ -13,3 +13,18 @@ os.environ["AGENT_CI_CHECK"] = "0"
 for name in ("SECRET_KEY", "WEBHOOK_SECRET", "GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET",
              "ATLASSIAN_CLIENT_ID", "ATLASSIAN_CLIENT_SECRET"):
     os.environ.setdefault(name, "test-value-for-" + name.lower())
+
+# T-094: model_calls and agent_steps rows are written on a background thread. Wait for queued rows before any test
+# drops the tables, so a late write never races the drop (SQLite "database is locked" or "no such table").
+from sqlalchemy import MetaData  # noqa: E402
+
+_drop_all = MetaData.drop_all
+
+
+def _drop_all_after_writes(self, *args, **kwargs):
+    from backend import model_calls  # imported late: the settings above must be in place first
+    model_calls.flush(5)
+    return _drop_all(self, *args, **kwargs)
+
+
+MetaData.drop_all = _drop_all_after_writes

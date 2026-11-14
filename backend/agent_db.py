@@ -15,7 +15,7 @@ Test Agent lands in Deliverable 3 and needs a real run object, split it then.
 import json
 from datetime import datetime, timezone
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint, inspect, text
+from sqlalchemy import DateTime, ForeignKey, Index, String, Text, UniqueConstraint, inspect, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 from .db import Project, engine, now
@@ -40,7 +40,8 @@ class RiskAssessment(AgentBase):
     """One row per (project, pull request, head commit). A new push to the same PR is a new row,
     so the history of how the risk moved is kept rather than overwritten."""
     __tablename__ = "risk_assessments"
-    __table_args__ = (UniqueConstraint("project_id", "pr_number", "head_sha", name="uq_risk_pr_head"),)
+    __table_args__ = (UniqueConstraint("project_id", "pr_number", "head_sha", name="uq_risk_pr_head"),
+                      Index("ix_risk_feed", "project_id", "repo", "created_at"))  # T-094: the Risk feed's own query
 
     id: Mapped[int] = mapped_column(primary_key=True)
     project_id: Mapped[int] = mapped_column(ForeignKey(PROJECT_ID), index=True)
@@ -98,6 +99,36 @@ class ModelCall(AgentBase):
     error: Mapped[str | None] = mapped_column(Text)          # masked, first 300 characters
     run_id: Mapped[str | None] = mapped_column(String(40), index=True)  # the agents' trace run, when there is one
     at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, index=True)
+
+
+class PrFileSnapshot(AgentBase):
+    """T-094: a pull request's changed files at one analysed commit, with a risk each and the imports between them
+    (backend/pr_files.py). A commit never changes, so it is read from GitHub once and served from here afterwards."""
+    __tablename__ = "pr_file_snapshots"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assessment_id: Mapped[int] = mapped_column(ForeignKey(RiskAssessment.__table__.c.id, ondelete="CASCADE"), unique=True)
+    head_sha: Mapped[str] = mapped_column(String(64))
+    data: Mapped[str] = mapped_column(Text)                 # the /files answer as JSON, with its rules version
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now)
+
+
+class AgentStep(AgentBase):
+    """T-094: one step of an agent run, as the live view shows it (backend/live.py describe). Written from the trace
+    by backend/model_calls.py (record_step), so a run's history outlives the rotating trace file."""
+    __tablename__ = "agent_steps"
+    __table_args__ = (Index("ix_agent_steps_pr", "repo", "pr_number", "at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    repo: Mapped[str] = mapped_column(String(200))
+    pr_number: Mapped[int]
+    run_id: Mapped[str | None] = mapped_column(String(40))
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    event: Mapped[str] = mapped_column(String(60))
+    stage: Mapped[str] = mapped_column(String(20))
+    level: Mapped[str] = mapped_column(String(10))
+    text: Mapped[str] = mapped_column(Text)
+    done: Mapped[bool]
 
 
 def init_agent_db() -> None:

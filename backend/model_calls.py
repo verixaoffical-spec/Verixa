@@ -9,13 +9,15 @@ import logging
 import queue
 import threading
 
-from .agent_db import ModelCall
+from datetime import datetime
+
+from .agent_db import AgentStep, ModelCall
 from .db import SessionLocal
 
 log = logging.getLogger(__name__)
 EVENTS = {"analysis.model_answered": ("analysis", True), "analysis.model_failed": ("analysis", False),
           "llm.model_answered": (None, True), "llm.model_failed": (None, False)}
-_queue: queue.Queue = queue.Queue(maxsize=1000)
+_queue: queue.Queue = queue.Queue(maxsize=5000)  # model calls and run steps (T-094) share it
 _worker: threading.Thread | None = None
 
 
@@ -41,30 +43,54 @@ def to_row(line: dict) -> dict | None:
 
 def _write_forever() -> None:
     while True:
-        row = _queue.get()
+        table, row = _queue.get()
         try:
             with SessionLocal() as db:
-                db.add(ModelCall(**row))
+                db.add(table(**row))
                 db.commit()
         except Exception as exc:
-            log.warning("model_calls: could not write a row (%s)", type(exc).__name__)
+            log.warning("%s: could not write a row (%s)", table.__tablename__, type(exc).__name__)
         finally:
             _queue.task_done()
 
 
 def record(line: dict) -> None:
     """Trace listener. Cheap and never raises: it only queues the row."""
-    global _worker
     row = to_row(line)
-    if row is None:
-        return
+    if row is not None:
+        _enqueue(ModelCall, row)
+
+
+def step_row(line: dict) -> dict | None:
+    """T-094: the agent_steps columns for one trace line, or None for steps the live view does not show."""
+    from .live import describe  # live imports the app's tables; imported here to keep this module light
+    m = describe(line)
+    if not m:
+        return None
+    try:
+        at = datetime.fromisoformat(str(m["at"]))
+    except ValueError:
+        return None
+    return {"repo": m["repo"][:200], "pr_number": m["pr"], "run_id": m["run_id"], "at": at, "event": m["event"][:60],
+            "stage": m["stage"], "level": m["level"], "text": m["text"], "done": m["done"]}
+
+
+def record_step(line: dict) -> None:
+    """Trace listener (T-094): every step the live view shows is also kept in agent_steps."""
+    row = step_row(line)
+    if row is not None:
+        _enqueue(AgentStep, row)
+
+
+def _enqueue(table, row: dict) -> None:
+    global _worker
     if _worker is None or not _worker.is_alive():
         _worker = threading.Thread(target=_write_forever, name="model-calls-writer", daemon=True)
         _worker.start()
     try:
-        _queue.put_nowait(row)
+        _queue.put_nowait((table, row))
     except queue.Full:
-        log.warning("model_calls: queue full, a row was dropped")
+        log.warning("%s: writer queue full, a row was dropped", table.__tablename__)
 
 
 def flush(timeout: float = 10.0) -> bool:
