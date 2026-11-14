@@ -63,7 +63,8 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "scripts/seed_demo.py": "T-036 seeds PR #7 with two commits for the history",
                  "tests/e2e/playwright.config.ts": "T-036 adds the risk browser test project",
                  "backend/analysis_api.py": "T-036 adds a scored count",
-                 "frontend/src/dashboard/api.ts": "T-036 reads up to 200 rows and the scored count"}
+                 "frontend/src/dashboard/api.ts": "T-036 reads up to 200 rows and the scored count",
+                 "backend/live.py": "T-038 adds the stage of each live message"}
 
 
 def committed_sha(f: str) -> str | None:

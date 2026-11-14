@@ -17,3 +17,4 @@
 
 ## Rate limits and quotas
 (fill in after checking dashboards: Gemini ~1500 req/day free per proposal, Groq and OpenRouter limits TBD)
+- GitHub contents API (T-038): opening the Dependency graph for one PR makes up to about 71 GitHub calls (1 PR read, up to 30 file-list pages, up to 40 file reads to find imports). Nothing is cached; the graph is only read when a person opens it.

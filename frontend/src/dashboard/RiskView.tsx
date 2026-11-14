@@ -14,6 +14,8 @@ import { icons } from './icons';
 import { Chip, hookLabel, type HookState, type Link } from './connection';
 import { useToast } from './Toast';
 import { History, RiskCharts } from './RiskCharts';
+import RiskGraph from './RiskGraph';
+import RiskLive from './RiskLive';
 
 interface Props {
   hidden: boolean;
@@ -32,6 +34,8 @@ const STATE_TEXT: Record<Assessment['state'], string> = {
   failed: 'Failed',
 };
 const POLL_MS = 4000;
+type Tab = 'overview' | 'graph' | 'live';
+const TABS: [Tab, string][] = [['overview', 'Overview'], ['graph', 'Dependency graph'], ['live', 'Live runs and logs']];
 const LIVE_KEEP_MS = 2 * 60 * 1000;  // a finished run stays on screen this long
 
 // The live messages of one pull request's current run
@@ -125,7 +129,7 @@ function StateBadge({ state }: { state: Assessment['state'] }) {
   );
 }
 
-function Detail({ row, history }: { row: Assessment; history: Assessment[] }) {
+function Detail({ row, history, onGo }: { row: Assessment; history: Assessment[]; onGo: (tab: Tab) => void }) {
   const raised = row.base_label && row.risk_label && row.base_label !== row.risk_label;
   return (
     <tr>
@@ -184,6 +188,8 @@ function Detail({ row, history }: { row: Assessment; history: Assessment[] }) {
             {raised && <Chip on={false}>raised from {row.base_label} by a minimum label</Chip>}
             {row.model_used && <Chip on={false}>explained by {row.model_used}</Chip>}
             {row.attempts > 1 && <Chip on={false}>{row.attempts} manager attempts</Chip>}
+            <button className="btn ghost sm" onClick={() => onGo('graph')}>Open dependency graph</button>
+            <button className="btn ghost sm" onClick={() => onGo('live')}>Open run log</button>
             {row.pr_url?.startsWith('https://github.com/') && (
               <a className="btn ghost sm" href={row.pr_url} target="_blank" rel="noopener noreferrer">
                 Open on GitHub
@@ -203,6 +209,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
   const [open, setOpen] = useState<number | null>(null);
   const [prNumber, setPrNumber] = useState('');
   const [busy, setBusy] = useState(false);
+  const [tab, setTab] = useState<Tab>('overview');
 
   const load = useCallback(async (): Promise<RiskFeed | null> => {
     try {
@@ -296,6 +303,8 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
   const items = feed?.items ?? [];
   const counts = feed?.counts ?? {};
+  // The graph and log follow the opened PR, at its newest analysis (the feed is newest first)
+  const latestOpen = items.find(r => r.pr_number === items.find(x => x.id === open)?.pr_number)?.id ?? null;
   const tiles: { key: RiskLabel | 'total'; cls: string; label: string; icon: typeof icons.bolt; sub: string }[] = [
     { key: 'total', cls: '', label: 'Pull requests', icon: icons.pullRequests, sub: 'seen by the agent' },
     { key: 'High', cls: 'high', label: 'High risk', icon: icons.alert, sub: 'test these first' },
@@ -320,8 +329,16 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
             {(counts.needs_review ?? 0) > 0 && <Chip on={false}>{counts.needs_review} need review</Chip>}
             {(counts.failed ?? 0) > 0 && <Chip on={false}>{counts.failed} failed</Chip>}
           </div>
+          <div className="seg rtabs" role="tablist" aria-label="Risk Analysis views">
+            {TABS.map(([key, label]) => (
+              <button key={key} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{label}</button>
+            ))}
+          </div>
         </header>
 
+        {tab === 'graph' && <div className="pane" role="tabpanel" aria-label="Dependency graph"><RiskGraph items={items} pick={latestOpen} /></div>}
+        {tab === 'live' && <div className="pane" role="tabpanel" aria-label="Live runs and logs"><RiskLive items={items} live={liveRuns} pick={latestOpen} /></div>}
+        {tab === 'overview' && <>
         <div className="pane">
           {hook !== 'ok' && (
             <div className="warnbox" style={{ marginBottom: 18 }}>
@@ -409,12 +426,13 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
                     <td><StateBadge state={row.state} /></td>
                     <td className="ract"><span className="muted">{ago(row.updated_at)}</span></td>
                   </tr>
-                  {open === row.id && <Detail row={row} history={items.filter(r => r.pr_number === row.pr_number)} />}
+                  {open === row.id && <Detail row={row} history={items.filter(r => r.pr_number === row.pr_number)} onGo={setTab} />}
                 </tbody>
               ))}
             </table>
           </div>
         )}
+        </>}
       </article>
     </section>
   );

@@ -5,6 +5,8 @@ Every route needs an account, through the same `current_user` dependency the res
 uses, so the session cookie and the 401 contract ("the session is gone") are unchanged.
 """
 import logging
+
+import httpx
 from importlib.util import find_spec
 
 from cryptography.fernet import InvalidToken
@@ -20,6 +22,8 @@ from .api import MAX_INT, current_user, project_of
 from .auth import _check_origin
 from .db import User, get_db
 from .integrations import github_access_token
+from .live import describe
+from .pr_files import pr_files, pr_log
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/analysis")
@@ -81,6 +85,43 @@ def one_assessment(assessment_id: int = Path(ge=1, le=MAX_INT), user: User = Dep
     if not row or not project or row.project_id != project.id:
         raise HTTPException(404, "No analysis with that id")
     return to_json(row)
+
+
+def _own_row(db: Session, user: User, assessment_id: int) -> RiskAssessment:
+    project = project_of(db, user)
+    row = db.get(RiskAssessment, assessment_id) if project else None
+    if not row or not project or row.project_id != project.id:
+        raise HTTPException(404, "No analysis with that id")
+    return row
+
+
+@router.get("/pull-requests/{assessment_id}/files")
+async def changed_files(assessment_id: int = Path(ge=1, le=MAX_INT), user: User = Depends(current_user),
+                        db: Session = Depends(get_db)):
+    """T-038: the pull request's changed files with a risk each and the imports between them, read from GitHub now."""
+    row = _own_row(db, user, assessment_id)
+    if not user.github_token:
+        raise HTTPException(409, "Link GitHub first, so Verixa can read the pull request")
+    try:
+        token = await run_in_threadpool(github_access_token, db, user)
+    except InvalidToken:
+        raise HTTPException(409, "Your stored GitHub token could not be read. Link GitHub again")
+    try:
+        return await run_in_threadpool(pr_files, row.repo, row.pr_number, row.head_sha, token)
+    except httpx.HTTPStatusError as exc:
+        code = exc.response.status_code
+        raise HTTPException(502, "GitHub has no such pull request any more" if code == 404 else
+                            f"GitHub refused to list the changed files ({code})")
+    except httpx.HTTPError:
+        raise HTTPException(502, "Could not reach GitHub")
+
+
+@router.get("/pull-requests/{assessment_id}/log")
+def past_log(assessment_id: int = Path(ge=1, le=MAX_INT), user: User = Depends(current_user),
+             db: Session = Depends(get_db)):
+    """T-038: every saved run of this pull request from the trace log, newest first."""
+    row = _own_row(db, user, assessment_id)
+    return {"runs": pr_log(row.repo, row.pr_number, describe)}
 
 
 class AnalyseIn(BaseModel):

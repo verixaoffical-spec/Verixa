@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-15 T-038 Dependency graph, per-file risk, past-log endpoint and live stage view on the Risk Analysis screen (prompt §8 B/C/D), from the approved prototype, no new libraries (Farheen, via Claude)
 - 2026-11-14 T-036 Risk dashboard charts and per-PR history in the real app (prompt §8 A), built from the approved prototype with no new libraries (Farheen, via Claude)
 - 2026-11-14 T-035 Manager verified on the real ADK loop; answers now validated with a pydantic schema; judgment check deferred to T-039 (D-012) (Farheen, via Claude)
 - 2026-11-14 T-034 Yes/no risk questions with a majority vote of 3 that can only raise the rule label (D-011) (Farheen, via Claude)

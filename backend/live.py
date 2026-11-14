@@ -116,7 +116,17 @@ def describe(line: dict) -> dict | None:
     if not pr:
         return None
     return {"type": "agent", "repo": pr[0], "pr": pr[1], "run_id": f.get("run_id"), "at": f.get("at"),
-            "event": e, "text": text, "level": level, "done": done}
+            "event": e, "text": text, "level": level, "done": done, "stage": stage_of(e)}
+
+
+# T-038: the stage of the analysis each step belongs to, for the dashboard's stepper
+STAGES = [("received", ("service.delivery", "run.start")), ("changes", ("github.pr_read", "github.read_failed")),
+          ("history", ("github.defects_",)), ("ci", ("github.ci_", "ci.")), ("rules", ("rules.",)),
+          ("model", ("analysis.",)), ("manager", ("manager.",)), ("saved", ("service.", "run."))]
+
+
+def stage_of(event: str) -> str:
+    return next(name for name, prefixes in STAGES + [("saved", ("",))] if event.startswith(prefixes))
 
 
 def _put(queue: asyncio.Queue, message: dict) -> None:

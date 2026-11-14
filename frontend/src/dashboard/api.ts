@@ -79,6 +79,27 @@ export interface RiskFeed {
   agent_available: boolean;
 }
 
+// T-038: a pull request's changed files, read from GitHub on request, with a risk each and the imports between them
+export interface PrFile {
+  path: string;
+  status: string | null;
+  additions: number;
+  deletions: number;
+  risk: RiskLabel;
+  why: string;
+  folder: string;
+}
+export interface PrFiles {
+  head_sha: string;
+  same_commit: boolean;       // false: the PR has newer commits than the analysed one
+  total_files: number;
+  shown_files: number;
+  scanned_for_imports: number;
+  files: PrFile[];
+  edges: [string, string][];  // [importer, imported]
+}
+export interface PastRun { run_id: string | null; started: string | null; messages: LiveEvent[] }
+
 export class ApiError extends Error {
   constructor(message: string, public status: number, public detail: any) {
     super(message);
@@ -119,6 +140,8 @@ export const api = {
   // Scores a pull request now instead of waiting for GitHub. Runs the agent and answers when done,
   // so it can take as long as the model chain takes.
   analysePr: (prNumber: number) => request<Assessment>('/api/analysis/analyse', { pr_number: prNumber }),
+  prFiles: (id: number) => request<PrFiles>(`/api/analysis/pull-requests/${id}/files`),
+  prLog: (id: number) => request<{ runs: PastRun[] }>(`/api/analysis/pull-requests/${id}/log`),
 
   // Two-step verification. Changing it asks for the password again, and turning it off also asks for a code.
   twoFactor: () => request<TwoFactorStatus>('/auth/2fa'),
@@ -132,6 +155,8 @@ export const api = {
   deleteAccount: (password: string, code: string) => request<null>('/api/account/delete', { password, code }),
 };
 
+export type Stage = 'received' | 'changes' | 'history' | 'ci' | 'rules' | 'model' | 'manager' | 'saved';
+
 // One step of an agent run, pushed by the server over the WebSocket at /api/live
 export interface LiveEvent {
   type: 'agent';
@@ -143,6 +168,7 @@ export interface LiveEvent {
   text: string;
   level: 'info' | 'ok' | 'warn' | 'error';
   done: boolean;     // the last message of a run: the result is saved, or it stopped
+  stage: Stage;      // T-038: which analysis stage this step belongs to
   replay?: boolean;  // sent again because the page connected while the run was going on
 }
 

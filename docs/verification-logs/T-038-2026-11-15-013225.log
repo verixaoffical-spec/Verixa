@@ -1,0 +1,15 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-038.py
+     Ran 7 tests in 4.916s |  | OK
+ok   backend: files and log endpoints, stages, ownership (tests/test_pr_views.py)
+ok   frontend type-checks and builds (tsc && vite build)
+     4 passed (27.6s)
+ok   graph and live views (risk_views.spec.ts)
+     2 passed (23.8s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     [8/33] [controlled] â€º agents.spec.ts:105:7 â€º showing what the agents saved â€º AT-17 a failed analysis says so, and shows no invented label | 33 passed (2.5m)
+ok   the Risk screen's existing browser tests (agents.spec.ts)
+
+PASS: 0 failed
+
+
+exit code: 0
