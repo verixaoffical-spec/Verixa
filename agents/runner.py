@@ -17,7 +17,8 @@ from .analysis import ANALYSES
 from .manager import root_agent
 from .trace import agent_run, trace
 
-APP, USER = "verixa", "system"
+APP = "verixa"
+USER = os.getenv("ADK_SESSION_USER", "system")  # checks run their server under their own user, so cleanup touches only theirs
 
 
 def run_timeout() -> float:

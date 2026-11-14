@@ -46,3 +46,9 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-022 | 2026-11-14 | auto | scripts\verify\T-022.py | PASS | docs/verification-logs/T-022-2026-11-14-191013.log | faafc69b7653c42025e07fa42a7cd70db86ef8bf89c6d74c5af77e0578134423 |
 | T-030 | 2026-11-14 | auto | scripts\verify\T-030.py | PASS | docs/verification-logs/T-030-2026-11-14-191313.log | 1665c53029faf495b01360851f7fe9e447bf0e8874d8ec704dba20eb713ed42c |
 | T-030 | 2026-11-14 | auto | scripts\verify\T-030.py | PASS | docs/verification-logs/T-030-2026-11-14-191420.log | a5f105d25f457b4bdc8c5391c88de92db542a79a4f74b0524d505ddabb9eb38c |
+| T-031 | 2026-11-14 | auto | scripts\verify\T-031.py | FAIL | docs/verification-logs/T-031-2026-11-14-191557.log | e791ea798ebeb173746c8900b5ff611401b09a8f40ead2fe1c2e2a7a0b67b486 |
+| T-031 | 2026-11-14 | auto | scripts\verify\T-031.py | FAIL | docs/verification-logs/T-031-2026-11-14-191657.log | b13c44fc1387b47733cf7e85e676e92040a3bfec890c2c49240f32ab0bc6201a |
+| T-031 | 2026-11-14 | auto | scripts\verify\T-031.py | PASS | docs/verification-logs/T-031-2026-11-14-191735.log | ea6ff0cb66adc1a1c068b6226ab0650cd6ff6d93e8006e27694fc72f414bc691 |
+| T-015 | 2026-11-14 | manual | manual by Farheen | PASS | docs/verification-logs/T-015-2026-11-14-192748.log | c28c57e7136f5822d34939bf6f10bf1677db2abd13761b0c17a5cff4348665bf |
+| T-031 | 2026-11-14 | auto | scripts\verify\T-031.py | PASS | docs/verification-logs/T-031-2026-11-14-201149.log | f4b74dbdf2c472dc98638b6d80cb1b38139e3f9ea5b3ebad9ebe394e1771cfe2 |
+| T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-14-201610.log | c637ec6dcb7756282ca02db522646031096c2175e7db48af72e9a787b7c15b9b |

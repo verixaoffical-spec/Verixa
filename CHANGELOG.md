@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-14 T-031 Rule-based risk scoring verified end to end on the real server; ADK_SESSION_USER lets checks keep their agent sessions separate (Farheen, via Claude)
 - 2026-11-14 T-030 GitHub PR diff fetch verified live, including pagination past 100 files and files without a patch (Farheen, via Claude)
 - 2026-11-14 T-022 Webhook receiver verified on a real server with real signatures; no code change needed (Farheen, via Claude)
 - 2026-11-14 T-026 Model names moved to backend/llm/config.yaml; model_calls table (migration 0002) logs every model attempt from the agents' trace on a background thread; D-010 (Farheen, via Claude)

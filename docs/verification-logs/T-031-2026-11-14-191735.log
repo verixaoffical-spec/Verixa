@@ -1,0 +1,17 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-031.py
+ok   risk rule unit tests and eval tests pass
+ok   rules: sensitive auth code -> High
+ok   rules: docs only -> Low
+ok   rules: the same input gives the same label, score and factors
+ok   rules: the PR title is not an input, so it cannot steer the label
+ok   end to end: a risk row appears for the new PR
+ok   end to end: the rules gave a label
+ok   end to end: factors and file count saved
+ok   end to end: the model explained it and the Manager approved (state scored)
+ok   negative: with no model keys the rules still give a label and the row needs human review
+
+PASS: 0 failed
+
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+
+exit code: 0

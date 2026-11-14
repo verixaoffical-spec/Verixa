@@ -1,0 +1,19 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-031.py
+ok   risk rule unit tests and eval tests pass
+ok   rules: sensitive auth code -> High
+ok   rules: docs only -> Low
+ok   rules: the same input gives the same label, score and factors
+ok   rules: the PR title is not an input, so it cannot steer the label
+
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\scripts\verify\T-031.py", line 59, in <module>
+    pr, _ = fetch_pr(REPO, 1, token)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\agents\github_client.py", line 53, in fetch_pr
+    pr.raise_for_status()
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\httpx\_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '401 Unauthorized' for url 'https://api.github.com/repos/octocat/Hello-World/pulls/1'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+
+exit code: 1

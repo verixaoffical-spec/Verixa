@@ -1,0 +1,18 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-031.py
+ok   risk rule unit tests and eval tests pass
+ok   rules: sensitive auth code -> High
+ok   rules: docs only -> Low
+ok   rules: the same input gives the same label, score and factors
+ok   rules: the PR title is not an input, so it cannot steer the label
+
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\scripts\verify\T-031.py", line 114, in <module>
+    row = run_once({}, {"scored", "needs_human_review", "failed"})
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\scripts\verify\T-031.py", line 83, in run_once
+    body = delivery(pr["head"]["sha"])
+                    ~~^^^^^^^^
+KeyError: 'head'
+
+exit code: 1
