@@ -56,3 +56,9 @@
 - Decision: Farheen removed branch protection from T-010's acceptance criteria. scripts/verify/T-010.py no longer checks it. This is a change of requirement by the owner, not a test weakened to pass. Arisha (T-010 lead) should sign off when she returns.
 - Consequences: as of today nothing protects main, so anyone with write access can delete or force-push it. Optional safety net later: activate the "main1" ruleset (blocks deletion and force pushes, does not require PRs).
 - Owner: Farheen
+
+### D-009 Neon PostgreSQL instead of docker compose for T-011 (2026-11-14)
+- Context: Docker is not installed on Farheen's machine. Farheen created a new, empty Neon project and put its connection string in .env (DATABASE_URL).
+- Decision: T-011 uses that Neon database (PostgreSQL 18, SSL required, pgvector enabled). docker-compose.yml stays as an optional local fallback. Tests keep using SQLite by default (tests/__init__.py), never the .env database.
+- Consequences: the shared database is in the cloud, so anything a check writes must clean up after itself. The older Neon database used by mid is no longer the app's database.
+- Owner: Farheen

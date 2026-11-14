@@ -1,0 +1,15 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-011.py
+ok   DATABASE_URL points at a Neon host
+ok   SSL is required
+ok   app engine connects; PostgreSQL 15 or newer
+ok   pgvector is available on the server
+ok   pgvector extension is enabled
+ok   vector distance query returns the nearest row
+ok   negative: wrong password is refused
+ok   .env is not tracked by git
+ok   docker-compose.yml keeps the local pgvector fallback
+
+PASS: 0 failed
+
+
+exit code: 0

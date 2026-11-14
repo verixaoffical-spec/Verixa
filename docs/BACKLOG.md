@@ -25,7 +25,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
 | T-010 | Repo init, layout (branch protection dropped, D-008) | Arisha | Farheen | T-002 | DONE |
-| T-011 | PostgreSQL + pgvector via docker compose | Farheen | Arisha | T-010 | TODO |
+| T-011 | PostgreSQL + pgvector (Neon, D-009; docker compose kept as local fallback) | Farheen | Arisha | T-010 | DONE |
 | T-012 | Initial schema and migrations (DATA_MODEL.md) | Farheen | Arisha | T-011 | TODO |
 | T-013 | FastAPI scaffold, health route, config loading | Arisha | Farheen | T-010 | IN REVIEW |
 | T-014 | Register GitHub OAuth App | Arisha | | | TODO |
