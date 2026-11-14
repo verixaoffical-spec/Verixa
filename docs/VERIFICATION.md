@@ -44,3 +44,5 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-010 | 2026-11-14 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-14-190327.log | e04a96ef9ea03cb3d912fe12be01b51dbb83c00a928c7d8ae1289fcbc8c6f3ac |
 | T-022 | 2026-11-14 | auto | scripts\verify\T-022.py | PASS | docs/verification-logs/T-022-2026-11-14-190852.log | 5c25aa6f6b00a9591970b70fc7547897c697748cdb241415396a313c543da0b3 |
 | T-022 | 2026-11-14 | auto | scripts\verify\T-022.py | PASS | docs/verification-logs/T-022-2026-11-14-191013.log | faafc69b7653c42025e07fa42a7cd70db86ef8bf89c6d74c5af77e0578134423 |
+| T-030 | 2026-11-14 | auto | scripts\verify\T-030.py | PASS | docs/verification-logs/T-030-2026-11-14-191313.log | 1665c53029faf495b01360851f7fe9e447bf0e8874d8ec704dba20eb713ed42c |
+| T-030 | 2026-11-14 | auto | scripts\verify\T-030.py | PASS | docs/verification-logs/T-030-2026-11-14-191420.log | a5f105d25f457b4bdc8c5391c88de92db542a79a4f74b0524d505ddabb9eb38c |

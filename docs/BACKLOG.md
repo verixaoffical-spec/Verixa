@@ -50,7 +50,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 ## Phase 3: D2 Risk scoring (wk 7-8)
 | ID | Task | Lead | Support | Dep | Status |
 |---|---|---|---|---|---|
-| T-030 | GitHub PR diff fetch via integration | Arisha | Farheen | T-022 | IN REVIEW |
+| T-030 | GitHub PR diff fetch via integration | Arisha | Farheen | T-022 | DONE |
 | T-031 | Analysis Agent: rule-based risk score | Farheen | | T-030, T-026 | IN REVIEW |
 | T-032 | Module defect history query | Arisha | Farheen | T-012 | IN REVIEW |
 | T-033 | New-module size-based scoring | Farheen | | T-031 | IN REVIEW |
