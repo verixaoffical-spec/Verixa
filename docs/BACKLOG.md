@@ -44,7 +44,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | T-023 | Parser for TS Playwright specs and Postman collection | Arisha | | T-013 | IN REVIEW |
 | T-024 | Upload widget with live preview | Farheen | Arisha | T-023 | IN REVIEW |
 | T-025 | Test Library storage and listing | Arisha | | T-012, T-023 | IN REVIEW |
-| T-026 | LLM router, config.yaml, fallback, model_calls logging | Farheen | | T-017 | TODO |
+| T-026 | LLM router, config.yaml, fallback, model_calls logging | Farheen | | T-017 | DONE |
 | T-035 | Manager Agent: validation, retry cap, escalation | Farheen | Arisha | T-016 | IN REVIEW |
 
 ## Phase 3: D2 Risk scoring (wk 7-8)

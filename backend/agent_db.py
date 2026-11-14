@@ -83,6 +83,23 @@ class RiskAssessment(AgentBase):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
 
 
+class ModelCall(AgentBase):
+    """One row per model attempt (T-026): which model answered or failed, how fast, how many tokens. Written from
+    the agents' trace by backend/model_calls.py; used for quota tracking and model evals (docs/MODELS.md)."""
+    __tablename__ = "model_calls"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    agent: Mapped[str] = mapped_column(String(40))          # the chain's task: analysis, select, classify, draft
+    model: Mapped[str] = mapped_column(String(120))         # provider/model, as in backend/llm/config.yaml
+    provider: Mapped[str] = mapped_column(String(40))       # groq, openrouter, gemini
+    tokens: Mapped[int | None]
+    latency_ms: Mapped[int | None]
+    ok: Mapped[bool]
+    error: Mapped[str | None] = mapped_column(Text)          # masked, first 300 characters
+    run_id: Mapped[str | None] = mapped_column(String(40), index=True)  # the agents' trace run, when there is one
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, index=True)
+
+
 def init_agent_db() -> None:
     """Creates `risk_assessments` if it is not there, and adds columns introduced later. Never drops anything."""
     AgentBase.metadata.create_all(engine)

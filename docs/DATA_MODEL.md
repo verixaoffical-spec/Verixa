@@ -15,7 +15,7 @@
 | tickets | id, run_id, result_id, draft_json, status(draft/approved/filed), jira_key | |
 | approvals | id, run_id, gate(run/tests/ticket), approved_by, at | audit of human gates |
 | agent_runs | id, run_id, agent, attempt, output_valid, error | retries and escalations |
-| model_calls | id, agent, model, provider, tokens, latency_ms, ok, at | quota tracking and evals |
+| model_calls | id, agent, model, provider, tokens, latency_ms, ok, error, run_id, at | quota tracking and evals; built in T-026 (migration 0002), one row per model attempt |
 | sessions, events, app_states, user_states, adk_internal_metadata | managed by ADK's DatabaseSessionService (T-016) | agent session state and event history; not in the Alembic migrations |
 | memory_embeddings | id, ticket_id, embedding vector | FYP-II |
 
@@ -33,6 +33,7 @@ database in .env (D-009). These are mid's eight tables, unchanged; the planned t
 | spec_files | backend/db.py | Test Library Playwright specs, revision for conflicts |
 | collections | backend/db.py | Test Library Postman collection |
 | risk_assessments | backend/agent_db.py | one row per (project, PR, head commit); folds in the pull_requests facts |
+| model_calls | backend/agent_db.py | added by migration 0002 (T-026): one row per model attempt, written from the agents' trace |
 
 Schema changes go through a new Alembic revision (`.venv\Scripts\python.exe -m alembic revision --autogenerate -m "..."`,
 then `alembic upgrade head`). The app's startup create_all only fills gaps and never alters a table.

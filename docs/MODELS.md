@@ -27,3 +27,8 @@ Models are undecided. This is Farheen's starting guess, to be tested.
 
 ## Final choice
 Status: undecided. When decided, record in DECISIONS.md and update this file.
+
+## Removed by providers
+- 2026-11-14 (found in T-017): OpenRouter removed `qwen/qwen3-8b` and `deepseek/deepseek-v4`. They are still in
+  backend/llm/config.yaml so the chain order stays visible; calls to them fail and the chain moves on. Farheen will
+  pick replacements (no OpenRouter option is free now; see STATUS.md Known issues).

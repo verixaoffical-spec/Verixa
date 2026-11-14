@@ -15,6 +15,8 @@ alembic>=1.14
 # --- ADK session state in PostgreSQL through SQLAlchemy's async engine (T-016) ---
 greenlet>=3
 asyncpg>=0.29
+# --- Model chains live in backend/llm/config.yaml (T-026) ---
+pyyaml>=6
 
 # --- Deliverable 2: the Analysis Agent (from multi-agents/requirements.txt) ---
 google-adk

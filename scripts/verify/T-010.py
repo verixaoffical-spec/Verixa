@@ -52,7 +52,10 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "backend/main.py": "T-013 adds the /health route",
                  "agents/runner.py": "T-016 session state in PostgreSQL",
                  "backend/analysis_service.py": "T-016 wires the runner to PostgreSQL",
-                 "tests/test_analysis_integration.py": "T-016 allows the hello smoke agent in the scope test"}
+                 "tests/test_analysis_integration.py": "T-016 allows the hello smoke agent in the scope test",
+                 "agents/llm.py": "T-026 reads the chains from backend/llm/config.yaml, traces each attempt",
+                 "agents/analysis.py": "T-026 adds tokens to the model trace",
+                 "backend/agent_db.py": "T-026 adds the ModelCall table"}
 
 
 def committed_sha(f: str) -> str | None:

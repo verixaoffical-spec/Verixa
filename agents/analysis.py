@@ -230,14 +230,16 @@ class AnalysisAgent(BaseAgent):
             started = time.perf_counter()
             trace("analysis.model_called", model=name)
             try:
-                text = ""
+                text, tokens = "", None
                 async for ev in _within(writer.run_async(ctx), model_timeout()):
                     yield ev
                     if ev.is_final_response() and ev.content and ev.content.parts:
                         text = "".join(p.text or "" for p in ev.content.parts)
+                    if getattr(ev, "usage_metadata", None) and ev.usage_metadata.total_token_count:
+                        tokens = ev.usage_metadata.total_token_count  # for the model_calls log (T-026)
                 st.update(raw=text, model=name, error=None)
                 trace("analysis.model_answered", model=name, ms=round((time.perf_counter() - started) * 1000),
-                      chars=len(text), answer=text[:PREVIEW])
+                      chars=len(text), answer=text[:PREVIEW], tokens=tokens)
                 return
             except Exception as e:
                 reason = f"no answer within {model_timeout():g} seconds" if isinstance(e, TimeoutError) else str(e)

@@ -1,0 +1,19 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-012.py
+ok   mid's eight tables are all still in the app's models
+ok   no app table shares a name with ADK's tables (so the exclusion hides nothing of ours)
+ok   database is at the head revision (0002)
+ok   database has every model table (mid's 8 + later) and matches the models (TC-03)
+No new upgrade operations detected.
+ok   alembic check: no difference between models and database
+ok   round trip: upgrade creates every model table
+ok   round trip: SQLite copy matches the models too
+ok   negative: a missing column is flagged
+ok   round trip: downgrade removes the tables
+ok   pgvector still enabled
+     ok  signup 202 (202) | ok  pending sign-up row, no account yet | ok  verify email 200 (200) | ok  pending row consumed by verification | ok  password stored hashed | ok  logout | ok  login reads the account | ok  rename updates row | ok  password change | ok  session_version bumped | ok  connect | ok  project row + webhook verified | ok  import (200 {"saved_specs":2,"removed_specs":0,"saved_collection":true,"removed_collection":false}) | ok  2 specs + collection stored | ok  update bumps revision | ok  stale update refused | ok  session reads it back (x8) | ok  delete spec | ok  delete collect
+ok   app check on the new database passes (scripts/check_database.py)
+
+PASS: 0 failed
+
+
+exit code: 0

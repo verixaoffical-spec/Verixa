@@ -48,7 +48,7 @@ Live checks run on 2026-11-02 from `mid/`:
 | D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
 | D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
 | D1 Accounts + 2FA | BUILT, UNVERIFIED | (not in backlog) | 2026-11-02 live | mid: -m scripts.check_database | Email/password sign-in, password rotation, authenticator enrolment with an encrypted secret and 10 hashed recovery codes, cascading delete. GitHub sign-in untested (no OAuth app) |
-| LLM router + fallback | IN PROGRESS | T-026 | 2026-11-02 live | mid: scripts/live_check.py | The chain picks a model and a live Groq call succeeded. No config.yaml and no model_calls logging, so the task is not met as written |
+| LLM router + fallback + model_calls | WORKING | T-026 | 2026-11-14 | `python3 scripts/verify/run.py T-026` | Chains in backend/llm/config.yaml (D-010), live fallback verified, one model_calls row per attempt (tokens, latency, errors masked) |
 | D2 Analysis Agent (risk) | BUILT, UNVERIFIED | T-030..T-037 | 2026-11-02 live | mid: scripts/live_check.py | T-030..T-033 built and verified live against real GitHub. T-034 and T-037 not implemented. T-036 still Arisha's |
 | Manager Agent (built in wk 5-6) | BUILT, UNVERIFIED | T-035 | 2026-11-02 live | mid: tests/test_analysis_integration.py | Validation, feedback retry, cap at 3, escalation asserted end to end; a live run was accepted on attempt 1 |
 | D3 Test selection | NOT STARTED | T-040 | | | |
@@ -79,7 +79,7 @@ Live checks run on 2026-11-02 from `mid/`:
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
+DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017, T-026 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
 (code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues

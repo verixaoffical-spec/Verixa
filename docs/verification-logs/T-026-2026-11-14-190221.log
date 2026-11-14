@@ -1,0 +1,26 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-026.py
+ok   config.yaml has the analysis, select, classify and draft chains
+ok   agents.llm reads its chains from config.yaml
+ok   no model name from config.yaml is hardcoded in agents/ or backend/ Python code
+ok   ANALYSIS_MODELS still overrides the chain
+ok   negative: a config with an empty chain is refused
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm.turn_on_debug()'.
+
+ok   fallback: the failing model is skipped and the next one answers with parsed JSON
+ok   model_calls writer drained
+ok   failed attempt logged: ok=false, provider groq, error kept
+ok   answered attempt logged: ok=true with tokens and latency
+ok   negative: when model_calls cannot be written, the answer still comes back
+ok   real agents: their model call is in model_calls with tokens and the run id
+
+PASS: 0 failed
+
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+19:02:37 - LiteLLM:WARNING: logging_worker.py:166 - LoggingWorker: event loop changed; carried 1 pending and revived 0 dequeued logging task(s) onto the new loop
+model_calls: could not write a row (OSError)
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+19:03:11 - LiteLLM:WARNING: logging_worker.py:166 - LoggingWorker: event loop changed; carried 2 pending and revived 0 dequeued logging task(s) onto the new loop
+
+exit code: 0

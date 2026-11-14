@@ -1,24 +1,30 @@
-"""Model chains per task, taken from the model priority table.
+"""Model chains per task, read from backend/llm/config.yaml (T-026; model names live only there).
 Each task tries its models in order and moves to the next on any failure
 (no key, quota, bad JSON). Override a chain with env, e.g. DRAFT_MODELS=a,b,c"""
 import json
 import os
 import re
-import litellm
+import time
+from pathlib import Path
 
-DEFAULT_CHAINS = {
-    # PR analysis: explanation and test areas (the risk label itself is computed by rules)
-    "analysis": ["groq/openai/gpt-oss-20b", "groq/openai/gpt-oss-120b",
-                 "openrouter/qwen/qwen3-8b", "gemini/gemini-3.5-flash"],
-    # small and fast: decisions
-    "select": ["groq/openai/gpt-oss-20b", "openrouter/qwen/qwen3-8b",
-               "groq/openai/gpt-oss-120b", "gemini/gemini-3.5-flash"],
-    "classify": ["groq/openai/gpt-oss-20b", "openrouter/qwen/qwen3-8b",
-                 "groq/openai/gpt-oss-120b", "gemini/gemini-3.5-flash"],
-    # code generation
-    "draft": ["openrouter/qwen/qwen3-coder", "groq/openai/gpt-oss-120b",
-              "openrouter/deepseek/deepseek-v4", "gemini/gemini-3.5-flash"],
-}
+import litellm
+import yaml
+
+from .trace import trace
+
+CONFIG = Path(os.getenv("MODEL_CONFIG", Path(__file__).resolve().parent.parent / "backend" / "llm" / "config.yaml"))
+
+
+def load_chains(path: Path = CONFIG) -> dict[str, list[str]]:
+    """The chains from config.yaml. A missing or malformed file stops the import: running with no models is worse."""
+    chains = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get("chains")
+    if not isinstance(chains, dict) or not all(isinstance(v, list) and v and all(isinstance(m, str) and "/" in m for m in v)
+                                               for v in chains.values()):
+        raise ValueError(f"{path}: 'chains' must map each task to a non-empty list of provider/model names")
+    return chains
+
+
+DEFAULT_CHAINS = load_chains()
 KEYS = {"groq/": "GROQ_API_KEY", "openrouter/": "OPENROUTER_API_KEY", "gemini/": "GEMINI_API_KEY"}
 
 
@@ -57,6 +63,7 @@ async def ask(task: str, system: str, user: str, as_json: bool = True, timeout: 
         kwargs = {}
         if model.startswith("groq/") and "gpt-oss" in model:
             kwargs["extra_body"] = {"include_reasoning": False}
+        started = time.perf_counter()
         try:
             resp = await litellm.acompletion(
                 model=model, temperature=0, timeout=timeout,
@@ -64,7 +71,13 @@ async def ask(task: str, system: str, user: str, as_json: bool = True, timeout: 
                 **kwargs,
             )
             text = resp.choices[0].message.content or ""
-            return (parse_json(text) if as_json else strip_code(text)), model
+            answer = parse_json(text) if as_json else strip_code(text)
+            usage = getattr(resp, "usage", None)
+            trace("llm.model_answered", task=task, model=model, ms=round((time.perf_counter() - started) * 1000),
+                  tokens=getattr(usage, "total_tokens", None))
+            return answer, model
         except Exception as e:
             errors.append(f"{model}: {type(e).__name__}: {str(e)[:120]}")
+            trace("llm.model_failed", task=task, model=model, ms=round((time.perf_counter() - started) * 1000),
+                  error=f"{type(e).__name__}: {str(e)[:300]}")
     raise RuntimeError("All models failed: " + " | ".join(errors))

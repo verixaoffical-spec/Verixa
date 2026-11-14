@@ -1,0 +1,31 @@
+# Model chains per task (T-026). The only place model names live (CLAUDE.md, docs/MODELS.md).
+# Each task tries its models in order and moves to the next on any failure (no key, quota, timeout, bad JSON).
+# Override a chain without editing this file: <TASK>_MODELS=a,b,c in .env, e.g. ANALYSIS_MODELS=groq/x,groq/y
+# Names are LiteLLM style: provider/model. gemini/... runs on ADK's native Gemini client.
+#
+# NOT FINAL (MODELS.md). Open since 2026-11-14 (STATUS.md, Known issues): OpenRouter removed qwen/qwen3-8b and
+# deepseek/deepseek-v4. They stay listed until Farheen picks replacements; calls to them fail and the chain moves on.
+chains:
+  # PR analysis: explanation and test areas (the risk label itself is computed by rules)
+  analysis:
+    - groq/openai/gpt-oss-20b
+    - groq/openai/gpt-oss-120b
+    - openrouter/qwen/qwen3-8b
+    - gemini/gemini-3.5-flash
+  # small and fast: decisions
+  select:
+    - groq/openai/gpt-oss-20b
+    - openrouter/qwen/qwen3-8b
+    - groq/openai/gpt-oss-120b
+    - gemini/gemini-3.5-flash
+  classify:
+    - groq/openai/gpt-oss-20b
+    - openrouter/qwen/qwen3-8b
+    - groq/openai/gpt-oss-120b
+    - gemini/gemini-3.5-flash
+  # code generation
+  draft:
+    - openrouter/qwen/qwen3-coder
+    - groq/openai/gpt-oss-120b
+    - openrouter/deepseek/deepseek-v4
+    - gemini/gemini-3.5-flash

@@ -62,3 +62,9 @@
 - Decision: T-011 uses that Neon database (PostgreSQL 18, SSL required, pgvector enabled). docker-compose.yml stays as an optional local fallback. Tests keep using SQLite by default (tests/__init__.py), never the .env database.
 - Consequences: the shared database is in the cloud, so anything a check writes must clean up after itself. The older Neon database used by mid is no longer the app's database.
 - Owner: Farheen
+
+### D-010 The LLM router stays in agents/llm.py; config at backend/llm/config.yaml (2026-11-14)
+- Context: ARCHITECTURE.md and backend/CLAUDE.md plan backend/llm/router.py. The working router came from mid as agents/llm.py (chains, fallback, ask()), and the agents package does not import the backend.
+- Decision: keep the router in agents/llm.py and move only the model names into backend/llm/config.yaml (T-026). model_calls rows are written by backend/model_calls.py from the agents' trace, so the agents still never touch the database.
+- Consequences: "llm/router.py" in the docs means agents/llm.py. Changing models means editing config.yaml (or <TASK>_MODELS in .env), never code.
+- Owner: Farheen

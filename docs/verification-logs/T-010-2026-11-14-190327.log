@@ -1,0 +1,25 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-010.py
+ok   160 mid files still byte-identical in the working tree (mid @ 5559f9c)
+ok   9 files changed by later tasks were byte-identical when imported (aec9c6d)
+ok   none of mid's 12 .md files imported
+ok   .env is not tracked by git
+ok   .env is ignored by git
+ok   .gitignore keeps all of mid's patterns
+ok   verification logs stay committable
+ok   .env.example lists mid's variable names
+ok   negative: untouched copy passes the hash check
+ok   negative: tampered copy is caught by the hash check
+ok   negative: a different file at a mid .md path is not flagged
+ok   negative: md check flags an identical copy
+ok   virtualenv exists (.venv, from requirements.txt)
+     Ran 455 tests in 228.911s |  | OK
+ok   imported unit test suite passes
+ok   negative: unsigned webhook refused with 401
+ok   negative: wrongly signed webhook refused with 401
+ok   npm available
+ok   frontend builds (npm run build)
+
+PASS: 0 failed
+
+
+exit code: 0

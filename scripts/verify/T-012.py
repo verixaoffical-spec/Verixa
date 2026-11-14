@@ -38,9 +38,12 @@ from sqlalchemy import create_engine, inspect, text  # noqa: E402
 from backend.agent_db import AgentBase  # noqa: E402
 from backend.db import Base, engine  # noqa: E402
 
-TABLES = {"users", "recovery_codes", "password_resets", "pending_signups", "projects", "spec_files", "collections",
-          "risk_assessments"}
+MID_TABLES = {"users", "recovery_codes", "password_resets", "pending_signups", "projects", "spec_files", "collections",
+              "risk_assessments"}
 MODELS = {t.name: t for md in (Base.metadata, AgentBase.metadata) for t in md.sorted_tables}
+# Every table the app's models define (mid's eight, plus later migrations such as model_calls in T-026)
+TABLES = set(MODELS)
+check("mid's eight tables are all still in the app's models", MID_TABLES <= TABLES, str(sorted(MID_TABLES - TABLES)))
 # ADK's DatabaseSessionService creates and manages its own tables (T-016); they are not part of these migrations
 ADK_TABLES = {"sessions", "events", "app_states", "user_states", "adk_internal_metadata"}
 check("no app table shares a name with ADK's tables (so the exclusion hides nothing of ours)", not ADK_TABLES & MODELS.keys())
@@ -91,7 +94,7 @@ check(f"database is at the head revision ({head})", current == head, f"at {curre
 
 # 2. exactly mid's tables, matching the models
 problems = schema_problems(engine)
-check("database has mid's 8 tables and matches the models (TC-03)", not problems, "; ".join(problems[:6]))
+check("database has every model table (mid's 8 + later) and matches the models (TC-03)", not problems, "; ".join(problems[:6]))
 
 # 3. models and migrations agree
 try:
@@ -105,7 +108,7 @@ tmp = tempfile.mkdtemp()
 lite_url = "sqlite:///" + os.path.join(tmp, "t012.db").replace("\\", "/")
 command.upgrade(cfg(lite_url), "head")
 lite = create_engine(lite_url)
-check("round trip: upgrade creates the 8 tables", set(inspect(lite).get_table_names()) - {"alembic_version"} == TABLES)
+check("round trip: upgrade creates every model table", set(inspect(lite).get_table_names()) - {"alembic_version"} == TABLES)
 check("round trip: SQLite copy matches the models too", not schema_problems(lite), "; ".join(schema_problems(lite)[:4]))
 
 # negative: the comparison catches a missing column
