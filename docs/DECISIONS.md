@@ -42,5 +42,11 @@
 ### D-006 Backlog cleanup and work order after the mid consolidation (2026-11-14)
 - Context: T-011, T-012, T-016 and T-026 were IN PROGRESS from the mid consolidation while T-002 was also open, breaking "one active task per person". Their code is partial (see BACKLOG consolidation notes).
 - Decision: set them back to TODO; the partial code in mid is reused when each task is started in order. Farheen instructed Claude to work through FYP-1 tasks in numbering order for both people, including Arisha-led tasks (starting with T-010, importing mid without .md files). Ownership in CONTRIBUTIONS.md is unchanged; the owner reviews the work.
-- Consequences: Arisha must review the Arisha-led tasks Claude completes. Root cause found: `*.log` in .gitignore meant no verification log was ever kept, so every PASS was invalid; fixed with a .gitignore exception and .gitattributes `-text`.
+- Consequences: Arisha must review the Arisha-led tasks Claude completes (superseded for now by D-007). Root cause found: `*.log` in .gitignore meant no verification log was ever kept, so every PASS was invalid; fixed with a .gitignore exception and .gitattributes `-text`.
+- Owner: Farheen
+
+### D-007 Farheen covers both roles; direct pushes to main for now (2026-11-14)
+- Context: Farheen is doing Arisha's tasks as well. The repo was made public so GitHub branch rules work on the free plan.
+- Decision: until Farheen says otherwise, finished task branches are pushed straight to main without a second reviewer. The /review step (code-reviewer agent) still runs before each finish. The main ruleset blocks deletion and force pushes, and requires a PR once its target branch is set.
+- Consequences: no human second review for now; Arisha should read the merged history when she returns. Once the ruleset targets main, work goes back to PRs.
 - Owner: Farheen
