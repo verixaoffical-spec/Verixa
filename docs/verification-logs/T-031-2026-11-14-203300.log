@@ -1,0 +1,17 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-031.py
+ok   risk rule unit tests and eval tests pass
+ok   rules: sensitive auth code -> High
+ok   rules: docs only -> Low
+ok   rules: the same input gives the same label, score and factors
+ok   rules: the PR title is not an input, so it cannot steer the label
+FAIL end to end: a risk row appears for the new PR - None
+ok   negative: with no model keys the rules still give the same label and the row needs human review
+ok   negative: the Manager tried 3 times before handing it to a human (retry cap, D-005)
+
+FAIL: 1 failed (end to end: a risk row appears for the new PR)
+
+[agent -] octocat/Hello-World#1 github.pr_read repo_id=1296269 pr_url=https://github.com/octocat/Hello-World/pull/1 head_sha=7044a8a032e85b6ab611033b2ac8af7ce85805b2 base_sha=553c2077f0edc3d5dc5d17262f6aa498e69d6f8e pr_updated_at=2026-11-10T21:37:53Z pr_state=closed files=1 ms=1344
+[agent -] octocat/Hello-World#1 rules.scored risk_label=Low base_label=Low score=2 module=root sensitivity=none files_read=1 files_changed=1 history_known=True lines_changed=7 secrets_hidden=0 files_shown_to_model=1 diff_fingerprint=4f635ea232a8888f risk_factors=['size: 1 file(s), 7 lines changed (2 pts)', 'defect history: none found', 'sensitive area: none (0 pts)', 'score 2 gives Low']
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+
+exit code: 1

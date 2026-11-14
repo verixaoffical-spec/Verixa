@@ -1,0 +1,16 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-033.py
+ok   new module: scoring_basis says it is scored by size with no history yet
+ok   new module: a risk factor explains it
+ok   new module: 2 small files -> Low
+FAIL new module: 5 files, 150 lines -> Medium - Low
+FAIL new module: 12 files, 800 lines -> High - Low
+FAIL new module: the score rises with size (no fixed default) - 2 < 2 < 2
+FAIL existing module: basis is size + defect history - size (new module, no history yet) + sensitive areas, with minimum labels
+FAIL existing module: no new-module factor
+FAIL existing module with failed lookups: basis says the history is unknown - size (new module, no history yet) + sensitive areas, with minimum labels
+FAIL negative: one modified file in the module means it is not a new module - size (new module, no history yet) + sensitive areas, with minimum labels
+
+FAIL: 7 failed (new module: 5 files, 150 lines -> Medium, new module: 12 files, 800 lines -> High, new module: the score rises with size (no fixed default), existing module: basis is size + defect history, existing module: no new-module factor, existing module with failed lookups: basis says the history is unknown, negative: one modified file in the module means it is not a new module)
+
+
+exit code: 1

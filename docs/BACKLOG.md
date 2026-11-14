@@ -53,7 +53,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | T-030 | GitHub PR diff fetch via integration | Arisha | Farheen | T-022 | DONE |
 | T-031 | Analysis Agent: rule-based risk score | Farheen | | T-030, T-026 | DONE |
 | T-032 | Module defect history query | Arisha | Farheen | T-012 | DONE |
-| T-033 | New-module size-based scoring | Farheen | | T-031 | IN REVIEW |
+| T-033 | New-module size-based scoring | Farheen | | T-031 | DONE |
 | T-034 | Yes/no risk questions + majority vote of 3 | Farheen | | T-031 | TODO |
 | T-036 | PR and risk dashboard screen | Arisha | Farheen | T-031 | TODO |
 | T-037 | Analysis eval set (20-30 cases) | Arisha | Farheen | T-031 | TODO |

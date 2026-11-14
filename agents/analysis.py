@@ -95,9 +95,14 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
         paths[name] = path
     module = max(per_module, key=per_module.get) if per_module else "root"
 
+    # T-033: a module whose every changed file is newly added has no history yet, so its score rests on change size
+    # (files + lines) and sensitive areas, never on a fixed default. Its lookups are skipped: the issue search matches
+    # the name as text and would count old bugs of an unrelated folder with the same name.
+    new_module = module != "root" and all(f.get("status") == "added" for f in files if module_of(f["filename"])[0] == module)
+
     # defect history from git (bug-fix commits on that folder) and bug issues, whichever is higher
     defects, notes, found = 0, [], []
-    if module != "root":
+    if module != "root" and not new_module:
         for label, fn, arg in (("commits", count_fix_commits, paths[module]), ("issues", count_defects, module)):
             try:
                 found.append(fn(repo, arg, token=token))
@@ -108,7 +113,7 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
         defects = max(found, default=0)
 
     # A failed lookup is not evidence of a clean history. It is only "known" if at least one lookup answered.
-    history_known = module == "root" or bool(found)
+    history_known = module == "root" or new_module or bool(found)
     total_files = max(pr.get("changed_files") or 0, len(files))
     # Whatever a change looks like, a failing build or test run on its commit means it breaks something
     ci = read_ci(pr_id, repo, pr["head"]["sha"], token)
@@ -116,6 +121,11 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
     secrets_added = sum(hide_secrets("\n".join(line for line in (f.get("patch") or "").splitlines()
                                                if line.startswith("+") and not line.startswith("+++")))[1] for f in files)
     a = assess(files, defects, "; ".join(notes), history_known, total_files, ci, secrets_added)
+    if new_module:  # say so, so the label can be read correctly
+        a["risk_factors"].insert(1, f"new module: every changed file in {module} is new, so there is no history "
+                                    "and it is scored by change size")
+    basis = ("size (new module, no history yet)" if new_module else
+             "size + defect history" if history_known else "size (defect history unknown)")
     has_code = any((f.get("patch") or "").strip() for f in files)  # False for images, moved files and empty commits
     top = sorted(files, key=lambda f: f["additions"] + f["deletions"], reverse=True)[:8]
 
@@ -136,7 +146,7 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
         "lines_changed": a["lines_changed"], "past_defects_in_module": defects if history_known else None,
         "score": a["score"], "base_label": a["base_label"], "risk_label": a["risk_label"],
         "risk_factors": a["risk_factors"], "sensitivity": a["sensitivity"],
-        "scoring_basis": "size + defect history + sensitive areas, with minimum labels",
+        "scoring_basis": f"{basis} + sensitive areas, with minimum labels",
         "diff_summary": "\n".join(shown),
         "has_code": has_code,
     }

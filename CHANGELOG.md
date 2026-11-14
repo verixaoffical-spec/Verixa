@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-14 T-033 New modules are scored by change size with no history lookups, and the basis says so (Farheen, via Claude)
 - 2026-11-14 T-032 Defect history verified live; fixed search-qualifier injection through folder names and the silent 100-commit cap (Farheen, via Claude)
 - 2026-11-14 T-031 Rule-based risk scoring verified end to end on the real server; ADK_SESSION_USER lets checks keep their agent sessions separate (Farheen, via Claude)
 - 2026-11-14 T-030 GitHub PR diff fetch verified live, including pagination past 100 files and files without a patch (Farheen, via Claude)
