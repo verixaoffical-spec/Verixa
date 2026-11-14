@@ -55,7 +55,8 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "tests/test_analysis_integration.py": "T-016 allows the hello smoke agent in the scope test",
                  "agents/llm.py": "T-026 reads the chains from backend/llm/config.yaml, traces each attempt",
                  "agents/analysis.py": "T-026 adds tokens to the model trace",
-                 "backend/agent_db.py": "T-026 adds the ModelCall table"}
+                 "backend/agent_db.py": "T-026 adds the ModelCall table",
+                 "agents/github_client.py": "T-032 pages fix commits, refuses unsafe module names in the issue search"}
 
 
 def committed_sha(f: str) -> str | None:

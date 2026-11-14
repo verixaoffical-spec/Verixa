@@ -1,0 +1,14 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-032.py
+ok   count_fix_commits finds bug-fix commits on python/cpython Lib/asyncio
+ok   count_defects finds bug issues mentioning 'terminal' in microsoft/vscode
+ok   fix pattern matches fix / fixes / hotfix / regression / bug wording
+ok   fix pattern ignores words that only contain the letters (prefix, debugging)
+ok   merge commits are not counted as fixes
+ok   more past defects give a higher score for the same change
+ok   when both lookups fail, scoring still works and says the history is unknown
+ok   negative: a repository that does not exist raises (404), not 0
+
+PASS: 0 failed
+
+
+exit code: 0

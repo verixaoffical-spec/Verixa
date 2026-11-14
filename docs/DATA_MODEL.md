@@ -8,7 +8,7 @@
 | test_cases | id, test_file_id, name, module, source(uploaded/drafted), approved | Test Library |
 | pull_requests | id, project_id, number, title, head_sha, files_changed, lines_changed | |
 | risk_assessments | id, pr_id, label(low/med/high), score, basis(history/size), confidence, model_used | |
-| module_defect_history | id, project_id, module, defect_count, last_defect_at | feeds risk |
+| module_defect_history | id, project_id, module, defect_count, last_defect_at | feeds risk. Not stored yet: T-032 computes it live from GitHub (fix commits on the folder + bug issues); a cache table can come later |
 | test_runs | id, pr_id, status, started_at, finished_at, triggered_by | one run object |
 | test_results | id, run_id, test_case_id, status(pass/fail/deployment_pending), classification(real_bug/timeout/deployment_pending), retries | |
 | evidence | id, result_id, kind(screenshot/trace/console/network), path, redacted | paths only |

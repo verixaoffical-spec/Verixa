@@ -108,15 +108,28 @@ def count_fix_commits(repo: str, path: str, months: int = 12, token: str | None 
     """Defect history from git itself: bug-fix commits on the default branch that touched this
     folder in the last N months (merge commits are ignored). Raises on API errors."""
     since = (datetime.now(timezone.utc) - timedelta(days=30 * months)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    firsts: list[str] = []
     with httpx.Client(headers=_headers(token), timeout=20) as c:
-        r = c.get(f"{API}/repos/{repo}/commits", params={"path": path, "since": since, "per_page": 100})
-        r.raise_for_status()
-        firsts = [(x["commit"]["message"] or "").split("\n")[0] for x in r.json()]
+        for page in range(1, 11):  # up to 1000 commits; the defect points stop growing long before that
+            r = c.get(f"{API}/repos/{repo}/commits", params={"path": path, "since": since, "per_page": 100, "page": page})
+            r.raise_for_status()
+            batch = r.json()
+            firsts += [(x["commit"]["message"] or "").split("\n")[0] for x in batch]
+            if len(batch) < 100:
+                break
     return sum(1 for m in firsts if not m.startswith("Merge") and FIX_RE.search(m))
 
 
+MODULE_RE = re.compile(r"[\w.-]+")
+
+
 def count_defects(repo: str, module: str, token: str | None = None) -> int:
-    """Open or closed issues labeled 'bug' that mention the module. Raises on API errors."""
+    """Open or closed issues labeled 'bug' that mention the module. Raises on API errors.
+
+    The module name comes from folder names in the PR, which its author controls: a quote in it could close the
+    phrase and add search qualifiers (another repo:, for example) and change the count, so only plain names pass."""
+    if not MODULE_RE.fullmatch(module or ""):
+        raise ValueError("module name is not a plain folder name, so it is not searched")
     q = f'repo:{repo} is:issue label:bug "{module}" in:title,body'
     with httpx.Client(headers=_headers(token), timeout=20) as c:
         r = c.get(f"{API}/search/issues", params={"q": q, "per_page": 1})

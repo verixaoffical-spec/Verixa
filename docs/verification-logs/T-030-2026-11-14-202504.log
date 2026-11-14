@@ -1,0 +1,17 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-030.py
+ok   small PR: title and a 40-character head commit
+ok   small PR: file count equals GitHub's changed_files
+ok   small PR: each file has filename, additions, deletions and patch
+ok   large PR: all files fetched across pages (count equals changed_files)
+ok   large PR: no file listed twice
+ok   score_pr reads the fetched diff and scores it
+ok   a file without a patch (binary or very large) is still scored
+ok   parse_pr_id: 'owner/repo#12' -> ('owner/repo', 12)
+ok   negative: a malformed PR id is refused
+ok   negative: a PR that does not exist raises 404
+ok   negative: a bad token raises 401
+
+PASS: 0 failed
+
+
+exit code: 0
