@@ -49,7 +49,10 @@ m = json.load(open(os.path.join(ROOT, "scripts/verify/T-010.manifest.json"), enc
 #    in the import commit instead; every other imported file must still be byte-identical in the working tree.
 IMPORT_COMMIT = "aec9c6d"
 CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_database.py": "T-012 follows the email-verified sign-up",
-                 "backend/main.py": "T-013 adds the /health route"}
+                 "backend/main.py": "T-013 adds the /health route",
+                 "agents/runner.py": "T-016 session state in PostgreSQL",
+                 "backend/analysis_service.py": "T-016 wires the runner to PostgreSQL",
+                 "tests/test_analysis_integration.py": "T-016 allows the hello smoke agent in the scope test"}
 
 
 def committed_sha(f: str) -> str | None:

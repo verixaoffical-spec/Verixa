@@ -16,7 +16,7 @@
 | approvals | id, run_id, gate(run/tests/ticket), approved_by, at | audit of human gates |
 | agent_runs | id, run_id, agent, attempt, output_valid, error | retries and escalations |
 | model_calls | id, agent, model, provider, tokens, latency_ms, ok, at | quota tracking and evals |
-| adk_sessions | managed by ADK | |
+| sessions, events, app_states, user_states, adk_internal_metadata | managed by ADK's DatabaseSessionService (T-016) | agent session state and event history; not in the Alembic migrations |
 | memory_embeddings | id, ticket_id, embedding vector | FYP-II |
 
 ## In the database now (T-012, 2026-11-14)

@@ -12,6 +12,9 @@ segno>=1.6
 
 # --- Database migrations (T-012) ---
 alembic>=1.14
+# --- ADK session state in PostgreSQL through SQLAlchemy's async engine (T-016) ---
+greenlet>=3
+asyncpg>=0.29
 
 # --- Deliverable 2: the Analysis Agent (from multi-agents/requirements.txt) ---
 google-adk

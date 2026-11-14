@@ -49,11 +49,22 @@ class AgentUnavailable(RuntimeError):
 def _load_runner():
     """Imported late and on purpose. The agent pulls in google-adk and litellm, which are heavy and
     may be missing; the dashboard, auth and the Test Library must still work without them."""
+    global _sessions_ready
     try:
-        from agents.runner import run_manager
+        from agents import runner
     except Exception as exc:  # ImportError, or a provider SDK blowing up at import time
         raise AgentUnavailable(f"Analysis Agent is unavailable: {type(exc).__name__}: {exc}") from exc
-    return run_manager
+    if not _sessions_ready:  # T-016: agent session state lives in the app's PostgreSQL database
+        from .settings import settings
+        try:
+            runner.use_database(settings.database_url)
+        except Exception as exc:  # missing asyncpg/greenlet or a bad URL: the caller marks the row failed
+            raise AgentUnavailable(f"Agent session store is unavailable: {type(exc).__name__}") from exc
+        _sessions_ready = True
+    return runner.run_manager
+
+
+_sessions_ready = False
 
 
 def _dict(value) -> dict:

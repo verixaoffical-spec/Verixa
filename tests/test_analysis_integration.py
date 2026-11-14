@@ -418,7 +418,8 @@ class ScopeTests(unittest.TestCase):
 
         import agents
         names = {p.stem for p in pathlib.Path(agents.__file__).parent.glob("*.py")}
-        self.assertEqual(names, {"__init__", "analysis", "events", "github_client", "llm",
+        # "hello" is the ADK skeleton's smoke agent (T-016): it calls no model and is not Test Agent code
+        self.assertEqual(names, {"__init__", "analysis", "events", "github_client", "hello", "llm",
                                  "manager", "models", "redact", "risk_rules", "runner", "trace"})
         for absent in ("steps", "runners", "selector", "classifier", "drafter", "store", "test_phase"):
             self.assertNotIn(absent, names, f"{absent} belongs to the Test Agent, not this scope")

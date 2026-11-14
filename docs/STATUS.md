@@ -42,6 +42,7 @@ Live checks run on 2026-11-02 from `mid/`:
 | Database: Neon PostgreSQL 18 + pgvector | WORKING | T-011 | 2026-11-14 | `python3 scripts/verify/run.py T-011` | New empty Neon project from .env, SSL required, pgvector enabled (D-009). Tables come in T-012 |
 | Schema + migrations: mid's 8 tables on Neon | WORKING | T-012 | 2026-11-14 | `python3 scripts/verify/run.py T-012` | Alembic baseline 0001, live schema matches the models, real-app check (sign-up to delete) passes on Neon |
 | API scaffold + /health + config | WORKING | T-013 | 2026-11-14 | `python3 scripts/verify/run.py T-013` | Real server answers /health (200, 503 when the DB is down), weak SECRET_KEY refused, API routes need a session |
+| Agent session state in PostgreSQL (ADK) | WORKING | T-016 | 2026-11-14 | `python3 scripts/verify/run.py T-016` | DatabaseSessionService on Neon via asyncpg; state survives a restart; hello smoke agent; real Manager + Analysis agents run through it |
 | Environment (DB, API, CI) | IN PROGRESS | T-014..T-019 | | | FastAPI and the schema are built. No Alembic migrations, no CI, ADK session state is in memory not Postgres |
 | D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
 | D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
@@ -77,7 +78,7 @@ Live checks run on 2026-11-02 from `mid/`:
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
+DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
 (code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues

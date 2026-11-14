@@ -41,6 +41,9 @@ from backend.db import Base, engine  # noqa: E402
 TABLES = {"users", "recovery_codes", "password_resets", "pending_signups", "projects", "spec_files", "collections",
           "risk_assessments"}
 MODELS = {t.name: t for md in (Base.metadata, AgentBase.metadata) for t in md.sorted_tables}
+# ADK's DatabaseSessionService creates and manages its own tables (T-016); they are not part of these migrations
+ADK_TABLES = {"sessions", "events", "app_states", "user_states", "adk_internal_metadata"}
+check("no app table shares a name with ADK's tables (so the exclusion hides nothing of ours)", not ADK_TABLES & MODELS.keys())
 
 
 def cfg(url: str | None = None) -> Config:
@@ -54,7 +57,7 @@ def cfg(url: str | None = None) -> Config:
 def schema_problems(eng) -> list[str]:
     """Differences between a live database and the models, table by table."""
     insp, out = inspect(eng), []
-    live = set(insp.get_table_names()) - {"alembic_version"}
+    live = set(insp.get_table_names()) - {"alembic_version"} - ADK_TABLES
     out += [f"missing table {t}" for t in sorted(TABLES - live)] + [f"extra table {t}" for t in sorted(live - TABLES)]
     for name in sorted(TABLES & live):
         model, cols = MODELS[name], {c["name"]: c for c in insp.get_columns(name)}

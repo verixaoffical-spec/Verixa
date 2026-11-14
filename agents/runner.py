@@ -29,6 +29,36 @@ _service = InMemorySessionService()
 _runner = Runner(agent=root_agent, app_name=APP, session_service=_service)
 
 
+def session_service(url: str):
+    """ADK's own session store on the app's PostgreSQL database (tables sessions, events, app_states,
+    user_states, adk_internal_metadata, created and managed by ADK).
+
+    Uses asyncpg, ADK's default: psycopg's async mode cannot run on Windows' default event loop. asyncpg reads
+    SSL from connect_args instead of `sslmode`, and Neon's pooler cannot keep prepared statements, so both
+    caches are off. No pool here: asyncpg connections belong to the event loop that opened them, and Neon's
+    pooler already pools."""
+    from google.adk.sessions import DatabaseSessionService
+    from sqlalchemy.engine import make_url
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy.pool import NullPool
+    u = make_url(url)
+    ssl = u.query.get("sslmode")  # asyncpg takes libpq's mode names, so verify-full keeps its certificate check
+    # The other libpq query options (channel_binding, sslrootcert, options...) are not asyncpg arguments and are dropped
+    u = u.set(drivername="postgresql+asyncpg", query={"prepared_statement_cache_size": "0"})
+    args = {"statement_cache_size": 0, **({"ssl": ssl} if ssl else {})}
+    return DatabaseSessionService(db_engine=create_async_engine(u, poolclass=NullPool, connect_args=args))
+
+
+def use_database(url: str) -> None:
+    """Keeps every run's session state and event history in PostgreSQL (T-016), so a restart does not lose it.
+    Any other database (the SQLite one the tests use) keeps the in-memory store. Called once by the backend."""
+    global _service, _runner
+    if not url.startswith("postgresql"):
+        return
+    _service = session_service(url)
+    _runner = Runner(agent=root_agent, app_name=APP, session_service=_service)
+
+
 async def run_manager(pr_id: str, token: str | None = None) -> dict:
     """Runs the manager -> Analysis Agent loop for one pull request and returns its result dict."""
     ANALYSES.setdefault(pr_id, {})["token"] = token

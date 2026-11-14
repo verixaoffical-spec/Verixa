@@ -1,0 +1,22 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-016.py
+ok   session store is ADK's DatabaseSessionService on PostgreSQL
+ok   hello agent ran: state hello_runs = 1 stored
+ok   hello agent's event stored
+ok   after restart: session read back from PostgreSQL with its state
+ok   after restart: a second run continues the session (hello_runs = 2)
+ok   after restart: both runs' events are in the history
+ok   negative: a deleted session is gone
+ok   ADK's session tables exist in the database
+ok   negative: a non-PostgreSQL URL keeps the in-memory store
+ok   app wiring: the runner uses DatabaseSessionService
+ok   real Manager + Analysis agents ran through the PostgreSQL store
+ok   their session events were saved
+
+PASS: 0 failed
+
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "verixa-t016-check", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "verixa-t016-check", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+
+exit code: 0
