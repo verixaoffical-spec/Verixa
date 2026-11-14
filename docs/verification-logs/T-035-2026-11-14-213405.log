@@ -1,0 +1,24 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-035.py
+ok   the Manager's existing tests pass
+ok   good first answer: approved after 1 attempt, rule label kept
+ok   bad then good: approved after 2 attempts
+ok   the retry received the first attempt's problems as feedback
+ok   bad every time: stops at 3 attempts (D-005)
+ok   then hands it to a human with the reasons
+ok   unreadable PR: no pointless retries, 1 attempt then a human
+ok   validate accepts the good answer
+ok   negative: validate rejects not JSON
+ok   negative: validate rejects too-short reasoning
+ok   negative: validate rejects reasoning that contradicts a High label
+ok   negative: validate rejects test areas not about the change
+ok   negative: validate rejects a 'safe, no testing needed' dismissal
+ok   negative: validate rejects an over-long concern
+
+PASS: 0 failed
+
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+
+exit code: 0

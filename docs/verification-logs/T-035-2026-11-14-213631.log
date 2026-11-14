@@ -1,0 +1,25 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-035.py
+ok   the Manager's existing tests pass
+ok   good first answer: approved after 1 attempt, rule label kept
+ok   bad then good: approved after 2 attempts
+ok   the retry received the first attempt's problems as feedback
+ok   bad every time: stops at 3 attempts (D-005)
+ok   then hands it to a human with the reasons
+ok   unreadable PR: no pointless retries, 1 attempt then a human
+ok   validate accepts the good answer
+ok   negative: an answer that does not fit the pydantic schema is rejected, naming the fields
+
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+App name mismatch detected. The runner is configured with app name "t035", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\scripts\verify\T-035.py", line 133, in <module>
+    check("the Manager's feedback is written into the real prompt on a retry", "reasoning must be 2-3 sentences." in _instruction(ctx))
+                                                                                                                     ^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\agents\analysis.py", line 188, in _instruction
+    Module: {f['module']} (modules touched: {', '.join(f['modules_touched'])})
+             ~^^^^^^^^^^
+KeyError: 'module'
+
+exit code: 1

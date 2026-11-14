@@ -74,3 +74,9 @@
 - Decision: T-034 asks 4 yes/no questions (auth, money, validation, data), 3 times on the first working model at temperature 0.7, answers checked against a strict pydantic schema. A question with at least 2 of 3 yes (all 3 answers usable) raises the label to that question's minimum (auth/money High, validation/data Medium). "No" never lowers. A 2-1 split is shown as low confidence. Every vote is listed in risk_factors. RISK_QUESTIONS=0 turns it off.
 - Consequences: about 3 extra small model calls per PR, run at the same time. Disguised risky changes the keyword rules miss can still reach High (TC-15). When the chains have 3 working models, the vote can move to one answer per model.
 - Owner: Farheen
+
+### D-012 Manager judgment check deferred to its own task, T-039 (2026-11-14)
+- Context: MODELS.md and TESTING.md describe a Manager "judgment check": a model asked twice whether a claim is supported by evidence, disagreement routed to a human. It is not built, and T-035's title covers validation, retry cap and escalation only. Its real use is the Report Agent's root-cause claims (D5), which do not exist yet.
+- Decision: T-035 closes on validation (now with a pydantic answer schema), the retry cap of 3 and escalation. The judgment check becomes T-039, after T-035, to be built when the Report Agent gives it claims to judge.
+- Consequences: until T-039, no second-opinion check runs; every Analysis answer still passes the plain-code validation. The TESTING.md safety check "disagreement routes to human" is open until then.
+- Owner: Farheen

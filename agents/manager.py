@@ -8,12 +8,23 @@ from google.adk.agents import BaseAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event
 
+from pydantic import BaseModel, ConfigDict, ValidationError
+
 from .analysis import ANALYSES, analysis_agent
 from .events import text_event
 from .llm import parse_json
 from .trace import trace
 
 MAX_ATTEMPTS = 3
+
+
+class AnalysisAnswer(BaseModel):
+    """The Analysis Agent's answer, as the Manager accepts it (CLAUDE.md: pydantic for agent I/O). The shape is
+    checked here; whether the content is good (about this change, not contradicting the label...) is checked after."""
+    model_config = ConfigDict(extra="ignore")
+    reasoning: str
+    suggested_test_areas: list[str]
+    concern: str | None = None
 LABELS = ["Low", "Medium", "High"]
 # Words that say nothing about which change is being described, so they do not count as a match.
 GENERIC_WORDS = {"this", "that", "with", "from", "have", "been", "will", "they", "their", "only", "file", "files", "code",
@@ -104,6 +115,12 @@ def validate(pr_id: str) -> tuple[dict | None, list[str]]:
         data = parse_json(st["raw"])
     except Exception:
         return None, ["Output is not valid JSON."]
+    try:
+        data = AnalysisAnswer.model_validate(data).model_dump()
+    except ValidationError as exc:
+        fields = sorted({str(e["loc"][0]) for e in exc.errors() if e.get("loc")})
+        return None, [f"Output does not match the answer schema ({', '.join(fields) or 'shape'}): reasoning is text, "
+                      "suggested_test_areas a list of text, concern text or empty."]
     errs, label = [], st["facts"]["risk_label"]
     reasoning, areas = data.get("reasoning"), data.get("suggested_test_areas")
     if not isinstance(reasoning, str) or len(reasoning.strip()) < 20:

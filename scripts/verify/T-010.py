@@ -56,7 +56,8 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "agents/llm.py": "T-026 reads the chains from backend/llm/config.yaml, traces each attempt",
                  "agents/analysis.py": "T-026 adds tokens to the model trace",
                  "backend/agent_db.py": "T-026 adds the ModelCall table",
-                 "agents/github_client.py": "T-032 pages fix commits, refuses unsafe module names in the issue search"}
+                 "agents/github_client.py": "T-032 pages fix commits, refuses unsafe module names in the issue search",
+                 "agents/manager.py": "T-035 validates the answer with a pydantic schema"}
 
 
 def committed_sha(f: str) -> str | None:
