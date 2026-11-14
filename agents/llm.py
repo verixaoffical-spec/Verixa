@@ -53,7 +53,7 @@ def strip_code(text: str) -> str:
     return (m.group(1) if m else text).strip()
 
 
-async def ask(task: str, system: str, user: str, as_json: bool = True, timeout: int = 45):
+async def ask(task: str, system: str, user: str, as_json: bool = True, timeout: int = 45, temperature: float = 0):
     """Returns (answer, model_used). Models without a key are skipped instantly."""
     errors = []
     for model in chain(task):
@@ -66,7 +66,7 @@ async def ask(task: str, system: str, user: str, as_json: bool = True, timeout: 
         started = time.perf_counter()
         try:
             resp = await litellm.acompletion(
-                model=model, temperature=0, timeout=timeout,
+                model=model, temperature=temperature, timeout=timeout,
                 messages=[{"role": "system", "content": system}, {"role": "user", "content": user}],
                 **kwargs,
             )

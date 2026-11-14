@@ -1,0 +1,24 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-034.py
+ok   schema: a complete yes/no answer is accepted
+ok   negative: schema rejects another word
+ok   negative: schema rejects a missing key
+ok   negative: schema rejects an extra key
+ok   vote: 3/3 yes on auth raises Low to High
+ok   vote: 2/3 yes raises it and is marked low confidence
+ok   negative: 1/3 yes does not raise
+ok   vote: a Medium question raises Low only to Medium
+ok   negative: all-no answers never lower a High label
+ok   negative: with only 2 usable answers no vote counts
+ok   the rule facts are not modified in place
+ok   negative: a broken answer is dropped (3 asked, 2 usable)
+ok   RISK_QUESTIONS=0 asks nothing
+ok   votes are cached per commit in the agent (no new vote on a Manager retry)
+ok   live: 3 schema-valid answers for the permission-removal diff
+ok   live: majority says the removed admin check weakens auth
+ok   live: that vote raises a Low rule label to High
+ok   live: a docs-only typo fix raises nothing
+
+PASS: 0 failed
+
+
+exit code: 0

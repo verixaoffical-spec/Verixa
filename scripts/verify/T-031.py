@@ -121,8 +121,12 @@ try:
     row = run_once({}, {"scored", "needs_human_review", "failed"})
     check("end to end: a risk row appears for the new PR", row is not None and "error" not in row, str(row)[:200])
     if row and "error" not in row:
-        check("end to end: the saved label is exactly the rules' label for this PR (the model only explains)",
-              row["risk_label"] == RULE_LABEL and RULE_LABEL in ("Low", "Medium", "High"), f"{row['risk_label']} vs rules {RULE_LABEL}")
+        # The rules decide; only a yes-majority risk question (T-034, D-011) may raise it, and then a factor says so
+        raised = [f for f in json.loads(row["risk_factors"] or "[]") if "raised the label to " in f]
+        expected = raised[-1].rsplit("raised the label to ", 1)[1].strip() if raised else RULE_LABEL
+        check("end to end: the saved label is the rules' label, or raised by a recorded risk-question vote (never lowered)",
+              row["risk_label"] == expected and RULE_LABEL in ("Low", "Medium", "High"),
+              f"{row['risk_label']} vs rules {RULE_LABEL}, raised {raised}")
         check("end to end: factors and file count saved", bool(row["risk_factors"]) and row["files_changed"] == pr["changed_files"])
         check("end to end: the model explained it and the Manager approved (state scored)",
               row["state"] == "scored" and bool(row["model_used"]) and bool(row["reasoning"]), f"{row['state']} {row['model_used']}")

@@ -14,6 +14,7 @@ from google.adk.events import Event
 
 from .events import text_event
 from .github_client import ci_status, count_defects, count_fix_commits, fetch_pr, parse_pr_id
+from .risk_questions import apply_votes, ask_questions
 from .llm import _has_key, chain
 from .models import adk_model
 from .redact import HIDDEN, hide_secrets
@@ -228,8 +229,20 @@ class AnalysisAgent(BaseAgent):
             st["error"] = facts["message"]
             yield text_event(self.name, f"failed: {st['error']}")
             return
-        st["facts"] = facts
         yield text_event(self.name, f"risk by rules: {facts['risk_label']} (score {facts['score']})")
+        # T-034: yes/no risk questions, majority of 3; they can only raise the rule label (D-011)
+        if facts.get("has_code", True):
+            ruled = facts["risk_label"]
+            # Asked once per commit: the Manager reruns this agent on a retry, and a new vote at temperature 0.7 could
+            # move the label between attempts (and cost 3 more calls each time)
+            if st.get("votes_sha") != facts["head_sha"]:
+                st["votes"] = await ask_questions(_as_data(facts["title"]), _as_data(facts.get("diff_summary", "")))
+                st["votes_sha"] = facts["head_sha"]
+            facts = apply_votes(facts, st["votes"])
+            trace("analysis.questions_voted", pr_id, rule_label=ruled, label=facts["risk_label"])
+            if facts["risk_label"] != ruled:
+                yield text_event(self.name, f"risk questions raised it to {facts['risk_label']}")
+        st["facts"] = facts
 
         errors = []
         for name, writer in zip(self.model_names, self.writers):

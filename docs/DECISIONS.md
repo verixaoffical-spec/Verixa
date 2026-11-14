@@ -68,3 +68,9 @@
 - Decision: keep the router in agents/llm.py and move only the model names into backend/llm/config.yaml (T-026). model_calls rows are written by backend/model_calls.py from the agents' trace, so the agents still never touch the database.
 - Consequences: "llm/router.py" in the docs means agents/llm.py. Changing models means editing config.yaml (or <TASK>_MODELS in .env), never code.
 - Owner: Farheen
+
+### D-011 Risk questions can only raise the rule label (2026-11-14)
+- Context: PROMPTS.md plans yes/no risk questions that "feed the rule score", and MODELS.md a majority vote of 3. P-D7 says the rules decide the label and the model only explains, and a model answer that could lower a label would let text in a PR talk its own risk down.
+- Decision: T-034 asks 4 yes/no questions (auth, money, validation, data), 3 times on the first working model at temperature 0.7, answers checked against a strict pydantic schema. A question with at least 2 of 3 yes (all 3 answers usable) raises the label to that question's minimum (auth/money High, validation/data Medium). "No" never lowers. A 2-1 split is shown as low confidence. Every vote is listed in risk_factors. RISK_QUESTIONS=0 turns it off.
+- Consequences: about 3 extra small model calls per PR, run at the same time. Disguised risky changes the keyword rules miss can still reach High (TC-15). When the chains have 3 working models, the vote can move to one answer per model.
+- Owner: Farheen
