@@ -1,0 +1,16 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-036.py
+ok   frontend type-checks and builds (tsc && vite build)
+     2 passed (30.8s)
+ok   risk charts and history (risk_charts.spec.ts)
+     test-results\agents-showing-what-the-ag-2ee53--given-and-the-agent-s-text-controlled\test-failed-1.png | test-results\agents-showing-what-the-ag-79234-nd-closes-from-the-keyboard-controlled\test-failed-1.png | test-results\agents-showing-what-the-ag-79234-nd-closes-from-the-keyboard-controlled\test-
+FAIL the Risk screen's existing browser tests (agents.spec.ts) - .Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\events.py", line 88, in _run
+[WebServer]     self._context.run(self._callback, *self._args)
+[WebServer]   File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+[WebServer]     self._sock.shutdown(socket.SHUT_RDWR)
+[WebServer] ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+
+FAIL: 1 failed (the Risk screen's existing browser tests (agents.spec.ts))
+
+
+exit code: 1

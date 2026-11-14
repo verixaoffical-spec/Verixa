@@ -57,7 +57,13 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "agents/analysis.py": "T-026 adds tokens to the model trace",
                  "backend/agent_db.py": "T-026 adds the ModelCall table",
                  "agents/github_client.py": "T-032 pages fix commits, refuses unsafe module names in the issue search",
-                 "agents/manager.py": "T-035 validates the answer with a pydantic schema"}
+                 "agents/manager.py": "T-035 validates the answer with a pydantic schema",
+                 "frontend/src/dashboard/RiskView.tsx": "T-036 adds the risk charts and per-PR history",
+                 "frontend/src/dashboard/risk.css": "T-036 chart styles",
+                 "scripts/seed_demo.py": "T-036 seeds PR #7 with two commits for the history",
+                 "tests/e2e/playwright.config.ts": "T-036 adds the risk browser test project",
+                 "backend/analysis_api.py": "T-036 adds a scored count",
+                 "frontend/src/dashboard/api.ts": "T-036 reads up to 200 rows and the scored count"}
 
 
 def committed_sha(f: str) -> str | None:

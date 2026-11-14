@@ -55,7 +55,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | T-032 | Module defect history query | Arisha | Farheen | T-012 | DONE |
 | T-033 | New-module size-based scoring | Farheen | | T-031 | DONE |
 | T-034 | Yes/no risk questions + majority vote of 3 | Farheen | | T-031 | DONE |
-| T-036 | PR and risk dashboard screen | Arisha | Farheen | T-031 | TODO |
+| T-036 | PR and risk dashboard screen | Arisha | Farheen | T-031 | DONE |
 | T-037 | Analysis eval set (20-30 cases) | Arisha | Farheen | T-031 | TODO |
 | T-038 | PR file graph + per-file risk + past-log endpoints, live stage view (prompt §8, P-D8) | Arisha | Farheen | T-036 | TODO |
 | T-039 | Manager judgment check: model asked twice if a claim is supported by evidence, disagreement -> human review (D-012) | Farheen | Arisha | T-035 | TODO |

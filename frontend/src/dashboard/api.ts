@@ -75,7 +75,7 @@ export interface Assessment {
 export interface RiskFeed {
   project: { repo: string; jira_key: string; webhook_verified: boolean } | null;
   items: Assessment[];
-  counts: Partial<Record<RiskLabel | 'total' | 'pending' | 'needs_review' | 'failed', number>>;
+  counts: Partial<Record<RiskLabel | 'total' | 'pending' | 'scored' | 'needs_review' | 'failed', number>>;
   agent_available: boolean;
 }
 
@@ -115,7 +115,7 @@ export const api = {
   applyLibrary: (body: ReturnType<typeof applyRequest>) => request<unknown>('/api/library/apply', body),
 
   // Risk Analysis. The feed is polled while anything is still being scored.
-  riskFeed: () => request<RiskFeed>('/api/analysis/pull-requests'),
+  riskFeed: () => request<RiskFeed>('/api/analysis/pull-requests?limit=200'),  // the charts read up to 200 rows
   // Scores a pull request now instead of waiting for GitHub. Runs the agent and answers when done,
   // so it can take as long as the model chain takes.
   analysePr: (prNumber: number) => request<Assessment>('/api/analysis/analyse', { pr_number: prNumber }),

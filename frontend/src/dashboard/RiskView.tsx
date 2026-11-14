@@ -13,6 +13,7 @@ import { ApiError, api, openLive, type Assessment, type LiveEvent, type RiskFeed
 import { icons } from './icons';
 import { Chip, hookLabel, type HookState, type Link } from './connection';
 import { useToast } from './Toast';
+import { History, RiskCharts } from './RiskCharts';
 
 interface Props {
   hidden: boolean;
@@ -124,7 +125,7 @@ function StateBadge({ state }: { state: Assessment['state'] }) {
   );
 }
 
-function Detail({ row }: { row: Assessment }) {
+function Detail({ row, history }: { row: Assessment; history: Assessment[] }) {
   const raised = row.base_label && row.risk_label && row.base_label !== row.risk_label;
   return (
     <tr>
@@ -170,6 +171,8 @@ function Detail({ row }: { row: Assessment }) {
               </ul>
             </div>
           )}
+
+          <History rows={history} />
 
           <div className="rmeta">
             {row.module && <Chip on={false}>module {row.module}</Chip>}
@@ -357,6 +360,8 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
           )}
 
           <LivePanel runs={liveRuns} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
+
+          {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
         </div>
 
         {!feed ? (
@@ -404,7 +409,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
                     <td><StateBadge state={row.state} /></td>
                     <td className="ract"><span className="muted">{ago(row.updated_at)}</span></td>
                   </tr>
-                  {open === row.id && <Detail row={row} />}
+                  {open === row.id && <Detail row={row} history={items.filter(r => r.pr_number === row.pr_number)} />}
                 </tbody>
               ))}
             </table>

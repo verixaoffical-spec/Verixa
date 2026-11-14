@@ -51,6 +51,7 @@ Live checks run on 2026-11-02 from `mid/`:
 | New-module size-based scoring | WORKING | T-033 | 2026-11-14 | `python3 scripts/verify/run.py T-033` | A module whose files are all new skips history lookups and is scored by size (Low/Medium/High by files + lines); basis and a factor say so |
 | Risk questions + majority vote of 3 | WORKING | T-034 | 2026-11-14 | `python3 scripts/verify/run.py T-034` | 4 yes/no questions, strict schema, 3 answers per commit (cached across Manager retries); a yes majority only raises the label (D-011). Live: removed admin check -> High |
 | Manager Agent: validation, retry cap, escalation | WORKING | T-035 | 2026-11-14 | `python3 scripts/verify/run.py T-035` | Real Manager loop: pydantic answer schema + content checks, feedback reaches the prompt, cap 3 then human review, unreadable PR not retried. Judgment check deferred to T-039 (D-012) |
+| PR and risk dashboard (charts + history) | WORKING | T-036 | 2026-11-14 | `python3 scripts/verify/run.py T-036` | Risk distribution and status donuts, analyses per day (hover + table), issues by type, per-PR history; real API data only; browser-tested with the 33 existing Risk screen tests |
 | Webhook receiver + signature check | WORKING | T-022 | 2026-11-14 | `python3 scripts/verify/run.py T-022` | Real server on Neon: signed deliveries accepted, unsigned/wrong/tampered refused 401, bad bodies 400, unconnected repos start no analysis. No body size cap yet (put one at the proxy) |
 | D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
 | D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
@@ -86,10 +87,11 @@ Live checks run on 2026-11-02 from `mid/`:
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017, T-022, T-026, T-030, T-031, T-032, T-033, T-034, T-035 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
+DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017, T-022, T-026, T-030, T-031, T-032, T-033, T-034, T-035, T-036 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
 (code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues
+- Pending (2026-11-14): the T-010 full re-run (455 unit tests) after T-036 changed backend/analysis_api.py and frontend/src/dashboard/api.ts was stopped twice by low memory. T-036's own check passed (build + 35 browser tests on the real app). Re-run `python3 scripts/verify/run.py T-010` when memory allows.
 - Open (T-031, 2026-11-14): reading a public PR with a stored GitHub token returned 401, anonymous reads work. Likely an expired GITHUB_TOKEN in .env or gh login; the app falls back to GITHUB_TOKEN when an account has no linked token. Farheen to check (Claude may not inspect credentials).
 - Open (T-031 review): the Manager validates agent output with dict checks, not pydantic models (CLAUDE.md convention), carried over from mid.
 - Open (T-030 review, 2026-11-14): GitHub fetch has no retry on 403/429 rate limits and no overall deadline (up to 31 calls of 20 s); a truncated (3000-file) diff is not flagged. Agent I/O for fetch_pr and score_pr is plain dicts, not pydantic (CLAUDE.md convention), carried over from mid. The GitHub client lives in agents/github_client.py, not backend/integrations/.

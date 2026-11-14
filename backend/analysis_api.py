@@ -63,6 +63,7 @@ def pull_requests(limit: int = Query(50, ge=1, le=200),
             **counts,
             "total": len(latest),
             "pending": sum(1 for r in latest.values() if r.state in ("queued", "running")),
+            "scored": sum(1 for r in latest.values() if r.state == "scored"),  # T-036: every status slice from one source
             "needs_review": sum(1 for r in latest.values() if r.state == "needs_human_review"),
             "failed": sum(1 for r in latest.values() if r.state == "failed"),
         },

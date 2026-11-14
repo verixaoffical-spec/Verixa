@@ -3,6 +3,7 @@
 Run with:  python -m scripts.seed_demo     Refuses anything but SQLite, so it can never touch the shared database.
 """
 import sys
+from datetime import datetime, timedelta, timezone
 
 from sqlalchemy import select
 
@@ -59,6 +60,16 @@ def main() -> None:
             assessment(project, 6, "scored", "High", XSS, score=7, module=XSS, risk_factors=dump([XSS]), reasoning=XSS,
                        test_areas=dump([XSS]), model_used=XSS, attempts=1),
         ])
+        # T-036: PR #7 has two commits, so the risk history shows its label moving from Medium to High
+        db.add(assessment(project, 7, "scored", "High", "Add refund endpoint", score=7, files_changed=4, lines_changed=210,
+                          module="payments", attempts=1, model_used="demo", reasoning="Refunds move real money.",
+                          risk_factors=dump(["size: 4 file(s), 210 lines changed (4 pts)", "sensitive area: high (2 pts)"])))
+        older = assessment(project, 7, "scored", "Medium", "Add refund endpoint", score=5, files_changed=2,
+                           lines_changed=60, module="payments", attempts=1,
+                           risk_factors=dump(["size: 2 file(s), 60 lines changed (2 pts)", "sensitive area: medium (1 pts)"]))
+        older.head_sha = "0000007older00"
+        older.created_at = older.updated_at = datetime.now(timezone.utc) - timedelta(days=2)
+        db.add(older)
         db.commit()
     print(f"Done. Log in as demo@verixa.dev or other@verixa.dev with the password {PASSWORD}")
 
