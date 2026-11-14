@@ -43,6 +43,7 @@ Live checks run on 2026-11-02 from `mid/`:
 | Schema + migrations: mid's 8 tables on Neon | WORKING | T-012 | 2026-11-14 | `python3 scripts/verify/run.py T-012` | Alembic baseline 0001, live schema matches the models, real-app check (sign-up to delete) passes on Neon |
 | API scaffold + /health + config | WORKING | T-013 | 2026-11-14 | `python3 scripts/verify/run.py T-013` | Real server answers /health (200, 503 when the DB is down), weak SECRET_KEY refused, API routes need a session |
 | Agent session state in PostgreSQL (ADK) | WORKING | T-016 | 2026-11-14 | `python3 scripts/verify/run.py T-016` | DatabaseSessionService on Neon via asyncpg; state survives a restart; hello smoke agent; real Manager + Analysis agents run through it |
+| ADK with Groq + OpenRouter (LiteLLM) | WORKING | T-017 | 2026-11-14 | `python3 scripts/verify/run.py T-017` | Live calls through the ADK Runner on both providers; fallback chain skips failing models. Two OpenRouter chain models are gone (Known issues) |
 | Environment (DB, API, CI) | IN PROGRESS | T-014..T-019 | | | FastAPI and the schema are built. No Alembic migrations, no CI, ADK session state is in memory not Postgres |
 | D1 Connect GitHub + Jira, webhook | BUILT, UNVERIFIED | T-020..T-022 | 2026-11-02 live | mid: scripts/live_check.py | Signature check verified live. OAuth client credentials missing, so real webhook creation and GitHub/Atlassian sign-in are untested |
 | D1 Upload + Test Library | BUILT, UNVERIFIED | T-023..T-025 | 2026-11-02 live | mid: -m scripts.check_database | Strict checks, live preview, create/update/conflict/delete all verified on real PostgreSQL |
@@ -78,10 +79,14 @@ Live checks run on 2026-11-02 from `mid/`:
 
 ## Progress counts
 Run /status to compute from BACKLOG.md.
-DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
+DONE and verified: T-001, T-002, T-010, T-011, T-012, T-013, T-016, T-017 (2026-11-14, `python3 scripts/verify/run.py T-xxx`). Thirteen are IN REVIEW
 (code exists in mid, awaiting /verify and /finish-task); the rest are TODO.
 
 ## Known issues
+- Open (found 2026-11-14 in T-017): OpenRouter removed two models in our chains, `qwen/qwen3-8b` (analysis, select,
+  classify) and `deepseek/deepseek-v4` (draft). Calls to them fail and the chain moves on to the next model, so Groq
+  answers. No OpenRouter replacement is free any more. Farheen will choose replacements later (candidates priced on
+  2026-11-14: qwen/qwen3-14b, deepseek/deepseek-v4-flash). Record the choice in DECISIONS.md and config.yaml (T-026).
 - Fixed 2026-11-14: `*.log` in .gitignore meant no verification log was ever kept, so every PASS
   row was invalid and the whole backlog was blocked. T-001 re-verified by hand, T-002 re-run (D-006).
 - The GitHub and Atlassian OAuth client credentials are missing, so the one-login flow and

@@ -1,0 +1,254 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-017.py
+ok   ADK LlmAgent on Groq (groq/openai/gpt-oss-20b) answers through the Runner
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm.turn_on_debug()'.
+
+FAIL ADK LlmAgent on OpenRouter (openrouter/qwen/qwen3-8b) answers through the Runner - NotFoundError: litellm.NotFoundError: NotFoundError: OpenrouterException - {"error":{"message":"Qwen3 8B was deprecated on Oct 9, 2026. We recommend migrating to Qwen3.7 Plus 
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm.turn_on_debug()'.
+
+ok   fallback: a failing model is skipped and the next one answers
+ok   fallback: the answer is parsed JSON
+ok   negative: with no keys every model is skipped and ask() raises
+
+FAIL: 1 failed (ADK LlmAgent on OpenRouter (openrouter/qwen/qwen3-8b) answers through the Runner)
+
+Node execution failed with exception
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\llm_http_handler.py", line 688, in _make_common_async_call
+    response = await async_httpx_client.post(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\logging_utils.py", line 372, in async_wrapper
+    result: Final = await func(*args, **kwargs)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 991, in post
+    await _raise_masked_async_error(e, stream)
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\http_handler.py", line 606, in _raise_masked_async_error
+    raise MaskedHTTPStatusError(e, message=_text, text=_text) from None
+litellm.llms.custom_httpx.http_handler.MaskedHTTPStatusError: Client error '404 Not Found' for url 'https://openrouter.ai/api/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\main.py", line 928, in acompletion
+    response = await _resolve_dispatched_chat_response(init_response)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\main.py", line 993, in _resolve_dispatched_chat_response
+    return await pending
+           ^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\llm_http_handler.py", line 802, in async_completion
+    response: Final = await self._make_common_async_call(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\llm_http_handler.py", line 705, in _make_common_async_call
+    raise self._handle_error(e=e, provider_config=provider_config)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\llms\custom_httpx\llm_http_handler.py", line 6849, in _handle_error
+    raise provider_error
+litellm.llms.openrouter.common_utils.OpenRouterException: {"error":{"message":"Qwen3 8B was deprecated on Oct 9, 2026. We recommend migrating to Qwen3.7 Plus (openrouter.ai/qwen/qwen3.7-plus).","code":404},"user_id":"user_3DckUoGQKYfXZBBy03FbFS0kL4J"}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 176, in run
+    await self._execute_node(ctx, node_input)
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 423, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 437, in _run_node_loop
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_base_node.py", line 213, in run
+    item = await anext(agen, _sentinel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\llm_agent.py", line 690, in _run_impl
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_llm_agent_wrapper.py", line 547, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 374, in run_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 476, in _run_with_lifecycle
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 169, in stream_in_scope
+    item = await _drive(owned.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 157, in _drive
+    return await step
+           ^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 439, in _run
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\llm_agent.py", line 639, in _run_async_impl
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 298, in run_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 380, in _run_one_step_async
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 563, in _call_llm_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_model_call.py", line 324, in call_llm_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 169, in stream_in_scope
+    item = await _drive(owned.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 157, in _drive
+    return await step
+           ^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_model_call.py", line 285, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 613, in _run_and_handle_error
+    async for response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 579, in run_and_handle_error
+    raise model_error
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 556, in run_and_handle_error
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\utils\_runner_utils.py", line 62, in _stream_in_caller_scope
+    item = await _InContext(ctx, agen.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\utils\_runner_utils.py", line 89, in __await__
+    waiting_on = self._ctx.run(coro.send, value)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 470, in _record_model_responses
+    async for llm_response in timed:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 1085, in time_model_awaits
+    async for response in responses:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\models\lite_llm.py", line 5390, in generate_content_async
+    response = await self.llm_client.acompletion(**completion_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\agents\models.py", line 15, in acompletion
+    return await super().acompletion(model=model, messages=clean, tools=tools, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\models\lite_llm.py", line 1250, in acompletion
+    return await acompletion(
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\chat_completions\dispatch.py", line 129, in acompletion
+    return await _ADISPATCH.arun(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\rust_bridge\dispatch.py", line 108, in arun
+    return await python(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\utils.py", line 2617, in wrapper_async
+    raise e
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\utils.py", line 2432, in wrapper_async
+    result = await original_function(*args, **call_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\main.py", line 981, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2915, in exception_type
+    raise e  # it's already mapped
+    ^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2836, in exception_type
+    _map_openrouter_exception(
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2305, in _map_openrouter_exception
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: OpenrouterException - {"error":{"message":"Qwen3 8B was deprecated on Oct 9, 2026. We recommend migrating to Qwen3.7 Plus (openrouter.ai/qwen/qwen3.7-plus).","code":404},"user_id":"user_3DckUoGQKYfXZBBy03FbFS0kL4J"}
+Root node pong failed.
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner_utils.py", line 267, in _drive_root_node
+    await root_ctx._run_node_internal(  # pylint: disable=protected-access
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\context.py", line 521, in _run_node_internal
+    return await _dynamic_node_scheduler.run_node_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_dynamic_node_scheduler.py", line 846, in run_node_internal
+    raise DynamicNodeFailError(
+google.adk.workflow._errors.DynamicNodeFailError: Dynamic node pong failed
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\runners.py", line 873, in _cleanup_root_task
+    await task
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner_utils.py", line 276, in _drive_root_node
+    raise e.error
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 176, in run
+    await self._execute_node(ctx, node_input)
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 423, in _execute_node
+    await self._run_node_loop(ctx, node_input)
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_node_runner.py", line 437, in _run_node_loop
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_base_node.py", line 213, in run
+    item = await anext(agen, _sentinel)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\llm_agent.py", line 690, in _run_impl
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\workflow\_llm_agent_wrapper.py", line 547, in run_llm_agent_as_node
+    async for event in run_iter:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 374, in run_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 476, in _run_with_lifecycle
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 169, in stream_in_scope
+    item = await _drive(owned.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 157, in _drive
+    return await step
+           ^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\base_agent.py", line 439, in _run
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\agents\llm_agent.py", line 639, in _run_async_impl
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 298, in run_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 380, in _run_one_step_async
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 563, in _call_llm_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_model_call.py", line 324, in call_llm_async
+    async for event in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 169, in stream_in_scope
+    item = await _drive(owned.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 157, in _drive
+    return await step
+           ^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_model_call.py", line 285, in _call_llm_with_tracing
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\base_llm_flow.py", line 613, in _run_and_handle_error
+    async for response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 579, in run_and_handle_error
+    raise model_error
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 556, in run_and_handle_error
+    async for llm_response in agen:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\utils\_runner_utils.py", line 62, in _stream_in_caller_scope
+    item = await _InContext(ctx, agen.__anext__())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\utils\_runner_utils.py", line 89, in __await__
+    waiting_on = self._ctx.run(coro.send, value)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\flows\llm_flows\core\_finalizer.py", line 470, in _record_model_responses
+    async for llm_response in timed:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\telemetry\_instrumentation.py", line 1085, in time_model_awaits
+    async for response in responses:
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\models\lite_llm.py", line 5390, in generate_content_async
+    response = await self.llm_client.acompletion(**completion_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\agents\models.py", line 15, in acompletion
+    return await super().acompletion(model=model, messages=clean, tools=tools, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\google\adk\models\lite_llm.py", line 1250, in acompletion
+    return await acompletion(
+           ^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\chat_completions\dispatch.py", line 129, in acompletion
+    return await _ADISPATCH.arun(
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\rust_bridge\dispatch.py", line 108, in arun
+    return await python(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\utils.py", line 2617, in wrapper_async
+    raise e
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\utils.py", line 2432, in wrapper_async
+    result = await original_function(*args, **call_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\main.py", line 981, in acompletion
+    raise exception_type(
+          ^^^^^^^^^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2915, in exception_type
+    raise e  # it's already mapped
+    ^^^^^^^
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2836, in exception_type
+    _map_openrouter_exception(
+  File "D:\verixa-merging\Verixa\.venv\Lib\site-packages\litellm\litellm_core_utils\exception_mapping_utils.py", line 2305, in _map_openrouter_exception
+    raise NotFoundError(
+litellm.exceptions.NotFoundError: litellm.NotFoundError: NotFoundError: OpenrouterException - {"error":{"message":"Qwen3 8B was deprecated on Oct 9, 2026. We recommend migrating to Qwen3.7 Plus (openrouter.ai/qwen/qwen3.7-plus).","code":404},"user_id":"user_3DckUoGQKYfXZBBy03FbFS0kL4J"}
+
+exit code: 1

@@ -1,0 +1,15 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-017.py
+ok   ADK LlmAgent on Groq (groq/openai/gpt-oss-20b) answers through the Runner
+ok   ADK LlmAgent on OpenRouter (openrouter/qwen/qwen3-14b) answers through the Runner
+
+[1;31mGive Feedback / Get Help: https://github.com/BerriAI/litellm/issues/new[0m
+LiteLLM.Info: If you need to debug this error, use `litellm.turn_on_debug()'.
+
+ok   fallback: a failing model is skipped and the next one answers
+ok   fallback: the answer is parsed JSON
+ok   negative: with no keys every model is skipped and ask() raises
+
+PASS: 0 failed
+
+
+exit code: 0
