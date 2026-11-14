@@ -1,0 +1,19 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-022.py
+ok   signed ping accepted (202)
+ok   signed ping marks the project's webhook verified
+ok   negative: no signature -> 401
+ok   negative: wrong signature -> 401
+ok   negative: valid signature of a different body (tampered) -> 401
+ok   negative: non-ASCII signature header -> 401, not a server error
+ok   negative: signed body that is not JSON -> 400
+ok   negative: signed body that is a JSON array -> 400
+ok   signed pull_request for an unconnected repository accepted (202)
+ok   signed pull_request with an unhandled action (closed) accepted (202)
+ok   no analysis started for the unconnected repository
+ok   no analysis started for the closed pull request
+ok   cleanup: the temporary account, project and any risk rows are gone
+
+PASS: 0 failed
+
+
+exit code: 0

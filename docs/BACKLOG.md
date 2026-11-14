@@ -40,7 +40,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 |---|---|---|---|---|---|
 | T-020 | GitHub + Jira login flow (one login) | Arisha | Farheen | T-014, T-015 | IN REVIEW |
 | T-021 | Automatic webhook provisioning | Arisha | | T-020 | IN REVIEW |
-| T-022 | Webhook receiver with signature verification | Arisha | Farheen | T-013 | IN REVIEW |
+| T-022 | Webhook receiver with signature verification | Arisha | Farheen | T-013 | DONE |
 | T-023 | Parser for TS Playwright specs and Postman collection | Arisha | | T-013 | IN REVIEW |
 | T-024 | Upload widget with live preview | Farheen | Arisha | T-023 | IN REVIEW |
 | T-025 | Test Library storage and listing | Arisha | | T-012, T-023 | IN REVIEW |

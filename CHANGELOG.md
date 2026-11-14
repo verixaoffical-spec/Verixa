@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-14 T-022 Webhook receiver verified on a real server with real signatures; no code change needed (Farheen, via Claude)
 - 2026-11-14 T-026 Model names moved to backend/llm/config.yaml; model_calls table (migration 0002) logs every model attempt from the agents' trace on a background thread; D-010 (Farheen, via Claude)
 - 2026-11-14 T-017 ADK verified with live Groq and OpenRouter calls through LiteLLM; found OpenRouter removed qwen3-8b and deepseek-v4 from our chains (open, Farheen to choose replacements) (Farheen, via Claude)
 - 2026-11-14 T-016 ADK session state moved from memory to PostgreSQL (DatabaseSessionService, asyncpg; works on Windows); hello smoke agent; scope test allows it (Farheen, via Claude)
