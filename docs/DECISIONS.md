@@ -46,7 +46,13 @@
 - Owner: Farheen
 
 ### D-007 Farheen covers both roles; direct pushes to main for now (2026-11-14)
-- Context: Farheen is doing Arisha's tasks as well. The repo was made public so GitHub branch rules work on the free plan.
-- Decision: until Farheen says otherwise, finished task branches are pushed straight to main without a second reviewer. The /review step (code-reviewer agent) still runs before each finish. The main ruleset blocks deletion and force pushes, and requires a PR once its target branch is set.
-- Consequences: no human second review for now; Arisha should read the merged history when she returns. Once the ruleset targets main, work goes back to PRs.
+- Context: Farheen is doing Arisha's tasks as well. The repo is now public.
+- Decision: until Farheen says otherwise, finished task branches are pushed straight to main without a second reviewer. The /review step (code-reviewer agent) still runs before each finish.
+- Consequences: no human second review for now; Arisha should read the merged history when she returns. Branch protection: see D-008.
+- Owner: Farheen
+
+### D-008 Branch protection removed from T-010 (2026-11-14)
+- Context: T-010 asked for branch protection on main. While the repo was private GitHub would not enforce it on the free plan. After making it public, three rulesets were created but none took effect ("main" active with no target branch, "main1" and "main2" disabled). The pushing account (farheenimam) has write access, not admin, so a required-PR rule with an admin bypass would block the direct pushes agreed in D-007. Setting this up was slowing the work down.
+- Decision: Farheen removed branch protection from T-010's acceptance criteria. scripts/verify/T-010.py no longer checks it. This is a change of requirement by the owner, not a test weakened to pass. Arisha (T-010 lead) should sign off when she returns.
+- Consequences: as of today nothing protects main, so anyone with write access can delete or force-push it. Optional safety net later: activate the "main1" ruleset (blocks deletion and force pushes, does not require PRs).
 - Owner: Farheen

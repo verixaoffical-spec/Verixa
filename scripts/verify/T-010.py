@@ -1,4 +1,4 @@
-"""T-010 Repo init, layout, branch protection.
+"""T-010 Repo init and layout.
 
 Asserts:
   1. Every tracked non-.md file of mid (manifest) is in Verixa, byte-identical (SHA256).
@@ -6,14 +6,13 @@ Asserts:
   3. .env is ignored and not tracked; .gitignore keeps mid's patterns; .env.example lists mid's variable names.
   4. The imported test suite passes (unittest, SQLite, never the .env database).
   5. The frontend builds.
-  6. main is branch-protected on GitHub.
+Branch protection on main was removed from this task by Farheen's decision D-008 (docs/DECISIONS.md).
 Negative cases: a tampered copy is caught by the hash check; a planted mid .md is caught;
 an unsigned webhook is refused with 401 by the imported app.
 """
 import hashlib, json, os, shutil, subprocess, sys, tempfile
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-REPO = "verixaoffical-spec/Verixa"
 fails: list[str] = []
 
 
@@ -113,14 +112,6 @@ if npm:
         subprocess.run([npm, "ci"], cwd=fe, capture_output=True, timeout=600)
     r = subprocess.run([npm, "run", "build"], cwd=fe, capture_output=True, text=True, timeout=600)
     check("frontend builds (npm run build)", r.returncode == 0, (r.stdout + r.stderr)[-300:])
-
-# 6. branch protection
-gh = shutil.which("gh")
-check("gh available", gh is not None)
-if gh:
-    r = subprocess.run([gh, "api", f"repos/{REPO}/branches/main", "--jq", ".protected"], capture_output=True, text=True, timeout=60)
-    check(f"main is branch-protected on {REPO}", r.stdout.strip() == "true",
-          "enable it in GitHub: Settings > Branches (needs the repo owner)")
 
 print(f"\n{'PASS' if not fails else 'FAIL'}: {len(fails)} failed" + (f" ({', '.join(fails)})" if fails else ""))
 sys.exit(1 if fails else 0)

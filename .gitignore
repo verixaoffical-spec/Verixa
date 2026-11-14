@@ -28,6 +28,8 @@ Thumbs.db
 ~$*
 tests.txt
 frontend/dist/
+# browser screenshots from Playwright MCP
+.playwright-mcp/
 .claude/settings.local.json
 .claude/active_task
 .claude/version_seen

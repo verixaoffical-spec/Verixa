@@ -28,7 +28,7 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 ## Phases
 | Phase | Item | Backlog task | Status |
 |---|---|---|---|
-| P1 | Import mid code (no .md), keep its layout | T-010 (Arisha lead) | DONE in code; task waits on branch protection |
+| P1 | Import mid code (no .md), keep its layout | T-010 (Arisha lead) | PASS 2026-11-14 (branch protection dropped, D-008) |
 | P1 | Copy `.env` (done by the user, Claude never reads it); merge var names into `.env.example` | T-010 | DONE |
 | P1 | New database via `DATABASE_URL`, same 8 tables, schema-compare script | T-011, T-012 | TODO, waiting on "Spring" |
 | P1 | Run mid's existing tests in the new location | T-010 | DONE: 455 pass |
@@ -82,4 +82,4 @@ Every "new task needed" row below must be added to BACKLOG.md before anyone star
 | 2026-11-14 | prompt.txt §8 (charts, PR node graph, live analysis view) inspected; proposal waiting for approval, no code changed. Belongs to T-036 + a new task after it | https://claude.ai/artifact/7z8gcowPSFuake8vqrwenB |
 | 2026-11-14 | §8 design made in-house (no 21st): 4 screens (overview, PR graph, live run + logs, empty/loading/error), example data only. Rules applied: landing-page-design visual system, dataviz checks (risk colours = validated status palette: High #d03b3b, Medium #fab219, Low #0ca30c; legend, hover, table view). Code waits on the gate (T-036 needs T-031) | https://claude.ai/artifact/Uop9Bi19swCD2HqogWeFM8 |
 | 2026-11-14 | §8 prototype rebuilt as a real page and checked in a browser at desktop and phone widths: landing page palette and fonts, black-canvas graph (layered left to right, pan, zoom, minimap, search, focus mode), live stepper and console. Risk colours High #d03b3b, Medium #fab219, Low #31c47f. Then checked point by point against prompt §8 and added: severity pie, issues by type, per-commit history (A); PR picker and group-by-folder for large PRs (B, E); files in the run, identified risks, decision (C); run picker for logs (D); titled sections (E) | https://claude.ai/artifact/E8gP5HT7nDBNWZqxfncoxv |
-| 2026-11-14 | T-010: 169 mid files imported (no .md), .env copied by Farheen, 455 tests pass, frontend builds. Verify FAILS only on GitHub branch protection (owner must enable) | docs/verification-logs/T-010-2026-11-14-020521.log |
+| 2026-11-14 | T-010: 169 mid files imported (no .md), .env copied by Farheen, 455 tests pass, frontend builds. Branch protection dropped by Farheen (D-008); verify PASS | docs/verification-logs/T-010-2026-11-14-171207.log |
