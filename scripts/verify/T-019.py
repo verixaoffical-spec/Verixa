@@ -3,7 +3,8 @@
 Asserts:
   1. .github/workflows/ci.yml runs on pull requests and on pushes to main, and runs ruff, mypy, the unit tests,
      the strict TypeScript check and the frontend build.
-  2. Each of those commands passes here, exactly as CI runs it, so CI starts green.
+  2. Each of those commands passes here, exactly as CI runs it.
+  3. The real GitHub Actions run for the current commit concluded success (gh run list).
 Negative cases: ruff catches an undefined name, mypy catches a wrong argument type, and tsc catches a TypeScript type
 error, each planted in a temporary file outside the repo.
 """
@@ -34,7 +35,10 @@ wf = yaml.safe_load(open(os.path.join(ROOT, ".github/workflows/ci.yml"), encodin
 on = wf.get("on") or wf.get(True) or {}  # PyYAML reads the bare key `on` as True
 check("CI runs on every pull request", "pull_request" in on)
 check("CI runs on pushes to main", (on.get("push") or {}).get("branches") == ["main"])
+py_steps = [s.get("name") for s in wf["jobs"]["python"]["steps"]]
 steps = " | ".join(s.get("run", "") for job in wf["jobs"].values() for s in job["steps"])
+check("CI builds the frontend before the Python tests (the app needs frontend/dist)",
+      py_steps.index("Build the frontend the app serves") < py_steps.index("Unit tests (SQLite, never a real database or secret)"))
 for cmd in ("ruff check .", "mypy", "python -m unittest discover -s tests -t .", "npm ci", "npm run typecheck", "npm run build"):
     check(f"CI step: {cmd}", cmd in steps)
 check("CI installs the pinned dev tools", "pip install -r requirements-dev.txt" in steps)
@@ -52,6 +56,18 @@ r = run([py, "-m", "unittest", "discover", "-s", "tests", "-t", "."], timeout=90
 tail = (r.stderr or "").strip().splitlines()[-3:]
 print("     " + " | ".join(tail))
 check("unit tests pass", r.returncode == 0 and tail[-1:] == ["OK"], " | ".join(tail))
+
+# 3. the real GitHub Actions run of this commit (push it first; checks run on GitHub, not on this machine)
+FAILED_RUN = "43701791993"  # the first run: unit tests could not import the app without frontend/dist
+
+
+head = run(["git", "rev-parse", "HEAD"]).stdout.strip()
+r = run(["gh", "run", "list", "--workflow", "ci.yml", "--commit", head, "--json", "status,conclusion", "--limit", "1"], timeout=60)
+check(f"GitHub Actions CI passed for this commit ({head[:7]})", r.returncode == 0 and '"conclusion":"success"' in r.stdout.replace(" ", ""),
+      (r.stdout + r.stderr)[-300:] or "no run found: push the commit and wait for CI")
+r = run(["gh", "run", "view", FAILED_RUN, "--json", "conclusion"], timeout=60)
+check("negative: the same check reads a failed run as failed", r.returncode == 0 and '"conclusion":"failure"' in r.stdout.replace(" ", ""),
+      (r.stdout + r.stderr)[-300:])
 
 # negative: each tool really fails on a planted mistake
 tmp = tempfile.mkdtemp()
