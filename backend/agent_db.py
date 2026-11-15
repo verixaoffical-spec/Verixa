@@ -131,6 +131,30 @@ class AgentStep(AgentBase):
     done: Mapped[bool]
 
 
+
+class PullRequest(AgentBase):
+    """T-096: every pull request of a connected repository, analysed or not, as GitHub lists it. Filled by
+    backend/pull_requests.py from GitHub's pull request list and from each webhook delivery, so the Pull Requests
+    screen reads the database and GitHub is only asked again when the list is stale."""
+    __tablename__ = "pull_requests"
+    __table_args__ = (UniqueConstraint("project_id", "number", name="uq_pull_requests_project_number"),
+                      Index("ix_pull_requests_feed", "project_id", "gh_updated_at"))
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    project_id: Mapped[int] = mapped_column(ForeignKey(PROJECT_ID, ondelete="CASCADE"))
+    repo: Mapped[str] = mapped_column(String(200))
+    number: Mapped[int]
+    title: Mapped[str | None] = mapped_column(String(500))
+    author: Mapped[str | None] = mapped_column(String(100))          # GitHub login of who opened it
+    state: Mapped[str] = mapped_column(String(10))                   # open, closed or merged
+    draft: Mapped[bool] = mapped_column(default=False)
+    html_url: Mapped[str | None] = mapped_column(String(500))
+    head_sha: Mapped[str | None] = mapped_column(String(64))
+    gh_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    gh_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    synced_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
+    listed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))  # last seen in GitHub's list; staleness
+
 def init_agent_db() -> None:
     """Creates `risk_assessments` if it is not there, and adds columns introduced later. Never drops anything."""
     AgentBase.metadata.create_all(engine)

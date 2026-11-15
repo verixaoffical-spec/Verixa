@@ -1,0 +1,22 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-096.py
+     Ran 22 tests in 17.391s |  | OK
+ok   backend: pull request list, authors, staleness, webhook save, ownership (+ T-094/T-038 routes)
+ok   Neon: Alembic is at 0004 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: pull_requests with its author columns and index exists
+ok   frontend type-checks and builds (tsc && vite build)
+     5 passed (39.5s)
+ok   Pull Requests section, cache, processing view, multi-line tests (pull_requests.spec.ts)
+     3 passed (28.1s)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (29.8s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (25.2s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     33 passed (3.0m)
+ok   the Risk screen's agent browser tests still pass (agents.spec.ts)
+
+PASS: 0 failed
+
+
+exit code: 0

@@ -3,7 +3,8 @@
  * GET /api/analysis/pull-requests/{id}/log, which reads the saved trace log. A stage is marked done only when
  * a step of that stage has arrived. Checks, risks and the decision are the saved assessment's own fields.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { keep, peek } from './cache';
 import { ApiError, api, type Assessment, type LiveEvent, type PastRun, type Stage } from './api';
 import { Glyph, latestPerPr } from './RiskCharts';
 
@@ -13,7 +14,7 @@ const GROUPS: Record<string, Stage[] | null> = { All: null, GitHub: ['received',
   Model: ['model'], Manager: ['manager', 'saved'] };
 const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString(undefined, { hour12: false }) : '');
 
-export default function RiskLive({ items, live, pick }: { items: Assessment[]; live: { pr: number; messages: LiveEvent[]; done: boolean }[]; pick: number | null }) {
+export default function RiskLive({ items, live, pick, active }: { items: Assessment[]; live: { pr: number; messages: LiveEvent[]; done: boolean }[]; pick: number | null; active: boolean }) {
   const prs = useMemo(() => latestPerPr(items), [items]);
   const [id, setId] = useState<number | null>(pick ?? prs[0]?.id ?? null);
   const [past, setPast] = useState<PastRun[] | null>(null);
@@ -24,14 +25,25 @@ export default function RiskLive({ items, live, pick }: { items: Assessment[]; l
   const current = live.find(r => r.pr === row?.pr_number);
 
   useEffect(() => { if (pick) setId(pick); }, [pick]);
+  // T-096: the view is mounted before the feed arrives, so pick the newest pull request once there is one
+  useEffect(() => { if (id === null && prs.length) setId(prs[0].id); }, [id, prs]);
+  // T-096: the saved log is read when the view is first shown for this analysis, then kept. It is read again only when
+  // a run of this pull request finishes, quietly, with the kept log on screen meanwhile.
+  const read = useRef('');
   useEffect(() => {
-    if (!id) return;
+    if (!id || !active) return;
+    const key = `${id}:${current?.done ? 'after-run' : ''}`;
+    if (read.current === key) return;
+    const first = !read.current.startsWith(`${id}:`);
+    read.current = key;
+    const hit = peek<PastRun[]>(`log:${id}`);
+    if (first) { setError(''); setRunIx(0); setPast(hit ?? null); }
+    if (hit && first && !current?.done) return;
     let on = true;
-    setPast(null); setError(''); setRunIx(0);
-    api.prLog(id).then(d => on && setPast(d.runs))
+    api.prLog(id).then(d => on && setPast(keep(`log:${id}`, d.runs)))
       .catch(e => on && setError(e instanceof ApiError ? e.message : 'Could not read the saved log'));
     return () => { on = false; };
-  }, [id, current?.done]);
+  }, [id, active, current?.done]);
 
   if (!prs.length) return <div className="empty"><b>No pull requests analysed yet</b>Runs and their logs show here once a pull request is analysed.</div>;
 

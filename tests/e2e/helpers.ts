@@ -50,18 +50,24 @@ export function watch(page: Page): string[] {
   return problems;
 }
 
-export async function openRisk(page: Page) {
+// T-096: Pull requests is the first view now; most Risk tests work on the Overview, so that is the default here
+export async function openRisk(page: Page, view: 'Pull requests' | 'Overview' | 'Dependency graph' | 'Live runs and logs' = 'Overview') {
   await page.goto('/verixa_prototype.html#risk');
   await expect(page.getByRole('heading', { name: 'Risk Analysis' })).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('tab', { name: view, exact: true }).click();
+  await expect(page.getByRole('tab', { name: view, exact: true })).toHaveAttribute('aria-selected', 'true');
 }
 
-export const rowOf = (page: Page, number: number) => page.locator('tr.risk-row', { hasText: `#${number}` }).filter({
+// T-096: the Overview's table; the Pull Requests section has its own rows, kept in the page while hidden
+const overview = (page: Page) => page.getByRole('tabpanel', { name: 'Overview' });
+const row = (page: Page, number: number) => page.locator('tr.risk-row', { hasText: `#${number}` }).filter({
   has: page.locator(`.rpr-title b:text-is("#${number}")`),
 });
+export const rowOf = (page: Page, number: number) => overview(page).locator(row(page, number));
 
 /** The expanded details of a row. Details always sit in the row right after it, inside the same tbody. */
 export const detailOf = (page: Page, number: number) =>
-  page.locator('tbody', { has: rowOf(page, number) }).locator('.rdetail');
+  overview(page).locator('tbody', { has: row(page, number) }).locator('.rdetail');
 
 export async function analyse(page: Page, number: number) {
   await page.getByLabel('Pull request number').fill(String(number));

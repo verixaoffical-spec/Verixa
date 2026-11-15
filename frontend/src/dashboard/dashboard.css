@@ -396,3 +396,7 @@
   :root[data-theme="light"] .acct-item{color:#2A2A3A;}
   :root[data-theme="light"] .acct-item:hover,:root[data-theme="light"] .acct-item:focus-visible{background:rgba(15,15,40,.05);color:#0B0B14;}
   :root[data-theme="light"] .acct-item.danger:hover,:root[data-theme="light"] .acct-item.danger:focus-visible{color:#C43D3D;}
+
+  /* T-096: a test case or request name too long for one line wraps and the row grows, instead of being cut off */
+  .cell.wrap{display:block;height:auto;min-height:38px;padding:9px 10px;line-height:1.4;resize:none;overflow:hidden;white-space:pre-wrap;overflow-wrap:anywhere;field-sizing:content;}
+  .grid td:has(> .cell.wrap){padding-top:5px;padding-bottom:5px;}

@@ -4,6 +4,7 @@
  * The file list beside the graph holds the same data, for keyboard and screen reader use.
  */
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { keep, peek } from './cache';
 import { ApiError, api, type Assessment, type PrFile, type PrFiles, type RiskLabel } from './api';
 import { Glyph, RISKS, latestPerPr } from './RiskCharts';
 import './risk-views.css';
@@ -45,7 +46,7 @@ export function layout(files: PrFile[], edges: [string, string][]) {
   return { pos, lanes, width: X0 + cols.length * COL + 40, height: Math.max(height, PRH + 2 * Y0) };
 }
 
-export default function RiskGraph({ items, pick: initial }: { items: Assessment[]; pick: number | null }) {
+export default function RiskGraph({ items, pick: initial, active }: { items: Assessment[]; pick: number | null; active: boolean }) {
   const prs = useMemo(() => latestPerPr(items), [items]);
   const [id, setId] = useState<number | null>(initial ?? prs[0]?.id ?? null);
   const [data, setData] = useState<PrFiles | null>(null);
@@ -60,14 +61,23 @@ export default function RiskGraph({ items, pick: initial }: { items: Assessment[
   const row = prs.find(p => p.id === id) ?? null;
 
   useEffect(() => { if (initial) setId(initial); }, [initial]);
+  // T-096: the view is mounted before the feed arrives, so pick the newest pull request once there is one
+  useEffect(() => { if (id === null && prs.length) setId(prs[0].id); }, [id, prs]);
+  // T-096: read only once the graph is shown, and once per analysis. An analysis is one commit, so its files never
+  // change: the tab's cache answers every later open, switch or reload (Try again reads it again).
+  const shown = useRef('');
   useEffect(() => {
-    if (!id) return;
+    if (!id || !active || shown.current === `${id}:${attempt}`) return;
+    shown.current = `${id}:${attempt}`;
+    setSel(null); setQ(''); setError('');
+    const hit = attempt === 0 ? peek<PrFiles>(`files:${id}`) : undefined;
+    if (hit) { setData(hit); return; }
     let live = true;
-    setData(null); setError(''); setSel(null); setQ('');
-    api.prFiles(id).then(d => live && setData(d))
+    setData(null);
+    api.prFiles(id).then(d => live && setData(keep(`files:${id}`, d)))
       .catch(e => live && setError(e instanceof ApiError ? e.message : 'Could not load the changed files'));
     return () => { live = false; };
-  }, [id, attempt]);
+  }, [id, attempt, active]);
 
   const g = useMemo(() => data && layout(data.files, data.edges), [data]);
   const fit = () => {
@@ -76,7 +86,7 @@ export default function RiskGraph({ items, pick: initial }: { items: Assessment[
     const k = Math.max(0.35, Math.min((el.clientWidth - 64) / g.width, (el.clientHeight - 104) / g.height, 1.15));
     setView({ k, x: (el.clientWidth - g.width * k) / 2, y: (el.clientHeight - g.height * k) / 2 + 18 });
   };
-  useEffect(fit, [g]);
+  useEffect(() => { if (active) fit(); }, [g, active]);  // a hidden view has no size to fit to
   const zoomAt = (k: number, mx: number, my: number) => setView(v => {
     const nk = Math.min(Math.max(k, 0.35), 2.2);
     return { k: nk, x: mx - (mx - v.x) * (nk / v.k), y: my - (my - v.y) * (nk / v.k) };

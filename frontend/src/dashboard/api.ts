@@ -1,3 +1,4 @@
+import { clearCache } from './cache';
 // Talks to the FastAPI backend. Same origin, so the session cookie travels with every call.
 
 import type { SavedFile, applyRequest } from './library';
@@ -99,6 +100,20 @@ export interface PrFiles {
   edges: [string, string][];  // [importer, imported]
 }
 export interface PastRun { run_id: string | null; started: string | null; messages: LiveEvent[] }
+// T-096: one pull request of the connected repository, analysed or not, as saved from GitHub
+export interface RepoPull {
+  number: number;
+  title: string | null;
+  author: string | null;
+  state: 'open' | 'closed' | 'merged';
+  draft: boolean;
+  url: string | null;
+  head_sha: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  analysis_id: number | null;
+}
+export interface RepoPulls { listed_at: string | null; stale: boolean; items: RepoPull[] }
 
 export class ApiError extends Error {
   constructor(message: string, public status: number, public detail: any) {
@@ -122,7 +137,7 @@ async function request<T>(path: string, body?: object): Promise<T> {
   if (res.status === 204) return null as T;
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    if (res.status === 401) onSessionLost();
+    if (res.status === 401) { clearCache(); onSessionLost(); }
     throw new ApiError(typeof data.detail === 'string' ? data.detail : 'Something went wrong', res.status, data.detail);
   }
   return data;
@@ -142,6 +157,9 @@ export const api = {
   analysePr: (prNumber: number) => request<Assessment>('/api/analysis/analyse', { pr_number: prNumber }),
   prFiles: (id: number) => request<PrFiles>(`/api/analysis/pull-requests/${id}/files`),
   prLog: (id: number) => request<{ runs: PastRun[] }>(`/api/analysis/pull-requests/${id}/log`),
+  repoPulls: () => request<RepoPulls>('/api/analysis/repo-pulls'),
+  // Reads GitHub's list again when the saved one is stale, or always with force
+  syncPulls: (force = false) => request<RepoPulls>(`/api/analysis/repo-pulls/sync${force ? '?force=true' : ''}`, {}),
 
   // Two-step verification. Changing it asks for the password again, and turning it off also asks for a code.
   twoFactor: () => request<TwoFactorStatus>('/auth/2fa'),
@@ -218,6 +236,7 @@ export async function linkAgain(): Promise<void> {
 
 export async function signOut(): Promise<boolean> {
   try {
+    clearCache();
     const res = await fetch('/auth/logout', { method: 'POST', credentials: 'same-origin' });
     return res.ok || res.status === 401;  // 401: already signed out
   } catch {

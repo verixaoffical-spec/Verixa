@@ -73,7 +73,7 @@ test.describe('showing what the agents saved', () => {
     await expect(tile('High risk')).toHaveText(String(counts.High));
     await expect(tile('Medium risk')).toHaveText(String(counts.Medium));
     await expect(tile('Low risk')).toHaveText(String(counts.Low));
-    await expect(page.locator('tr.risk-row')).toHaveCount(items.length);
+    await expect(page.getByRole('tabpanel', { name: 'Overview' }).locator('tr.risk-row')).toHaveCount(items.length);
   });
 
   test('opening a row shows the label, why it was given, and the agent\'s text', async () => {

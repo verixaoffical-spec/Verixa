@@ -32,7 +32,7 @@ export default function SpecTable({ spec, library }: { spec: SpecItem; library: 
                 <tr key={i}>
                   <td className="num">{i + 1}</td>
                   <td>
-                    <Cell id={`pw|${spec.name}|${i}|title`} value={displayTitle(test)} maxLength={200} label="Test case name"
+                    <Cell id={`pw|${spec.name}|${i}|title`} value={displayTitle(test)} maxLength={200} label="Test case name" multiline
                           readOnlyReason={titleEditable(test) ? undefined : 'This name has special characters. Edit it in your file.'}
                           onCommit={v => library.editTest(spec.name, i, 'title', v)} />
                   </td>

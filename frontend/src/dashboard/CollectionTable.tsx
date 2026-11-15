@@ -49,7 +49,7 @@ export default function CollectionTable({ collection, library }: { collection: C
                   </select>
                 </td>
                 <td>
-                  <Cell id={`pm|col|${i}|name`} value={r.name} maxLength={200} label="Request name"
+                  <Cell id={`pm|col|${i}|name`} value={r.name} maxLength={200} label="Request name" multiline
                         onCommit={v => library.editRequestCell(i, 'name', v)} />
                 </td>
                 <td>

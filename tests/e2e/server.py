@@ -136,6 +136,7 @@ def script_github_and_model() -> None:
         head = moved.get(number, f"{number:07x}" + "a" * 33)
         return {"title": title, "head": {"sha": moved.get(f"push-{number}", head)}, "base": {"sha": "b" * 40, "repo": {"id": 1}},
                 "html_url": f"https://github.com/{repo}/pull/{number}", "state": "open", "updated_at": "2026-11-06T00:00:00Z",
+                "user": {"login": f"author-{number}"},
                 "changed_files": 3500 if number == 111 else len(files)}, files
 
     def lookup(repo, arg, token=None):
@@ -153,6 +154,25 @@ def script_github_and_model() -> None:
 
     analysis.fetch_pr, analysis.count_fix_commits, analysis.count_defects = fetch_pr, lookup, lookup
     analysis.score_pr = score_pr
+
+    # T-096: GitHub's pull request list for the demo repository. #1..#7 are the seeded analyses, #8 was never
+    # analysed and has a long title, #9 is merged. Every other repository has none.
+    from backend import pull_requests
+
+    authors = {1: "alice-dev", 2: "bob-qa", 3: "alice-dev", 4: "carol-sec", 5: "dan-ops", 6: "eve-x", 7: "farheen", 8: "grace-long", 9: "bob-qa"}
+    titles = {1: "Refactor checkout session", 2: "Update profile page", 3: "Fix a typo in the footer", 4: "Rotate signing keys",
+              5: "Could not be analysed", 6: seed_demo.XSS, 7: "Add refund endpoint", 9: "Merge the old cart",
+              8: "Rework the checkout flow so that a declined card, a timeout and a duplicate click each show their own clear message"}
+
+    def list_pulls(repo, token=None):
+        if repo != "demo/shop":
+            return []
+        return [{"number": n, "title": titles[n], "user": {"login": authors[n]},
+                 "state": "closed" if n == 9 else "open", "merged_at": "2026-11-10T00:00:00Z" if n == 9 else None,
+                 "draft": n == 8, "html_url": f"https://github.com/{repo}/pull/{n}", "head": {"sha": f"{n:07x}abcdef"},
+                 "created_at": "2026-11-01T00:00:00Z", "updated_at": f"2026-11-{10 + n:02d}T00:00:00Z"} for n in range(9, 0, -1)]
+
+    pull_requests.list_pulls = list_pulls
     analysis._has_key = lambda name: True
     for index, writer in enumerate(analysis.analysis_agent.writers):
         writer.model = ScriptedModel(which=min(index, 1))

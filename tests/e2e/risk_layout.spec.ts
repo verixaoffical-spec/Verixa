@@ -12,18 +12,18 @@ const top = async (page: Page, selector: string) => (await page.locator(selector
 test('tabs sit at the top, the overview is cards in order, and the numbers are the saved feed', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'demo@verixa.dev', baseURL!);
   const analyses: string[] = [];
-  page.on('request', r => { if (r.method() === 'POST' && r.url().includes('/api/analysis')) analyses.push(r.url()); });
+  page.on('request', r => { if (r.method() === 'POST' && r.url().includes('/api/analysis/analyse')) analyses.push(r.url()); });
   await page.setViewportSize({ width: 1440, height: 900 });
   await openRisk(page);
 
   const nav = page.locator('section.workspace.risk > .rnav');
-  await expect(nav.getByRole('tab')).toHaveText(['Overview', 'Dependency graph', 'Live runs and logs']);
+  await expect(nav.getByRole('tab')).toHaveText(['Pull requests', 'Overview', 'Dependency graph', 'Live runs and logs']);
   await expect(nav.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
 
   // order on the page: tabs, title, KPI cards, Analyse card, charts, pull request table
   const ys = [await top(page, '.rnav'), await top(page, '.rpage-head h1'), await top(page, '.risk-stats'),
               await top(page, '[aria-label="Analyse a pull request"]'), await top(page, '[aria-label="Risk charts"]'),
-              await top(page, 'section.rtable')];
+              await top(page, '[aria-label="Overview"] section.rtable')];
   expect(ys).toEqual([...ys].sort((a, b) => a - b));
   expect(ys[0]).toBeLessThan(80);
 
@@ -31,11 +31,10 @@ test('tabs sit at the top, the overview is cards in order, and the numbers are t
   const feed = await (await page.request.get('/api/analysis/pull-requests')).json();
   const values = await page.locator('.risk-stat-value').allTextContents();
   expect(values).toEqual([feed.counts.total, feed.counts.High, feed.counts.Medium, feed.counts.Low].map(String));
-  await expect(page.locator('section.rtable tr.risk-row')).toHaveCount(feed.items.length);
+  await expect(page.locator('[aria-label="Overview"] section.rtable tr.risk-row')).toHaveCount(feed.items.length);
 
   // the donuts are drawn at size (a global 16px icon rule used to shrink them)
-  const donut = (await page.locator('.donut-wrap svg').first().boundingBox())!;
-  expect(Math.round(donut.width)).toBe(140);
+  await expect.poll(async () => Math.round((await page.locator('.donut-wrap svg').first().boundingBox())!.width)).toBe(140);  // after the entry animation
 
   // the bar stays at the top while scrolling, and switches the view below it
   await page.mouse.wheel(0, 1500);
@@ -44,7 +43,9 @@ test('tabs sit at the top, the overview is cards in order, and the numbers are t
   await expect(page.getByRole('tabpanel', { name: 'Live runs and logs' })).toBeVisible();
   await expect(page.getByRole('tabpanel', { name: 'Overview' })).toHaveCount(0);
   await nav.getByRole('tab', { name: 'Live runs and logs' }).focus();
-  await page.keyboard.press('Home');  // keyboard: Home goes back to the first view
+  await page.keyboard.press('Home');  // keyboard: Home goes to the first view, Pull requests
+  await expect(nav.getByRole('tab', { name: 'Pull requests' })).toBeFocused();
+  await page.keyboard.press('ArrowRight');  // and the arrow to the next one
   await expect(nav.getByRole('tab', { name: 'Overview' })).toBeFocused();
   await expect(nav.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
   await expect(page.locator('.risk-stat-value').first()).toHaveText(String(feed.counts.total));
@@ -66,9 +67,9 @@ test('at phone width the page does not scroll sideways', async ({ browser, baseU
 test('negative: an account with nothing analysed gets the tabs and an empty table card, no charts or rows', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'other@verixa.dev', baseURL!);
   await openRisk(page);
-  await expect(page.locator('.rnav').getByRole('tab')).toHaveCount(3);
-  await expect(page.locator('section.rtable')).toContainText('No pull requests analysed yet');
-  await expect(page.locator('section.rtable tr.risk-row')).toHaveCount(0);
+  await expect(page.locator('.rnav').getByRole('tab')).toHaveCount(4);
+  await expect(page.locator('[aria-label="Overview"] section.rtable')).toContainText('No pull requests analysed yet');
+  await expect(page.locator('[aria-label="Overview"] section.rtable tr.risk-row')).toHaveCount(0);
   await expect(page.getByLabel('Risk charts')).toHaveCount(0);
   await expect(page.locator('.risk-stat-value')).toHaveText(['0', '0', '0', '0']);
   expect(problems).toEqual([]);

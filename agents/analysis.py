@@ -168,6 +168,7 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
                                  "and hidden from the AI model. Check them and replace any real one")
     result = {
         "status": "ok", "pr_id": pr_id, "title": title, "head_sha": pr["head"]["sha"],
+        "author": (pr.get("user") or {}).get("login"),
         "module": module, "modules_touched": sorted(per_module), "files_changed": total_files,
         "lines_changed": a["lines_changed"], "past_defects_in_module": defects if history_known else None,
         "score": a["score"], "base_label": a["base_label"], "risk_label": a["risk_label"],

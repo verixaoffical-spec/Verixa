@@ -9,13 +9,16 @@
  * shows its real state (queued, running, needs review, failed), never a placeholder label.
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ApiError, api, openLive, type Assessment, type LiveEvent, type RiskFeed, type RiskLabel } from './api';
+import { ApiError, api, openLive, type LiveEvent, type RiskFeed, type RiskLabel } from './api';
 import { icons } from './icons';
 import { Chip, hookLabel, type HookState, type Link } from './connection';
 import { useToast } from './Toast';
-import { History, RiskCharts } from './RiskCharts';
+import { RiskCharts } from './RiskCharts';
 import RiskGraph from './RiskGraph';
 import RiskLive from './RiskLive';
+import { keep, peek } from './cache';
+import PullRequests, { type LiveRun } from './PullRequests';
+import { Detail, RiskBadge, STATE_TEXT, StateBadge, ago, hue, initials, type Tab } from './riskParts';
 
 interface Props {
   hidden: boolean;
@@ -24,27 +27,9 @@ interface Props {
   onGoConnect: () => void;
 }
 
-// The mock-up used low / med / high as class names. Map the agent's labels onto them.
-const BADGE: Record<RiskLabel, string> = { Low: 'low', Medium: 'med', High: 'high' };
-const STATE_TEXT: Record<Assessment['state'], string> = {
-  queued: 'Queued',
-  running: 'Analysing',
-  scored: 'Scored',
-  needs_human_review: 'Needs review',
-  failed: 'Failed',
-};
 const POLL_MS = 4000;
-type Tab = 'overview' | 'graph' | 'live';
-const TABS: [Tab, string][] = [['overview', 'Overview'], ['graph', 'Dependency graph'], ['live', 'Live runs and logs']];
+const TABS: [Tab, string][] = [['prs', 'Pull requests'], ['overview', 'Overview'], ['graph', 'Dependency graph'], ['live', 'Live runs and logs']];
 const LIVE_KEEP_MS = 2 * 60 * 1000;  // a finished run stays on screen this long
-
-// The live messages of one pull request's current run
-interface LiveRun {
-  pr: number;
-  messages: LiveEvent[];
-  done: boolean;
-  finishedAt: number;
-}
 
 function addLive(runs: LiveRun[], event: LiveEvent): LiveRun[] {
   const current = runs.find(r => r.pr === event.pr);
@@ -91,130 +76,20 @@ function LivePanel({ runs, onClose }: { runs: LiveRun[]; onClose: (pr: number) =
   );
 }
 
-const initials = (who: string | null) =>
-  (who || '??').replace(/[^a-zA-Z0-9]/g, '').slice(0, 2).toUpperCase() || '??';
-
-// A stable colour per author, so the same person keeps the same avatar between loads
-function hue(who: string | null): number {
-  let h = 0;
-  for (const ch of who || 'anon') h = (h * 31 + ch.charCodeAt(0)) % 360;
-  return h;
-}
-
-function ago(iso: string | null): string {
-  if (!iso) return '';
-  const seconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
-  if (!isFinite(seconds) || seconds < 0) return '';
-  if (seconds < 60) return 'just now';
-  const mins = Math.round(seconds / 60);
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.round(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  return `${Math.round(hours / 24)}d ago`;
-}
-
-function RiskBadge({ label }: { label: RiskLabel | null }) {
-  if (!label) return <span className="rbadge none"><i></i>Not scored</span>;
-  return <span className={'rbadge ' + BADGE[label]}><i></i>{label}</span>;
-}
-
-function StateBadge({ state }: { state: Assessment['state'] }) {
-  const busy = state === 'queued' || state === 'running';
-  return (
-    <span className={'rstate ' + state}>
-      {busy && <i></i>}
-      {state === 'scored' && <svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg>}
-      {STATE_TEXT[state]}
-    </span>
-  );
-}
-
-function Detail({ row, history, onGo }: { row: Assessment; history: Assessment[]; onGo: (tab: Tab) => void }) {
-  const raised = row.base_label && row.risk_label && row.base_label !== row.risk_label;
-  return (
-    <tr>
-      <td className="rdetail" colSpan={5}>
-        <div className="rdetail-in">
-          {!!row.errors.length && (
-            <div className="rerr">
-              <b>{row.state === 'failed' ? 'The analysis could not finish' : 'The Manager did not accept the output'}</b>
-              {row.errors.join(' · ')}
-              {row.attempts > 0 && ` (after ${row.attempts} attempt${row.attempts === 1 ? '' : 's'})`}
-            </div>
-          )}
-
-          {!!row.risk_factors.length && (
-            <div>
-              <h4>Why this label</h4>
-              <ul className="rfactors">
-                {row.risk_factors.map((factor, i) => <li key={i}>{factor}</li>)}
-              </ul>
-            </div>
-          )}
-
-          {row.reasoning && (
-            <div>
-              <h4>Agent reasoning</h4>
-              <p className="rreason">{row.reasoning}</p>
-            </div>
-          )}
-
-          {row.concern && (
-            <div className="rconcern" role="note">
-              <h4>The agent questions this label</h4>
-              <p>{row.concern}</p>
-              <p className="rconcern-note">The label comes from the rules and has not been changed. Check this before relying on it.</p>
-            </div>
-          )}
-
-          {!!row.test_areas.length && (
-            <div>
-              <h4>Suggested test areas</h4>
-              <ul className="rareas">
-                {row.test_areas.map((area, i) => <li key={i}><span>{i + 1}</span>{area}</li>)}
-              </ul>
-            </div>
-          )}
-
-          <History rows={history} />
-
-          <div className="rmeta">
-            {row.module && <Chip on={false}>module {row.module}</Chip>}
-            {row.files_changed !== null && (
-              <Chip on={false}>{row.files_changed} file{row.files_changed === 1 ? '' : 's'}, {row.lines_changed ?? 0} lines</Chip>
-            )}
-            {row.past_defects !== null && <Chip on={false}>{row.past_defects} past fix{row.past_defects === 1 ? '' : 'es'} here</Chip>}
-            {row.sensitivity && <Chip on={false}>sensitivity {row.sensitivity}</Chip>}
-            {raised && <Chip on={false}>raised from {row.base_label} by a minimum label</Chip>}
-            {row.model_used && <Chip on={false}>explained by {row.model_used}</Chip>}
-            {row.attempts > 1 && <Chip on={false}>{row.attempts} manager attempts</Chip>}
-            <button className="btn ghost sm" onClick={() => onGo('graph')}>Open dependency graph</button>
-            <button className="btn ghost sm" onClick={() => onGo('live')}>Open run log</button>
-            {row.pr_url?.startsWith('https://github.com/') && (
-              <a className="btn ghost sm" href={row.pr_url} target="_blank" rel="noopener noreferrer">
-                Open on GitHub
-              </a>
-            )}
-          </div>
-        </div>
-      </td>
-    </tr>
-  );
-}
-
 export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
   const toast = useToast();
-  const [feed, setFeed] = useState<RiskFeed | null>(null);
+  const [feed, setFeed] = useState<RiskFeed | null>(() => peek<RiskFeed>('feed') ?? null);  // T-096: last feed, at once
   const [failed, setFailed] = useState(false);
   const [open, setOpen] = useState<number | null>(null);
   const [prNumber, setPrNumber] = useState('');
   const [busy, setBusy] = useState(false);
-  const [tab, setTab] = useState<Tab>('overview');
+  const [tab, setTab] = useState<Tab>(() => peek<Tab>('tab') ?? 'prs');
+  const go = (next: Tab) => setTab(keep('tab', next));  // a reload comes back to the same view
 
   const load = useCallback(async (): Promise<RiskFeed | null> => {
     try {
       const next = await api.riskFeed();
-      setFeed(next);
+      setFeed(keep('feed', next));
       setFailed(false);
       return next;
     } catch (err) {
@@ -321,12 +196,12 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         if (next === undefined) return;
         e.preventDefault();
         const key = TABS[(next + TABS.length) % TABS.length][0];
-        setTab(key);
+        go(key);
         e.currentTarget.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus();
       }}>
         {TABS.map(([key, label]) => (
           <button key={key} role="tab" data-tab={key} aria-selected={tab === key} tabIndex={tab === key ? 0 : -1}
-                  onClick={() => setTab(key)}>{label}</button>
+                  onClick={() => go(key)}>{label}</button>
         ))}
       </div>
 
@@ -348,10 +223,18 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         </div>
       </header>
 
-      {tab === 'graph' && <div className="rcard" role="tabpanel" aria-label="Dependency graph"><RiskGraph items={items} pick={latestOpen} /></div>}
-      {tab === 'live' && <div className="rcard" role="tabpanel" aria-label="Live runs and logs"><RiskLive items={items} live={liveRuns} pick={latestOpen} /></div>}
-      {tab === 'overview' && (
-      <div className="rgrid" role="tabpanel" aria-label="Overview">
+      {/* T-096: every view stays mounted, so switching back shows what it already read without asking again */}
+      <div className="rpanel" role="tabpanel" aria-label="Pull requests" hidden={tab !== 'prs'}>
+        <PullRequests active={!hidden && tab === 'prs'} items={items} live={liveRuns}
+                      onGo={(next, id) => { if (id) setOpen(id); go(next); }} />
+      </div>
+      <div className="rcard rpanel" role="tabpanel" aria-label="Dependency graph" hidden={tab !== 'graph'}>
+        <RiskGraph items={items} pick={latestOpen} active={!hidden && tab === 'graph'} />
+      </div>
+      <div className="rcard rpanel" role="tabpanel" aria-label="Live runs and logs" hidden={tab !== 'live'}>
+        <RiskLive items={items} live={liveRuns} pick={latestOpen} active={!hidden && tab === 'live'} />
+      </div>
+      <div className="rgrid rpanel" role="tabpanel" aria-label="Overview" hidden={tab !== 'overview'}>
         {hook !== 'ok' && (
           <div className="warnbox">
             GitHub has not delivered anything to this webhook yet, so nothing will arrive on its own.
@@ -441,7 +324,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
                     <td><StateBadge state={row.state} /></td>
                     <td className="ract"><span className="muted">{ago(row.updated_at)}</span></td>
                   </tr>
-                  {open === row.id && <Detail row={row} history={items.filter(r => r.pr_number === row.pr_number)} onGo={setTab} />}
+                  {open === row.id && <Detail row={row} history={items.filter(r => r.pr_number === row.pr_number)} onGo={go} />}
                 </tbody>
               ))}
             </table>
@@ -449,7 +332,6 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         )}
         </section>
       </div>
-      )}
     </section>
   );
 }

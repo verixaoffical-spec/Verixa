@@ -19,6 +19,7 @@ export default defineConfig({
     { name: 'risk', testMatch: 'risk_charts.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'views', testMatch: 'risk_views.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'layout', testMatch: 'risk_layout.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
+    { name: 'prs', testMatch: 'pull_requests.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
   ],
   webServer: {
     command: `"${python}" tests/e2e/server.py${live ? ' --live' : ''}`,

@@ -27,12 +27,15 @@ from .db import User, get_db
 from .integrations import github_access_token
 from .live import describe
 from .pr_files import SNAPSHOT_VERSION, group_runs, pr_files, pr_log
+from . import pull_requests as repo_pulls
+from .accounts import Throttle
 
 log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/analysis")
 
 LABELS = ("High", "Medium", "Low")
 LOG_STEPS = 2000  # newest steps of one PR shown in its log
+forced_lists = Throttle(limit=6, window=60)  # T-096: "Refresh from GitHub" cannot burn the account's GitHub quota
 
 
 @router.get("/pull-requests")
@@ -155,6 +158,47 @@ def past_log(assessment_id: int = Path(ge=1, le=MAX_INT), user: User = Depends(c
 
 class AnalyseIn(BaseModel):
     pr_number: int = Field(strict=True, ge=1, le=10_000_000)  # strict: true and "4" are not pull request numbers
+
+
+@router.get("/repo-pulls")
+def repo_pull_list(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    """T-096: every saved pull request of the connected repository with its author, newest activity first. Reads the
+    database only; `stale` tells the screen to ask for a refresh (POST /repo-pulls/sync) in the background."""
+    project = project_of(db, user)
+    if not project:
+        return {"listed_at": None, "stale": False, "items": []}
+    return repo_pulls.rows_json(db, project)
+
+
+@router.post("/repo-pulls/sync")
+async def repo_pull_sync(request: Request, force: bool = Query(False), user: User = Depends(current_user),
+                         db: Session = Depends(get_db)):
+    """Reads GitHub's pull request list and saves it, unless the saved one is still fresh and no refresh was forced."""
+    _check_origin(request)
+    project = project_of(db, user)
+    if not project:
+        raise HTTPException(409, "Connect a repository first")
+    if not force and not repo_pulls.is_stale(db, project):
+        return repo_pulls.rows_json(db, project)
+    if force:
+        if wait := forced_lists.retry_after(str(user.id)):
+            raise HTTPException(429, f"Refreshed too often. Try again in {wait} seconds")
+        forced_lists.fail(str(user.id))
+    if not user.github_token:
+        raise HTTPException(409, "Link GitHub first, so Verixa can list the pull requests")
+    try:
+        token = await run_in_threadpool(github_access_token, db, user)
+    except InvalidToken:
+        raise HTTPException(409, "Your stored GitHub token could not be read. Link GitHub again")
+    try:
+        await run_in_threadpool(repo_pulls.sync, db, project, token)
+    except httpx.HTTPStatusError as exc:
+        db.rollback()
+        raise HTTPException(502, f"GitHub refused to list the pull requests ({exc.response.status_code})")
+    except httpx.HTTPError:
+        db.rollback()
+        raise HTTPException(502, "Could not reach GitHub")
+    return repo_pulls.rows_json(db, project)
 
 
 @router.post("/analyse")

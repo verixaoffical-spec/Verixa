@@ -21,7 +21,7 @@ import logging
 import re
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 from starlette.concurrency import run_in_threadpool
 
@@ -30,6 +30,7 @@ from agents.trace import mask, trace
 from .agent_db import RiskAssessment, dump
 from .db import Project, SessionLocal, User
 from .integrations import github_access_token
+from . import pull_requests
 
 log = logging.getLogger(__name__)
 
@@ -253,6 +254,13 @@ async def analyse_pull_request(payload: dict, delivery_id: str | None = None) ->
                 log.info("no connected project for %s, ignored", facts["repo"])
                 return
             for project in projects:
+                if isinstance(payload.get("pull_request"), dict):  # T-096: the Pull Requests list shows it at once
+                    try:
+                        pull_requests.save(db, project, [{**payload["pull_request"], "number": facts["pr_number"]}], listed=False)
+                        db.commit()
+                    except SQLAlchemyError:  # best effort: the list is a side view and must never stop the analysis
+                        db.rollback()
+                        log.exception("could not save %s to the pull request list", pr_id)
                 row = claim(db, project.id, facts, delivery_id)
                 if row is None:
                     trace("service.skipped", pr_id, project_id=project.id, head_sha=facts["head_sha"], reason="already handled")
@@ -293,7 +301,7 @@ async def analyse_now(project: Project, pr_number: int, token: str | None) -> in
         "head_sha": (scored.get("head_sha") or "")[:64],
         "title": (scored.get("title") or "")[:500] or None,
         "pr_url": f"https://github.com/{project.repo}/pull/{pr_number}",
-        "author": None,
+        "author": (scored.get("author") or "")[:100] or None,
     }
     async with _LOCKS.setdefault(pr_id, asyncio.Lock()):
         with SessionLocal() as db:

@@ -10,7 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from .accounts import Throttle
-from .agent_db import RiskAssessment
+from .agent_db import PullRequest, RiskAssessment
 from .auth import _check_origin, account_json, signed_in_user
 from .db import Collection, Project, SpecFile, User, get_db
 from .integrations import (
@@ -52,6 +52,7 @@ def remove_project(db: Session, user: User) -> None:
     # The agent's risk assessments point at this project, so they go with it. Without this, both
     # disconnecting and deleting an account would hit a foreign key error.
     db.execute(delete(RiskAssessment).where(RiskAssessment.project_id == project.id))
+    db.execute(delete(PullRequest).where(PullRequest.project_id == project.id))
     db.delete(project)
 
 

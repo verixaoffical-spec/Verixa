@@ -1,0 +1,32 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-096.py
+     Ran 22 tests in 19.643s |  | OK
+ok   backend: pull request list, authors, staleness, webhook save, ownership (+ T-094/T-038 routes)
+ok   Neon: Alembic is at 0004 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: pull_requests with its author columns and index exists
+ok   frontend type-checks and builds (tsc && vite build)
+     5 passed (37.9s)
+ok   Pull Requests section, cache, processing view, multi-line tests (pull_requests.spec.ts)
+     1 failed | 2 passed (32.8s)
+FAIL page layout still passes (risk_layout.spec.ts) - .Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\events.py", line 88, in _run
+[WebServer]     self._context.run(self._callback, *self._args)
+[WebServer]   File "C:\Program Files\WindowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+[WebServer]     self._sock.shutdown(socket.SHUT_RDWR)
+[WebServer] ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+
+     4 passed (31.0s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (24.9s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     15 failed | 18 passed (5.6m)
+FAIL the Risk screen's agent browser tests still pass (agents.spec.ts) - indowsApps\PythonSoftwareFoundation.Python.3.12_3.12.2800.0_x64__qbz5n2kfra8p0\Lib\asyncio\proactor_events.py", line 165, in _call_connection_lost
+[WebServer]     self._sock.shutdown(socket.SHUT_RDWR)
+[WebServer] ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
+[WebServer] Skipping missing token usage metadata for agent analysis_writer_0 and model fake
+[WebServer] Skipping missing token usage metadata for agent analysis_writer_0 and model fake
+
+
+FAIL: 2 failed (page layout still passes (risk_layout.spec.ts), the Risk screen's agent browser tests still pass (agents.spec.ts))
+
+
+exit code: 1

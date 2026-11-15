@@ -90,3 +90,13 @@
   - Once a PR has steps in agent_steps, its log shows only those; runs from before T-094 stay in the rotating trace file. Reading both would re-read the file on every open.
   - agent_steps has no retention and no link to a project, so steps stay after a project is deleted. Fine at FYP size; add cleanup if it grows.
 - Owner: Farheen
+
+### D-014 Pull requests saved in Postgres; Risk screens cached in the browser tab (2026-11-15)
+- Context: Farheen's prompt asked for a Pull Requests section listing every pull request of the repository with its author saved in Neon, and for logs and the dependency graph to show at once on tab switches and reloads.
+- Decision: T-096 adds the pull_requests table (migration 0004, a shared schema change: Arisha must be told), filled from GitHub's list when the saved one is older than 5 minutes and from each webhook delivery. In the browser, every Risk view stays mounted, and what it read is kept in memory and in the tab's sessionStorage, cleared on sign out and on a lost session. Authors are shown as initials: the page loads no images from GitHub (frontend/CLAUDE.md, CSP img-src 'self').
+- Consequences:
+  - The graph is cached per analysis. A PR that had moved past its analysed commit (D-013 reads it live each time) is now kept as first read until the tab closes or the user signs out; a new analysis is a new key.
+  - The browser cache is per tab, not per account: signing in as someone else in another tab leaves this tab's lists until its next 401 or reload.
+  - rows_json reads all of a project's analyses to find the latest per PR; fine at FYP size, a DISTINCT ON query later.
+- Owner: Farheen
+

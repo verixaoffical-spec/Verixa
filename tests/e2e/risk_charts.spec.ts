@@ -44,7 +44,7 @@ test('charts show the real counts, with details, a table view and the risk histo
 test('an account with no analysed pull requests sees no charts, only the empty state', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'other@verixa.dev', baseURL!);
   await openRisk(page);
-  await expect(page.getByText('No pull requests analysed yet')).toBeVisible();
+  await expect(page.getByRole('tabpanel', { name: 'Overview' }).getByText('No pull requests analysed yet')).toBeVisible();
   await expect(page.getByLabel('Risk charts')).toHaveCount(0);
   expect(problems).toEqual([]);
 });

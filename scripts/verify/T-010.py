@@ -70,7 +70,11 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                      "agents/trace.py", "backend/api.py", "backend/auth.py", "backend/integrations.py", "backend/mailer.py",
                      "backend/security.py", "backend/twofactor.py", "backend/validators.py", "tests/e2e/server.py",
                      "tests/test_agent_fixes.py", "tests/test_agents_real.py", "tests/test_live.py",
-                     "tests/test_qa_security.py")}}
+                     "tests/test_qa_security.py")},
+                 **{f: "T-096 multi-line test cells, Overview-scoped test helpers" for f in (
+                     "frontend/src/dashboard/Cell.tsx", "frontend/src/dashboard/CollectionTable.tsx",
+                     "frontend/src/dashboard/SpecTable.tsx", "frontend/src/dashboard/dashboard.css",
+                     "tests/e2e/agents.spec.ts", "tests/e2e/helpers.ts")}}
 
 
 def committed_sha(f: str) -> str | None:
