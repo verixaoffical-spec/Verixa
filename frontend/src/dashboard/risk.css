@@ -144,6 +144,8 @@
   .rchart h2{margin:0;font-size:14px;font-weight:600;}
   .rchart header span{font-size:12px;color:hsl(var(--muted-foreground));}
   .donut-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+  .donut-wrap svg{flex:none;width:140px;height:140px;}  /* the global icon rule sets every svg to 16px */
+  .donut-wrap text{stroke:none;}  /* ...and outlines text with its stroke */
   .donut-n{font:600 26px 'JetBrains Mono',monospace;fill:currentColor;}
   .donut-u{font:500 11px Inter,sans-serif;fill:hsl(var(--muted-foreground));}
   .clegend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;flex:1;min-width:150px;}
@@ -172,3 +174,23 @@
   @media (max-width:1100px){.rcharts{grid-template-columns:1fr 1fr;}.rchart.wide{grid-column:1/-1;}}
   @media (max-width:640px){.rcharts{grid-template-columns:1fr;}.rissue{grid-template-columns:110px minmax(0,1fr) 26px;}}
   @media (prefers-reduced-motion:reduce){.rbar-stack{transition:none;}}
+
+  /* T-095: view tabs as a pill bar at the top of the page, content as a column of cards (Verixa tokens only) */
+  .workspace.risk{gap:18px;}
+  html:has(.workspace.risk:not([hidden])){scroll-padding-top:72px;}  /* focus and scrolling never land under the bar */
+  .rnav{justify-self:center;position:sticky;top:12px;z-index:5;display:inline-flex;max-width:100%;overflow-x:auto;scrollbar-width:none;gap:4px;padding:5px;border-radius:999px;border:1px solid var(--hair);background:hsl(var(--background)/.88);backdrop-filter:blur(12px);box-shadow:0 10px 30px rgba(0,0,0,.28);}
+  .rnav button{flex:none;white-space:nowrap;min-height:36px;padding:0 18px;border:0;border-radius:999px;background:none;color:hsl(var(--muted-foreground));font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,color .2s;}
+  .rnav button:hover{color:hsl(var(--foreground));}
+  .rnav button[aria-selected="true"]{background:hsl(var(--accent));color:#fff;}
+  .rnav button:focus-visible{outline:2px solid hsl(var(--accent));outline-offset:2px;}
+  .rpage-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px;}
+  .rgrid{display:flex;flex-direction:column;gap:16px;min-width:0;}
+  .rcard{min-width:0;padding:18px;border-radius:18px;border:1px solid var(--hair);background:var(--soft);}
+  .rcard-title{margin:0 0 12px;font-size:14px;font-weight:600;}
+  .rgrid .risk-stats{margin:0;gap:16px;}
+  .rgrid .risk-stat{padding:16px 18px;}
+  .rgrid .rcharts{margin-top:0;gap:16px;}
+  .rgrid .rchart{border-radius:18px;padding:18px;}
+  .rtable{padding:0;overflow:hidden;}
+  .rtable .rcard-title{margin:0;padding:16px 18px 12px;}
+  :root[data-theme="light"] .rnav{background:rgba(255,255,255,.9);box-shadow:0 10px 30px rgba(15,15,40,.12);}

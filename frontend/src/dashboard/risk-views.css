@@ -4,8 +4,6 @@
 .risk .seg{display:inline-flex;flex-wrap:wrap;padding:3px;border-radius:10px;background:var(--soft);border:1px solid var(--hair);}
 .risk .seg button{height:28px;padding:0 12px;border:0;border-radius:7px;background:none;color:hsl(var(--muted-foreground));font-size:13px;font-weight:500;cursor:pointer;transition:background .2s,color .2s;}
 .risk .seg button[aria-pressed="true"]{background:hsl(var(--foreground)/.1);color:hsl(var(--foreground));}
-.rtabs{margin-top:16px;}
-.risk .rtabs button[aria-selected="true"]{background:hsl(var(--foreground)/.1);color:hsl(var(--foreground));}
 .rl-chips{display:flex;flex-wrap:wrap;gap:6px;}
 .rl-line time{font:inherit;}
 .rgraph,.rlive{display:flex;flex-direction:column;gap:14px;margin-top:-6px;}

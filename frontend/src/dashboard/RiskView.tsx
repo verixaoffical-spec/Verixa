@@ -314,49 +314,68 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
   return (
     <section hidden={hidden} className="workspace risk">
-      <article className="card">
-        <header className="head">
+      <div className="rnav" role="tablist" aria-label="Risk Analysis views" onKeyDown={e => {
+        // arrow keys, Home and End move between the views (WAI-ARIA tabs pattern)
+        const i = TABS.findIndex(([key]) => key === tab);
+        const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+        if (next === undefined) return;
+        e.preventDefault();
+        const key = TABS[(next + TABS.length) % TABS.length][0];
+        setTab(key);
+        e.currentTarget.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus();
+      }}>
+        {TABS.map(([key, label]) => (
+          <button key={key} role="tab" data-tab={key} aria-selected={tab === key} tabIndex={tab === key ? 0 : -1}
+                  onClick={() => setTab(key)}>{label}</button>
+        ))}
+      </div>
+
+      <header className="rpage-head">
+        <div>
           <h1>Risk Analysis</h1>
           <p className="lead">
             Every pull request on <b className="mono">{link.repo}</b> is scored automatically when GitHub
             delivers it. The label comes from rules in code; the agent writes the reasoning and the
             test areas.
           </p>
-          <div className="chips" style={{ marginTop: 14 }}>
-            <Chip on={hook === 'ok'}>{hookLabel(hook)}</Chip>
-            <Chip on={liveOn}>{liveOn ? 'Live updates on' : 'Live updates connecting'}</Chip>
-            {feed && <Chip on={false}>Jira {link.jiraKey}</Chip>}
-            {(counts.needs_review ?? 0) > 0 && <Chip on={false}>{counts.needs_review} need review</Chip>}
-            {(counts.failed ?? 0) > 0 && <Chip on={false}>{counts.failed} failed</Chip>}
-          </div>
-          <div className="seg rtabs" role="tablist" aria-label="Risk Analysis views">
-            {TABS.map(([key, label]) => (
-              <button key={key} role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{label}</button>
-            ))}
-          </div>
-        </header>
+        </div>
+        <div className="chips">
+          <Chip on={hook === 'ok'}>{hookLabel(hook)}</Chip>
+          <Chip on={liveOn}>{liveOn ? 'Live updates on' : 'Live updates connecting'}</Chip>
+          {feed && <Chip on={false}>Jira {link.jiraKey}</Chip>}
+          {(counts.needs_review ?? 0) > 0 && <Chip on={false}>{counts.needs_review} need review</Chip>}
+          {(counts.failed ?? 0) > 0 && <Chip on={false}>{counts.failed} failed</Chip>}
+        </div>
+      </header>
 
-        {tab === 'graph' && <div className="pane" role="tabpanel" aria-label="Dependency graph"><RiskGraph items={items} pick={latestOpen} /></div>}
-        {tab === 'live' && <div className="pane" role="tabpanel" aria-label="Live runs and logs"><RiskLive items={items} live={liveRuns} pick={latestOpen} /></div>}
-        {tab === 'overview' && <>
-        <div className="pane">
-          {hook !== 'ok' && (
-            <div className="warnbox" style={{ marginBottom: 18 }}>
-              GitHub has not delivered anything to this webhook yet, so nothing will arrive on its own.
-              Check Integrations, or score a pull request by number below.
+      {tab === 'graph' && <div className="rcard" role="tabpanel" aria-label="Dependency graph"><RiskGraph items={items} pick={latestOpen} /></div>}
+      {tab === 'live' && <div className="rcard" role="tabpanel" aria-label="Live runs and logs"><RiskLive items={items} live={liveRuns} pick={latestOpen} /></div>}
+      {tab === 'overview' && (
+      <div className="rgrid" role="tabpanel" aria-label="Overview">
+        {hook !== 'ok' && (
+          <div className="warnbox">
+            GitHub has not delivered anything to this webhook yet, so nothing will arrive on its own.
+            Check Integrations, or score a pull request by number below.
+          </div>
+        )}
+        {failed && (
+          <div className="warnbox">
+            Could not reach the Verixa server. The list below may be out of date.
+          </div>
+        )}
+
+        <div className="risk-stats">
+          {tiles.map(tile => (
+            <div key={tile.key} className={'risk-stat rcard ' + tile.cls}>
+              <div className="risk-stat-label">{tile.icon}{tile.label}</div>
+              <div className="risk-stat-value">{counts[tile.key] ?? 0}</div>
+              <div className="risk-stat-sub">{tile.sub}</div>
             </div>
-          )}
+          ))}
+        </div>
 
-          <div className="risk-stats">
-            {tiles.map(tile => (
-              <div key={tile.key} className={'risk-stat ' + tile.cls}>
-                <div className="risk-stat-label">{tile.icon}{tile.label}</div>
-                <div className="risk-stat-value">{counts[tile.key] ?? 0}</div>
-                <div className="risk-stat-sub">{tile.sub}</div>
-              </div>
-            ))}
-          </div>
-
+        <section className="rcard" aria-label="Analyse a pull request">
+          <h2 className="rcard-title">Analyse a pull request</h2>
           <div className="risk-ask">
             <input value={prNumber} onChange={e => setPrNumber(e.target.value.replace(/\D/g, '').slice(0, 7))}
                    onKeyDown={e => { if (e.key === 'Enter' && !busy) analyse(); }}
@@ -369,18 +388,14 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
                     : 'Scores a pull request without waiting for a webhook delivery.'}
             </span>
           </div>
+        </section>
 
-          {failed && (
-            <div className="warnbox" style={{ marginTop: 18 }}>
-              Could not reach the Verixa server. The list below may be out of date.
-            </div>
-          )}
+        <LivePanel runs={liveRuns} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
 
-          <LivePanel runs={liveRuns} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
+        {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
 
-          {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
-        </div>
-
+        <section className="rcard rtable" aria-label="Pull requests">
+          <h2 className="rcard-title">Pull requests</h2>
         {!feed ? (
           <div className="empty"><b>Loading</b>Reading the agent's assessments.</div>
         ) : !items.length ? (
@@ -432,8 +447,9 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
             </table>
           </div>
         )}
-        </>}
-      </article>
+        </section>
+      </div>
+      )}
     </section>
   );
 }
