@@ -101,3 +101,4 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-010 | 2026-11-15 | auto | scripts\verify\T-010.py | PASS | docs/verification-logs/T-010-2026-11-15-145254.log | 1cccda6d122a9948f682658bcb016c6527f14ee08b51babd8443c0e7d435bd67 |
 | T-095 | 2026-11-15 | auto | scripts\verify\T-095.py | PASS | docs/verification-logs/T-095-2026-11-15-151212.log | ecf4f297f242b6e25108ecf2e2a7d27f8f17e0d42752e50c4d2dd1531b5bbb16 |
 | T-095 | 2026-11-15 | auto | scripts\verify\T-095.py | PASS | docs/verification-logs/T-095-2026-11-15-151928.log | 2148ceb99abd6112c0e7fc5dfa8dc99292223c3d02a92878b911787f8e88c68d |
+| T-019 | 2026-11-15 | auto | scripts\verify\T-019.py | PASS | docs/verification-logs/T-019-2026-11-15-153344.log | 5e737faf796567bac5da42e33f59e38ed3342293f7b9d6fbfc5ef4876d89b470 |

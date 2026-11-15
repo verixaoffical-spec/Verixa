@@ -1,0 +1,27 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-019.py
+ok   CI runs on every pull request
+ok   CI runs on pushes to main
+ok   CI builds the frontend before the Python tests (the app needs frontend/dist)
+ok   CI step: ruff check .
+ok   CI step: mypy
+ok   CI step: python -m unittest discover -s tests -t .
+ok   CI step: npm ci
+ok   CI step: npm run typecheck
+ok   CI step: npm run build
+ok   CI installs the pinned dev tools
+ok   ruff check . passes
+ok   mypy (agents, backend) passes
+ok   npm run typecheck passes
+ok   npm run build passes
+     Ran 470 tests in 317.611s |  | OK
+ok   unit tests pass
+ok   GitHub Actions CI passed for this commit (110a9ad)
+ok   negative: the same check reads a failed run as failed
+ok   negative: ruff fails on an undefined name and an unused import
+ok   negative: mypy fails on a wrong argument type
+ok   negative: tsc fails on a type error
+
+PASS: 0 failed
+
+
+exit code: 0
