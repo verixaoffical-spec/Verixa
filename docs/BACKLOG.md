@@ -188,6 +188,7 @@ per-task verification scripts (`scripts/verify/T-030.py` and friends) have not b
 | T-095 | Risk Analysis dashboard layout: view tabs at the top of the page, card grid (KPIs, charts, live log, PR table) like the reference dashboard, Verixa palette and header unchanged, saved backend data only (Farheen's layout prompt, 2026-11-15) | Farheen | Arisha | T-094 | DONE |
 | T-096 | Pull Requests section first (every repo PR, author from GitHub saved in Neon via pull_requests table, search, expand), central live processing view from real agent events, tab data kept and cached (no refetch on tab switch or reload), multi-line test cells and Tests chips fixed, card transitions (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-095 | DONE |
 | T-097 | UI consistency: landing page wording on dashboard cards, one shared card surface (landing + dashboard) with 3D depth like the reference screenshot, Analyses per day as its own full-width section with an expanding View as table, smooth chart/table transitions (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-096 | DONE |
+| T-098 | Frontend refinements: frosted glass sliding indicator on the Risk view tabs; Live runs and logs Results and Tests laid out without empty space (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-097 | DONE |
 | T-093 | Weekly Friday review of STATUS and RISKS | Both | | | RECURRING |
 
 ## FYP-II (LOCKED until FYP-1 IS COMPLETED, version 1.0)

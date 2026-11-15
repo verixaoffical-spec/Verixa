@@ -178,9 +178,17 @@
   .workspace.risk{gap:18px;}
   html:has(.workspace.risk:not([hidden])){scroll-padding-top:72px;}  /* focus and scrolling never land under the bar */
   .rnav{justify-self:center;position:sticky;top:12px;z-index:5;display:inline-flex;max-width:100%;overflow-x:auto;scrollbar-width:none;gap:4px;padding:5px;border-radius:999px;border:1px solid var(--hair);background:hsl(var(--background)/.88);backdrop-filter:blur(12px);box-shadow:var(--card-edge),var(--card-depth);}
-  .rnav button{flex:none;white-space:nowrap;min-height:36px;padding:0 18px;border:0;border-radius:999px;background:none;color:hsl(var(--muted-foreground));font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,color .2s;}
+  .rnav button{position:relative;z-index:1;flex:none;white-space:nowrap;min-height:36px;padding:0 18px;border:0;border-radius:999px;background:none;color:hsl(var(--muted-foreground));font:inherit;font-size:13px;font-weight:600;cursor:pointer;transition:background .2s,color .2s;}
   .rnav button:hover{color:hsl(var(--foreground));}
-  .rnav button[aria-selected="true"]{background:hsl(var(--accent));color:#fff;}
+  .rnav button[aria-selected="true"]{color:#fff;}
+  .rnav:not(.measured) button[aria-selected="true"]{background:hsl(var(--accent)/.45);}  /* until the indicator is placed */
+  /* T-098: the selected tab's indicator is frosted glass in the accent colour, and glides between tabs */
+  .rnav-ind{position:absolute;top:5px;bottom:5px;left:0;border-radius:999px;pointer-events:none;
+            background:linear-gradient(180deg,hsl(var(--accent)/.5),hsl(var(--accent)/.26));border:1px solid hsl(var(--accent)/.5);
+            backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -10px 18px -12px hsl(var(--accent)/.7),0 8px 22px -10px hsl(var(--accent)/.75);
+            transition:transform .42s cubic-bezier(.22,1,.36,1),width .42s cubic-bezier(.22,1,.36,1);}
+  .rnav-ind::before{content:"";position:absolute;inset:1px 12% auto;height:45%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.22),transparent);}
   .rnav button:focus-visible{outline:2px solid hsl(var(--accent));outline-offset:2px;}
   .rpage-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px;}
   .rgrid{display:flex;flex-direction:column;gap:16px;min-width:0;}
@@ -194,6 +202,8 @@
   .rtable{padding:0;overflow:hidden;}
   .rtable .rcard-title{margin:0;padding:16px 18px 12px;}
   :root[data-theme="light"] .rnav{background:rgba(255,255,255,.9);}
+  :root[data-theme="light"] .rnav button[aria-selected="true"]{color:hsl(249 60% 28%);}
+  :root[data-theme="light"] .rnav-ind{background:linear-gradient(180deg,hsl(var(--accent)/.28),hsl(var(--accent)/.14));border-color:hsl(var(--accent)/.4);}
 
   /* T-096: Pull Requests section */
   .prs-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:16px 18px 12px;}
@@ -291,4 +301,4 @@
   .rday-table tfoot td{position:static;font-weight:600;}
   @keyframes rday-open{from{grid-template-rows:0fr;opacity:0;transform:translateY(-6px);}to{grid-template-rows:1fr;opacity:1;transform:none;}}
   @keyframes rday-close{from{grid-template-rows:1fr;opacity:1;}to{grid-template-rows:0fr;opacity:0;transform:translateY(-6px);}}
-  @media (prefers-reduced-motion:reduce){.rday-more,.rday-more.closing{animation:none;}.rday-axis{transition:none;}.risk-stat,.risk-stat:hover{transition:none;transform:none;}}
+  @media (prefers-reduced-motion:reduce){.rnav-ind{transition:none;}.rday-more,.rday-more.closing{animation:none;}.rday-axis{transition:none;}.risk-stat,.risk-stat:hover{transition:none;transform:none;}}

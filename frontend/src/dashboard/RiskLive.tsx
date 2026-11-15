@@ -97,7 +97,7 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
       </section>
 
       <div className="livegrid">
-        <section className="rchart flush">
+        <section className={'rchart flush' + (run && !run.done ? ' running' : '')}>
           <header>
             <h2>Log {run?.id && <span className="mono muted">· run {run.id.slice(0, 4)}</span>}</h2>
             <div className="seg" role="group" aria-label="Filter log">
@@ -117,14 +117,16 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
           </div>
         </section>
 
-        <div className="livecol">
-          <section className="rchart flush">
+        <section className="rchart flush">
             <header><h2>Rules and checks</h2>{rules && row?.score !== null && <span className="mono">{row?.score} pts → {row?.base_label ?? row?.risk_label}</span>}</header>
             {rules && row?.risk_factors.length ? (
               <ul className="checks">{row.risk_factors.map((f, i) => <li key={i}><i className="cdot" aria-hidden="true"></i><span>{f}</span></li>)}</ul>
             ) : <div className="pending">Waiting for the rules stage. Nothing shows until it reports.</div>}
           </section>
+      </div>
 
+      {/* T-098: the result and the tests share one row under the log, so nothing waits below an empty column */}
+      <div className="liveres">
           <section className="rchart">
             <header><h2>Result and decision</h2></header>
             {run && !run.done ? (
@@ -148,7 +150,6 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
             {!!row?.test_areas.length && <div className="rl-chips">{row.test_areas.map((t, i) => <span key={i} className="tchip">{t}</span>)}</div>}
             <div className="pending">Test execution is not built yet (Deliverable 3). Run status appears here once the Test Agent exists.</div>
           </section>
-        </div>
       </div>
     </div>
   );

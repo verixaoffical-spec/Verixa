@@ -77,8 +77,8 @@
 .flist button span:last-child{color:hsl(var(--muted-foreground));font-family:Inter,sans-serif;}
 
 .pill{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;color:hsl(var(--muted-foreground));background:var(--soft);border:1px solid var(--hair);white-space:nowrap;}
-.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--g-low);}
-.pill .dot.busy{background:var(--accent-hi);box-shadow:0 0 8px var(--accent-v);animation:rpulse 1.4s infinite;}
+.rlive .pill i.dot{position:static;flex:none;width:7px;height:7px;border-radius:50%;background:var(--g-low);box-shadow:none;}  /* not the change list's .dot (dashboard.css), in either theme */
+.rlive .pill i.dot.busy{background:var(--accent-hi);box-shadow:0 0 8px var(--accent-v);animation:rpulse 1.4s infinite;}
 .stepper{list-style:none;margin:0;padding:6px 0 0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));}
 .step{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;}
 .step::before{content:"";position:absolute;top:11px;left:-50%;right:50%;height:2px;background:hsl(var(--foreground)/.1);}
@@ -93,8 +93,13 @@
 .step .t{font:11px 'JetBrains Mono',monospace;color:hsl(var(--muted-foreground));}
 .step.w .n{color:hsl(var(--muted-foreground));}
 @keyframes rpulse{50%{opacity:.3;}}
-.livegrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:start;}
-.livecol{display:flex;flex-direction:column;gap:12px;min-width:0;}
+/* T-098: log beside its checks at one height, then result beside tests: no column left hanging over empty space */
+.livegrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:stretch;}
+.liveres{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:stretch;}
+.livegrid > .rchart.flush:first-child{display:flex;flex-direction:column;}
+.livegrid > .rchart.flush:first-child .console{flex:1 1 auto;height:0;min-height:160px;max-height:none;}
+.livegrid > .rchart.running:first-child .console{min-height:360px;}  /* while a run streams in, the log keeps its room even before any checks */
+.livegrid > .rchart.flush:last-child{max-height:520px;overflow-y:auto;}
 .rchart.flush{padding:0;gap:0;overflow:hidden;}
 .rchart.flush>header{padding:12px 16px;border-bottom:1px solid var(--hair);flex-wrap:wrap;}
 .rchart.flush>.pending{margin:16px;}
@@ -129,6 +134,6 @@
 .rl-chips .tchip{display:inline-flex;align-items:center;min-height:26px;max-width:100%;padding:4px 11px;border-radius:13px;font-size:12.5px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;text-align:left;color:#7fe0d4;background:rgba(46,194,179,.1);border:1px solid rgba(46,194,179,.35);}
 :root[data-theme="light"] .rl-chips .tchip{color:#0b6b61;}
 
-@media (max-width:1100px){.livegrid,.inspect{grid-template-columns:1fr;}}
+@media (max-width:1100px){.livegrid,.inspect,.liveres{grid-template-columns:1fr;}.livegrid > .rchart.flush:first-child .console{height:auto;max-height:420px;}}
 @media (max-width:760px){.vp{height:480px;}.stepper{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:16px;}.step:nth-child(5)::before{display:none;}.rg-select,.rg-find{max-width:100%;flex:1 1 100%;}}
-@media (prefers-reduced-motion:reduce){.e-imp.hi,.spin,.cursor,.step.c .b::after,.pill .dot.busy{animation:none;}}
+@media (prefers-reduced-motion:reduce){.e-imp.hi,.spin,.cursor,.step.c .b::after,.rlive .pill i.dot.busy{animation:none;}}

@@ -8,7 +8,7 @@
  * reads the risk_assessments rows the agent wrote. A pull request that has not been scored yet
  * shows its real state (queued, running, needs review, failed), never a placeholder label.
  */
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ApiError, api, openLive, type LiveEvent, type RiskFeed, type RiskLabel } from './api';
 import { icons } from './icons';
 import { Chip, hookLabel, type HookState, type Link } from './connection';
@@ -72,6 +72,44 @@ function LivePanel({ runs, onClose }: { runs: LiveRun[]; onClose: (pr: number) =
           </section>
         );
       })}
+    </div>
+  );
+}
+
+// The Risk views' tab bar. T-098: a frosted glass indicator measures the selected tab and glides to it.
+function ViewTabs({ tab, go, hidden }: { tab: Tab; go: (next: Tab) => void; hidden: boolean }) {
+  const bar = useRef<HTMLDivElement>(null);
+  const [ind, setInd] = useState<{ x: number; w: number } | null>(null);
+  useLayoutEffect(() => {
+    const el = bar.current;
+    if (!el || hidden) return;
+    const place = () => {
+      const on = el.querySelector<HTMLButtonElement>('[aria-selected="true"]');
+      if (on && on.offsetWidth) setInd({ x: on.offsetLeft, w: on.offsetWidth });
+    };
+    place();
+    const watch = new ResizeObserver(place);  // fonts loading, a narrower window, or the screen being shown again
+    watch.observe(el);
+    const on = el.querySelector('[aria-selected="true"]');
+    if (on) watch.observe(on);  // the tab itself can change size while the bar does not (the bar scrolls when clipped)
+    return () => watch.disconnect();
+  }, [tab, hidden]);
+  return (
+    <div ref={bar} className={'rnav' + (ind ? ' measured' : '')} role="tablist" aria-label="Risk Analysis views" onKeyDown={e => {
+      // arrow keys, Home and End move between the views (WAI-ARIA tabs pattern)
+      const i = TABS.findIndex(([key]) => key === tab);
+      const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      const key = TABS[(next + TABS.length) % TABS.length][0];
+      go(key);
+      e.currentTarget.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus();
+    }}>
+      {ind && <span className="rnav-ind" aria-hidden="true" style={{ width: ind.w, transform: `translateX(${ind.x}px)` }}></span>}
+      {TABS.map(([key, label]) => (
+        <button key={key} role="tab" data-tab={key} aria-selected={tab === key} tabIndex={tab === key ? 0 : -1}
+                onClick={() => go(key)}>{label}</button>
+      ))}
     </div>
   );
 }
@@ -189,21 +227,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
   return (
     <section hidden={hidden} className="workspace risk">
-      <div className="rnav" role="tablist" aria-label="Risk Analysis views" onKeyDown={e => {
-        // arrow keys, Home and End move between the views (WAI-ARIA tabs pattern)
-        const i = TABS.findIndex(([key]) => key === tab);
-        const next = { ArrowRight: i + 1, ArrowLeft: i - 1, Home: 0, End: TABS.length - 1 }[e.key];
-        if (next === undefined) return;
-        e.preventDefault();
-        const key = TABS[(next + TABS.length) % TABS.length][0];
-        go(key);
-        e.currentTarget.querySelector<HTMLButtonElement>(`[data-tab="${key}"]`)?.focus();
-      }}>
-        {TABS.map(([key, label]) => (
-          <button key={key} role="tab" data-tab={key} aria-selected={tab === key} tabIndex={tab === key ? 0 : -1}
-                  onClick={() => go(key)}>{label}</button>
-        ))}
-      </div>
+      <ViewTabs tab={tab} go={go} hidden={hidden} />
 
       <header className="rpage-head">
         <div>

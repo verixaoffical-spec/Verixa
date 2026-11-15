@@ -21,6 +21,7 @@ export default defineConfig({
     { name: 'layout', testMatch: 'risk_layout.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'prs', testMatch: 'pull_requests.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'ui', testMatch: 'ui_consistency.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
+    { name: 'refine', testMatch: 'refinements.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
   ],
   webServer: {
     command: `"${python}" tests/e2e/server.py${live ? ' --live' : ''}`,
