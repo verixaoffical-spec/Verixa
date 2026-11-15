@@ -60,13 +60,13 @@ def describe(line: dict) -> dict | None:
             "failure": (f"Analysis agent checked CI: failing on this commit ({failed})", "warn"),
             "pending": ("Analysis agent checked CI: still running", "info"),
             "success": (f"Analysis agent checked CI: all {f.get('passed')} check(s) passed", "ok"),
-        }.get(state, ("Analysis agent checked CI: no checks run on this commit", "info"))
+        }.get(str(state), ("Analysis agent checked CI: no checks run on this commit", "info"))
     elif e == "github.ci_failed":
         text, level = "Analysis agent could not read the CI result", "warn"
     elif e == "ci.updated":
         done = True
         if f.get("raised") in (True, "True", "true"):
-            text, level = f"CI finished and is failing, so the risk was raised to High", "warn"
+            text, level = "CI finished and is failing, so the risk was raised to High", "warn"
         elif f.get("state") == "failure":
             text, level = "CI finished and is failing. The risk was already High", "warn"
         elif f.get("state") == "success":

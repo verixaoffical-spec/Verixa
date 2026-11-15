@@ -6,6 +6,7 @@ uses, so the session cookie and the 401 contract ("the session is gone") are unc
 """
 import json
 import logging
+from typing import Any
 
 import httpx
 from importlib.util import find_spec
@@ -53,7 +54,7 @@ def pull_requests(limit: int = Query(50, ge=1, le=200),
 
     # Counts are over the latest assessment per pull request, so one PR pushed to five times is
     # counted once, at its current risk. They cover every row, whatever the page size.
-    latest = {}
+    latest: dict[int, Any] = {}
     for row in db.execute(select(RiskAssessment.pr_number, RiskAssessment.risk_label, RiskAssessment.state)
                           .where(*mine).order_by(*newest_first)):
         latest.setdefault(row.pr_number, row)

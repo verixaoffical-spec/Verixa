@@ -113,12 +113,13 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
           pr_state=pr.get("state"), files=len(files), ms=round((time.perf_counter() - started) * 1000))
 
     # module touched = the one with the most changed lines
-    per_module, paths = defaultdict(int), {}
+    per_module: defaultdict[str, int] = defaultdict(int)
+    paths: dict[str, str] = {}
     for f in files:
         name, path = module_of(f["filename"])
         per_module[name] += f["additions"] + f["deletions"]
         paths[name] = path
-    module = max(per_module, key=per_module.get) if per_module else "root"
+    module = max(per_module, key=lambda m: per_module[m]) if per_module else "root"
 
     # T-033: a module whose every changed file is newly added has no history yet, so its score rests on change size
     # (files + lines) and sensitive areas, never on a fixed default. Its lookups are skipped: the issue search matches
@@ -159,8 +160,8 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
     title, hidden = hide_secrets(pr["title"])
     shown = []
     for f in top:
-        patch, found = hide_secrets(f.get("patch"))
-        hidden += found
+        patch, n_found = hide_secrets(f.get("patch"))
+        hidden += n_found
         shown.append(f"{f['filename']} (+{f['additions']}/-{f['deletions']})\n{patch[:400]}")
     if hidden:
         a["risk_factors"].append(f"possible secret: {hidden} value(s) that look like a secret were found in this pull request "
@@ -184,8 +185,14 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
     return result
 
 
+def pr_id_of(ctx: ReadonlyContext | InvocationContext) -> str:
+    """The run's message is "Analyze owner/repo#N"."""
+    parts = ctx.user_content.parts if ctx.user_content else None
+    return ((parts[0].text if parts else None) or "").removeprefix("Analyze ").strip()
+
+
 def _instruction(ctx: ReadonlyContext) -> str:
-    pr_id = ctx.user_content.parts[0].text.removeprefix("Analyze ").strip()
+    pr_id = pr_id_of(ctx)
     st = ANALYSES[pr_id]
     f = st["facts"]
     if f.get("has_code", True):
@@ -246,7 +253,7 @@ class AnalysisAgent(BaseAgent):
     model_names: list[str]
 
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
-        pr_id = ctx.user_content.parts[0].text.removeprefix("Analyze ").strip()
+        pr_id = pr_id_of(ctx)
         st = ANALYSES[pr_id]
         facts = await asyncio.to_thread(score_pr, pr_id, False, st.get("token"))
         if facts.get("status") != "ok":

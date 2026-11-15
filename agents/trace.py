@@ -29,12 +29,12 @@ _logger = logging.getLogger("verixa.agents")
 
 class _JsonLine(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-        return json.dumps(record.fields, default=str)
+        return json.dumps(getattr(record, "fields"), default=str)
 
 
 class _ConsoleLine(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
-        f = record.fields
+        f = getattr(record, "fields")  # set by trace() through extra=
         rest = " ".join(f"{k}={v}" for k, v in f.items() if k not in ("at", "run_id", "pr_id", "event"))
         text = f"[agent {f['run_id'] or '-'}] {f['pr_id'] or '-'} {f['event']} {rest}".rstrip().replace("\n", " ")
         return text.encode("ascii", "replace").decode()  # model answers can hold characters a Windows console cannot print

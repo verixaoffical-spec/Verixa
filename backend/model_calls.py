@@ -30,7 +30,7 @@ def _int(value) -> int | None:
 
 def to_row(line: dict) -> dict | None:
     """The model_calls columns for one trace line, or None for lines that are not a model attempt."""
-    kind = EVENTS.get(line.get("event"))
+    kind = EVENTS.get(line.get("event", ""))
     if not kind:
         return None
     agent, ok = kind
@@ -96,5 +96,9 @@ def _enqueue(table, row: dict) -> None:
 def flush(timeout: float = 10.0) -> bool:
     """Waits until every queued row is written (tests and checks). True when the queue drained in time."""
     done = threading.Event()
-    threading.Thread(target=lambda: (_queue.join(), done.set()), daemon=True).start()
+
+    def drain() -> None:
+        _queue.join()
+        done.set()
+    threading.Thread(target=drain, daemon=True).start()
     return done.wait(timeout)

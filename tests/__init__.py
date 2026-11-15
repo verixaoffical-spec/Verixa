@@ -13,6 +13,12 @@ os.environ["AGENT_CI_CHECK"] = "0"
 for name in ("SECRET_KEY", "WEBHOOK_SECRET", "GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET",
              "ATLASSIAN_CLIENT_ID", "ATLASSIAN_CLIENT_SECRET"):
     os.environ.setdefault(name, "test-value-for-" + name.lower())
+# T-019: the same run here as in CI, which has no .env. Set empty (not deleted) so backend's load_dotenv, which never
+# overrides, cannot fill them from .env: no real provider key, no model chain or keyword override from this machine.
+for name in ("GROQ_API_KEY", "OPENROUTER_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "GITHUB_TOKEN",
+             "ANALYSIS_MODELS", "SELECT_MODELS", "CLASSIFY_MODELS", "DRAFT_MODELS",
+             "HIGH_RISK_KEYWORDS", "MEDIUM_RISK_KEYWORDS", "RISK_QUESTIONS"):
+    os.environ[name] = ""
 
 # T-094: model_calls and agent_steps rows are written on a background thread. Wait for queued rows before any test
 # drops the tables, so a late write never races the drop (SQLite "database is locked" or "no such table").

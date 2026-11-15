@@ -15,7 +15,9 @@ def seal(text: str) -> str:
     return _fernet.encrypt(text.encode()).decode()
 
 
-def unseal(token: str) -> str:
+def unseal(token: str | None) -> str:
+    if not token:
+        raise ValueError("no sealed token stored")  # an unlinked account, never an empty secret
     return _fernet.decrypt(token.encode()).decode()
 
 
@@ -30,7 +32,9 @@ def seal_totp(secret: str) -> str:
     return _totp_fernet.encrypt(secret.encode()).decode()
 
 
-def unseal_totp(token: str) -> str:
+def unseal_totp(token: str | None) -> str:
+    if not token:
+        raise ValueError("no two-step secret stored")
     return _totp_fernet.decrypt(token.encode()).decode()
 
 

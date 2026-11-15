@@ -1,5 +1,6 @@
 """JSON API used by the dashboard: session, connect, and the Test Library."""
 import time
+from typing import Any
 
 from cryptography.fernet import InvalidToken
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request, Response
@@ -58,11 +59,11 @@ def remove_project(db: Session, user: User) -> None:
 def session(request: Request, db: Session = Depends(get_db)):
     """Everything the dashboard needs on load, so a refresh never loses state."""
     user = signed_in_user(request, db)
-    empty = {"account": None, "github": None, "atlassian": None, "project": None, "specs": [], "collection": None}
+    empty: dict[str, Any] = {"account": None, "github": None, "atlassian": None, "project": None, "specs": [], "collection": None}
     if not user:
         return empty
     project = project_of(db, user)
-    out = {
+    out: dict[str, Any] = {
         **empty,
         "account": account_json(user),
         "github": {"login": user.github_login, "name": user.github_name or user.github_login} if user.github_token else None,
@@ -202,7 +203,7 @@ def _apply(db: Session, user: User, body: ApplyIn) -> dict:
     rows = {s.name: s for s in db.scalars(select(SpecFile).where(SpecFile.project_id == project.id))}
     collection_row = db.scalar(select(Collection).where(Collection.project_id == project.id))
     existing_specs = {n: {"revision": r.revision, "text": r.content} for n, r in rows.items()}
-    existing_col = collection_row and {"revision": collection_row.revision, "name": collection_row.name, "text": collection_row.content}
+    existing_col = {"revision": collection_row.revision, "name": collection_row.name, "text": collection_row.content} if collection_row else None
 
     try:
         plan = plan_apply(existing_specs, existing_col, body.model_dump())
@@ -220,12 +221,12 @@ def _apply(db: Session, user: User, body: ApplyIn) -> dict:
         db.delete(rows[name])
     if plan["collection"]:
         c = plan["collection"]
-        row = collection_row or Collection(project_id=project.id)
-        row.name, row.content = c["name"], c["text"]
-        row.size, row.request_count = len(c["text"].encode("utf-8")), c["requests"]
+        col = collection_row or Collection(project_id=project.id)
+        col.name, col.content = c["name"], c["text"]
+        col.size, col.request_count = len(c["text"].encode("utf-8")), c["requests"]
         if c["exists"]:
-            row.revision += 1
-        db.add(row)
+            col.revision += 1
+        db.add(col)
     if plan["delete_collection"]:
         db.delete(collection_row)
 

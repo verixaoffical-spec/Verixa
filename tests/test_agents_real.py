@@ -4,7 +4,6 @@ import json
 import os
 import pathlib
 import re
-import tempfile
 import unittest
 from unittest import mock
 
@@ -20,7 +19,7 @@ from agents.risk_rules import assess, module_of
 from agents.runner import run_manager
 from backend import analysis_service
 from backend.agent_db import RiskAssessment
-from backend.analysis_service import analyse_pull_request, store_result
+from backend.analysis_service import analyse_pull_request
 from backend.db import SessionLocal
 
 from .test_analysis_integration import AnalysisTestCase, PR_INFO, REPO, payload

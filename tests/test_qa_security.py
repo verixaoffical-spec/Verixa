@@ -21,7 +21,7 @@ from backend.agent_db import AgentBase, RiskAssessment, init_agent_db
 from backend.analysis_service import pr_facts
 from backend.db import Project, SessionLocal, User
 from backend.main import app
-from backend.security import seal, valid_signature
+from backend.security import valid_signature
 from backend.settings import Settings, settings
 from backend.validators import invalid_name_reason, scan, validate_collection, validate_spec
 

@@ -1,0 +1,70 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-002.py
+ok   exists: CLAUDE.md
+ok   exists: README.md
+ok   exists: CONTRIBUTING.md
+ok   exists: .claude/settings.json
+ok   exists: .mcp.json
+ok   exists: .claude/hooks/dependency_gate.py
+ok   exists: .claude/hooks/tracking_guard.py
+ok   exists: .claude/hooks/common.py
+ok   exists: scripts/verify/run.py
+ok   exists: .claude/hooks/version_status.py
+ok   exists: docs/VERSIONS.md
+ok   exists: .claude/commands/version.md
+ok   exists: docs/BACKLOG.md
+ok   exists: docs/STATUS.md
+ok   exists: docs/VERIFICATION.md
+ok   exists: docs/TESTING.md
+ok   exists: docs/CONTRIBUTIONS.md
+ok   exists: docs/DECISIONS.md
+ok   exists: docs/RISKS.md
+ok   command has frontmatter: decision.md
+ok   command has frontmatter: end-session.md
+ok   command has frontmatter: eval-agent.md
+ok   command has frontmatter: finish-task.md
+ok   command has frontmatter: next-task.md
+ok   command has frontmatter: review.md
+ok   command has frontmatter: start-session.md
+ok   command has frontmatter: start-task.md
+ok   command has frontmatter: status.md
+ok   command has frontmatter: verify.md
+ok   command has frontmatter: version.md
+ok   CLAUDE.md import resolves: docs/PROJECT.md
+ok   CLAUDE.md import resolves: docs/ARCHITECTURE.md
+ok   CLAUDE.md import resolves: docs/DATA_MODEL.md
+ok   CLAUDE.md import resolves: docs/INTEGRATIONS.md
+ok   CLAUDE.md import resolves: docs/PERSONAS.md
+ok   CLAUDE.md import resolves: docs/CONTRIBUTIONS.md
+ok   CLAUDE.md import resolves: docs/MODELS.md
+ok   CLAUDE.md import resolves: docs/PROMPTS.md
+ok   CLAUDE.md import resolves: docs/SECURITY.md
+ok   CLAUDE.md import resolves: docs/TESTING.md
+ok   CLAUDE.md import resolves: docs/VERIFICATION.md
+ok   CLAUDE.md import resolves: docs/VERSIONS.md
+ok   CLAUDE.md import resolves: docs/DECISIONS.md
+ok   CLAUDE.md import resolves: docs/GLOSSARY.md
+ok   backlog parsed (65 tasks)
+ok   all dependencies exist []
+ok   T-002 DONE but unverified blocks T-003
+ok   block message names owner Farheen
+ok   T-004 blocked by TODO T-003
+ok   T-002 clear (T-001 verified)
+ok   later FAIL cancels earlier PASS
+ok   tampered log invalidates PASS
+ok   T-080 'all above' blocked by unfinished tasks
+ok   FYP-II T-100 blocked until T-082
+ok   unknown task blocked
+
+ok   dependency gate selftest passes
+ok   complete FYP-1 attains v1.0
+ok   recurring task does not block v1.0
+ok   banner says FYP-1 IS COMPLETED
+ok   banner not repeated on same machine
+ok   one unfinished task keeps FYP-1 incomplete
+ok   gate locks FYP-2 with loud message
+
+ok   version tracking selftest passes (v1.0 banner, FYP-2 lock)
+ok   CLAUDE.md contains the v1.0 announcement rule
+
+
+exit code: 0

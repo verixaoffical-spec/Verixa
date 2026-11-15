@@ -127,7 +127,7 @@ def login(body: LoginIn, request: Request, db: Session = Depends(get_db)):
     if wait := max(t.retry_after(k) for t, k in keys):
         return _too_many(wait)
     user = db.scalar(select(User).where(User.email == email))
-    if not verify_password(body.password, user.password_hash if user else None):
+    if not verify_password(body.password, user.password_hash if user else None) or user is None:  # hash first: same timing
         for t, k in keys:
             t.fail(k)
         if wait := login_by_email.retry_after(email):

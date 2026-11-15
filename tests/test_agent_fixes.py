@@ -10,7 +10,6 @@ from unittest import mock
 
 from agents import analysis
 from agents.analysis import ANALYSES, _instruction
-from agents.manager import validate
 from agents.risk_rules import assess, risky_removals
 from backend.agent_db import RiskAssessment, to_json
 

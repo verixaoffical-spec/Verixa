@@ -7,6 +7,12 @@
 4. Only PASS allows /finish-task. A later FAIL cancels an earlier PASS.
 5. Manual-only checks use `--manual`, run by a human in a real terminal.
 
+## CI (T-019)
+`.github/workflows/ci.yml` runs on every pull request and every push to main: `ruff check .`, `mypy` (files listed in
+mypy.ini), `python -m unittest discover -s tests -t .` (SQLite; tests/__init__.py blanks the .env provider keys and
+model overrides so a local run matches CI), then `npm ci`, `npm run typecheck` and `npm run build` in frontend/.
+Dev tools are pinned in requirements-dev.txt. Run the same commands locally before pushing.
+
 ## Tool per layer
 | What | Tool |
 |---|---|

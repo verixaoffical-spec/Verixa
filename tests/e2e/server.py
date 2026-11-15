@@ -35,7 +35,6 @@ sys.path.insert(0, str(ROOT))
 os.chdir(ROOT)
 
 import uvicorn  # noqa: E402
-from sqlalchemy import select  # noqa: E402
 
 from backend.accounts import hash_password  # noqa: E402
 from backend.db import Project, SessionLocal, User, engine  # noqa: E402

@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-15 T-019 CI on GitHub Actions: ruff, mypy, unit tests, frontend type check and build on every PR and push to main; 66 type errors fixed; tests blank .env provider keys so local runs match CI (Farheen, via Claude)
 - 2026-11-15 T-094 Analysis artifacts saved in Postgres: PR file snapshots and agent run steps (migration 0003), Risk feed index, capped agent caches; no Redis or GraphQL (D-013) (Farheen, via Claude)
 - 2026-11-15 T-038 Dependency graph, per-file risk, past-log endpoint and live stage view on the Risk Analysis screen (prompt §8 B/C/D), from the approved prototype, no new libraries (Farheen, via Claude)
 - 2026-11-14 T-036 Risk dashboard charts and per-PR history in the real app (prompt §8 A), built from the approved prototype with no new libraries (Farheen, via Claude)

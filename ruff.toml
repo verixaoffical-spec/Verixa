@@ -1,0 +1,8 @@
+target-version = "py312"
+line-length = 120
+extend-exclude = ["frontend", "tests/e2e/node_modules", ".claude"]  # .claude holds the protected hooks
+
+[lint]
+# Default rules (pyflakes + pycodestyle errors). The house style puts short statements and imports on one line and
+# uses lambdas as small named helpers, so those style-only rules are off; every bug-class rule stays on.
+ignore = ["E401", "E701", "E702", "E731", "E741"]

@@ -10,7 +10,7 @@ Asserts:
 Negative case: with no model keys the label still comes from the rules and the row goes to needs_human_review.
 Every account, project, row, ADK session and model_calls row this check creates is deleted.
 """
-import asyncio, hashlib, hmac, json, os, shutil, socket, subprocess, sys, time, uuid
+import asyncio, hashlib, hmac, json, os, socket, subprocess, sys, time, uuid
 from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -38,7 +38,7 @@ import inspect  # noqa: E402
 import httpx  # noqa: E402
 from sqlalchemy import delete, select  # noqa: E402
 from agents.risk_rules import assess  # noqa: E402
-from backend.agent_db import ModelCall, RiskAssessment  # noqa: E402
+from backend.agent_db import RiskAssessment  # noqa: E402
 from backend.db import Project, SessionLocal, User  # noqa: E402
 from backend.settings import settings  # noqa: E402
 

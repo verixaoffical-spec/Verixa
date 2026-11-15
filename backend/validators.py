@@ -150,7 +150,7 @@ def analyse_spec(text: str) -> dict:
         errors.append('No tests found. Add at least one test("title", async ({ page }) => { ... })')
     if len(errors) >= 2 and not tests:
         errors.insert(0, NOT_REAL_FILE + ": a Playwright spec exported from your project")
-    fake = [f'"{t["title"]}"' for t in tests if not_real_text(t["title"])]
+    fake = [f'"{t["title"]}"' for t in tests if not_real_text(str(t["title"]))]
     if fake:
         errors.append(f"Test names {', '.join(fake[:3])}{' and more' if len(fake) > 3 else ''} are not real. "
                       "Use real names that say what each test checks")

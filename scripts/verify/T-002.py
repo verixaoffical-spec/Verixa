@@ -3,7 +3,7 @@ import json, os, re, subprocess, sys
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 sys.path.insert(0, os.path.join(ROOT, ".claude", "hooks"))
 os.environ["CLAUDE_PROJECT_DIR"] = ROOT
-import common as c
+import common as c  # noqa: E402  (needs the sys.path line above)
 
 errors = []
 def need(cond, msg):

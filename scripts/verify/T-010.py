@@ -65,7 +65,12 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  "backend/analysis_api.py": "T-036 adds a scored count",
                  "frontend/src/dashboard/api.ts": "T-036 reads up to 200 rows and the scored count",
                  "backend/live.py": "T-038 adds the stage of each live message",
-                 "tests/__init__.py": "T-094 waits for queued background writes before a test drops the tables"}
+                 "tests/__init__.py": "T-094 waits for queued background writes before a test drops the tables",
+                 **{f: "T-019 fixes found by mypy and ruff in CI" for f in (
+                     "agents/trace.py", "backend/api.py", "backend/auth.py", "backend/integrations.py", "backend/mailer.py",
+                     "backend/security.py", "backend/twofactor.py", "backend/validators.py", "tests/e2e/server.py",
+                     "tests/test_agent_fixes.py", "tests/test_agents_real.py", "tests/test_live.py",
+                     "tests/test_qa_security.py")}}
 
 
 def committed_sha(f: str) -> str | None:

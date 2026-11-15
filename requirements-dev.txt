@@ -1,0 +1,5 @@
+# CI and local checks (T-019): ruff check . && mypy && python -m unittest discover -s tests -t .
+-r requirements.txt
+ruff==0.8.4
+mypy==1.13.0
+types-PyYAML==6.0.12.20240917

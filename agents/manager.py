@@ -10,7 +10,7 @@ from google.adk.events import Event
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
-from .analysis import ANALYSES, analysis_agent
+from .analysis import ANALYSES, analysis_agent, pr_id_of
 from .events import text_event
 from .llm import parse_json
 from .trace import trace
@@ -101,7 +101,8 @@ def contradicts_label(reasoning: str, label: str) -> bool:
                 rf"|(?<!not )\b(?:treated|classified|rated|marked|labell?ed|considered)\s+(?:as\s+)?{other}\b"
                 rf"|\bshould\s+be\s+{other}\b", reasoning, re.I):
             # "raised from Medium risk to High" and "not a Low risk change" do not contradict it
-            before = reasoning[:re.search(rf"\b{other}\b", reasoning, re.I).start()].lower()
+            first = re.search(rf"\b{other}\b", reasoning, re.I)
+            before = reasoning[:first.start() if first else 0].lower()
             if not before.rstrip().endswith(("from", "not", "not a", "not an")):
                 return True
     return False
@@ -116,13 +117,14 @@ def validate(pr_id: str) -> tuple[dict | None, list[str]]:
     except Exception:
         return None, ["Output is not valid JSON."]
     try:
-        data = AnalysisAnswer.model_validate(data).model_dump()
+        answer = AnalysisAnswer.model_validate(data)
     except ValidationError as exc:
         fields = sorted({str(e["loc"][0]) for e in exc.errors() if e.get("loc")})
         return None, [f"Output does not match the answer schema ({', '.join(fields) or 'shape'}): reasoning is text, "
                       "suggested_test_areas a list of text, concern text or empty."]
-    errs, label = [], st["facts"]["risk_label"]
-    reasoning, areas = data.get("reasoning"), data.get("suggested_test_areas")
+    data = answer.model_dump()
+    errs, label = list[str](), st["facts"]["risk_label"]
+    reasoning, areas = answer.reasoning, answer.suggested_test_areas
     if not isinstance(reasoning, str) or len(reasoning.strip()) < 20:
         errs.append("reasoning must be 2-3 sentences.")
     elif contradicts_label(reasoning, label):
@@ -154,10 +156,10 @@ class AnalysisManager(BaseAgent):
     worker: BaseAgent
 
     async def _run_async_impl(self, ctx: InvocationContext) -> AsyncGenerator[Event, None]:
-        pr_id = ctx.user_content.parts[0].text.removeprefix("Analyze ").strip()
+        pr_id = pr_id_of(ctx)
         # Fresh state per run, but the account's GitHub token the caller seeded is kept.
         st = ANALYSES[pr_id] = {"token": (ANALYSES.get(pr_id) or {}).get("token")}
-        data, errs = None, []
+        data, errs = None, list[str]()
         for n in range(1, MAX_ATTEMPTS + 1):
             async for ev in self.worker.run_async(ctx):          # hand the task to the Analysis Agent
                 yield ev

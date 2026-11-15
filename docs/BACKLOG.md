@@ -33,7 +33,7 @@ unchanged. See "Consolidation status" below for exactly what was verified and wh
 | T-016 | ADK skeleton, hello agent, session state in Postgres | Farheen | | T-011 | DONE |
 | T-017 | Spike: ADK with Groq and OpenRouter models (LiteLLM or wrapper) | Farheen | | T-016 | DONE |
 | T-018 | Choose and deploy demo staging app and test repo | Arisha | Farheen | | TODO |
-| T-019 | CI: lint, type check, tests on PR | Arisha | | T-010 | TODO |
+| T-019 | CI: lint, type check, tests on PR | Arisha | | T-010 | DONE |
 
 ## Phase 2: D1 Connect + upload, plus agent core (wk 5-6)
 | ID | Task | Lead | Support | Dep | Status |

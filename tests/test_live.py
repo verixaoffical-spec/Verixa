@@ -4,7 +4,6 @@ import unittest
 from starlette.websockets import WebSocketDisconnect
 
 from agents.trace import add_listener, trace
-from backend import live
 from backend.live import describe, hub
 
 from .test_agents_real import AgentCase, reply

@@ -2,6 +2,7 @@
 import threading
 import time
 import urllib.parse as up
+from typing import Any
 
 import httpx
 from fastapi import HTTPException
@@ -35,7 +36,7 @@ def _call(method: str, url: str, **kwargs) -> httpx.Response:
         raise HTTPException(502, f"Could not reach {up.urlparse(url).netloc}")
 
 
-def _ok(response: httpx.Response, what: str, hint: str = "") -> dict | list:
+def _ok(response: httpx.Response, what: str, hint: str = "") -> Any:  # a JSON object or list, per endpoint
     if response.status_code == 401:  # the saved token is no good. Not a 401: the Verixa session itself is fine
         raise HTTPException(409, f"{what}: the saved sign in no longer works. Link your account again")
     if response.status_code >= 400:

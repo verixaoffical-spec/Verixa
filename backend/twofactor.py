@@ -9,7 +9,7 @@ import time
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from sqlalchemy import delete, func, or_, select, update
+from sqlalchemy import CursorResult, delete, func, or_, select, update
 from sqlalchemy.orm import Session
 
 from .accounts import Throttle, hash_password, verify_password
@@ -52,7 +52,8 @@ def _use_totp(db: Session, user: User, code: str) -> bool:
     if step is None:
         return False
     newer = or_(User.totp_last_step.is_(None), User.totp_last_step < step)
-    used = db.execute(update(User).where(User.id == user.id, newer).values(totp_last_step=step)).rowcount
+    result: CursorResult = db.execute(update(User).where(User.id == user.id, newer).values(totp_last_step=step))  # type: ignore[assignment]
+    used = result.rowcount
     db.commit()
     return bool(used)
 
@@ -65,7 +66,8 @@ def _use_recovery(db: Session, user: User, code: str) -> bool:
     for row in db.scalars(unused).all():
         if verify_password(code, row.code_hash):
             still_unused = RecoveryCode.id == row.id, RecoveryCode.used_at.is_(None)
-            used = db.execute(update(RecoveryCode).where(*still_unused).values(used_at=now())).rowcount
+            result: CursorResult = db.execute(update(RecoveryCode).where(*still_unused).values(used_at=now()))  # type: ignore[assignment]
+            used = result.rowcount
             db.commit()
             return bool(used)
     return False
@@ -114,7 +116,7 @@ def _confirm_identity(request: Request, user: User, password: str) -> None:
 
 def _codes_left(db: Session, user: User) -> int:
     unused = RecoveryCode.user_id == user.id, RecoveryCode.used_at.is_(None)
-    return db.scalar(select(func.count()).select_from(RecoveryCode).where(*unused))
+    return db.scalar(select(func.count()).select_from(RecoveryCode).where(*unused)) or 0
 
 
 def _new_recovery_codes(db: Session, user: User) -> list[str]:

@@ -29,6 +29,7 @@ def send_email(to: str, subject: str, text: str) -> None:
     message["Subject"] = subject
     message.set_content(text)
     context = ssl.create_default_context()
+    server: smtplib.SMTP
     try:
         if settings.smtp_port == 465:
             server = smtplib.SMTP_SSL(settings.smtp_host, settings.smtp_port, context=context, timeout=20)
