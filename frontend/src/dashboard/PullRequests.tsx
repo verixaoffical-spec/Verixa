@@ -39,7 +39,8 @@ export function Processing({ run, title }: { run: LiveRun; title: string | null 
         <p className="proc-kicker"><i className="live-dot" aria-hidden="true"></i>Analysing pull request #{run.pr}</p>
         <h2 className="proc-title">{title || 'Doing calculations…'}</h2>
         <p className="proc-now" role="status" aria-live="polite">{last?.text ?? 'Starting'}</p>
-        <ol className="proc-log" ref={logRef} aria-label="What the agents are doing">
+        <p className="proc-log-head">Agent activity<span>Live</span></p>
+        <ol className="proc-log" ref={logRef} aria-label="Agent activity">
           {run.messages.map((m, i) => (
             <li key={m.at + m.event + i} className={m.level + (i === run.messages.length - 1 ? ' current' : '')}>
               <time>{new Date(m.at).toLocaleTimeString(undefined, { hour12: false })}</time><span>{m.text}</span>
@@ -106,9 +107,9 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
         <Processing key={run.pr} run={run} title={data?.items.find(p => p.number === run.pr)?.title ?? byNumber.get(run.pr)?.title ?? null} />
       ))}
 
-      <section className="rcard rtable" aria-label="Pull requests on GitHub">
+      <section className="rcard rtable" aria-label="Pull Requests on GitHub">
         <div className="prs-head">
-          <h2 className="rcard-title">Pull requests</h2>
+          <h2 className="rcard-title">Pull Requests</h2>
           <div className="prs-tools">
             <input type="search" className="prs-search" value={q} onChange={e => setQ(e.target.value)}
                    placeholder="Search by number, title or author" aria-label="Search pull requests" />
@@ -132,7 +133,7 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
           <div className="tablewrap">
             <table className="grid risk-grid prs-grid">
               <thead>
-                <tr><th>Pull request</th><th>Author</th><th>State</th><th>Risk</th><th className="ract">Updated</th></tr>
+                <tr><th>Pull request</th><th>Author</th><th>Risk</th><th>Status</th><th className="ract">Updated</th></tr>
               </thead>
               {rows.map(p => {
                 const a = byNumber.get(p.number);
@@ -147,8 +148,8 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
                         <div className="rpr-meta">{p.draft ? 'draft · ' : ''}{p.head_sha ? <code>{p.head_sha.slice(0, 7)}</code> : null}</div>
                       </td>
                       <td><div className="rpr"><Avatar pull={p} /><span className="prs-author">{p.author ?? 'unknown'}</span></div></td>
-                      <td><span className={'prs-state ' + p.state}>{STATE[p.state]}</span></td>
                       <td>{a ? <RiskBadge label={a.risk_label} /> : <span className="muted">Not analysed</span>}</td>
+                      <td><span className={'prs-state ' + p.state}>{STATE[p.state]}</span></td>
                       <td className="ract"><span className="muted">{ago(p.updated_at)}</span></td>
                     </tr>
                     {isOpen && (a ? <Detail row={a} history={items.filter(r => r.pr_number === p.number)} onGo={tab => onGo(tab, a.id)} /> : (

@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-15 T-097 Landing page wording on the dashboard, one shared card surface with 3D depth (shared/cards.css), Analyses per day as its own section with an expanding table view (Farheen, via Claude)
 - 2026-11-15 T-096 Pull Requests section with every PR and its author saved in Neon (migration 0004), live processing view from real agent steps, Risk views cached and kept mounted, multi-line test cells and Tests chips fixed, card transitions (D-014) (Farheen, via Claude)
 - 2026-11-15 T-019 CI builds the frontend before the Python tests (first GitHub run failed without frontend/dist); verify now requires the real GitHub run to pass (Farheen, via Claude)
 - 2026-11-15 T-095 Risk Analysis page laid out as a card dashboard with the view tabs in a pill bar at the top; Verixa header and palette unchanged; donut chart size fixed (Farheen, via Claude)

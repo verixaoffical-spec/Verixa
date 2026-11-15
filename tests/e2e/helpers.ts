@@ -51,7 +51,7 @@ export function watch(page: Page): string[] {
 }
 
 // T-096: Pull requests is the first view now; most Risk tests work on the Overview, so that is the default here
-export async function openRisk(page: Page, view: 'Pull requests' | 'Overview' | 'Dependency graph' | 'Live runs and logs' = 'Overview') {
+export async function openRisk(page: Page, view: 'Pull Requests' | 'Overview' | 'Dependency graph' | 'Live runs and logs' = 'Overview') {
   await page.goto('/verixa_prototype.html#risk');
   await expect(page.getByRole('heading', { name: 'Risk Analysis' })).toBeVisible({ timeout: 15_000 });
   await page.getByRole('tab', { name: view, exact: true }).click();

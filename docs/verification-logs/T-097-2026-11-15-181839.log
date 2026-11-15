@@ -1,0 +1,19 @@
+$ C:\Users\farheen.imam\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\python.exe D:\verixa-merging\Verixa\scripts\verify\T-097.py
+ok   frontend type-checks and builds (tsc && vite build)
+     4 passed (1.1m)
+ok   landing wording, shared card surface and depth, Analyses per day section and table (ui_consistency.spec.ts)
+     5 passed (2.1m)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     3 passed (1.2m)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (1.0m)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (51.8s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     [8/33] [controlled] â€º agents.spec.ts:105:7 â€º showing what the agents saved â€º AT-17 a failed analysis says so, and shows no invented label | 33 passed (4.8m)
+ok   the Risk screen's agent browser tests still pass (agents.spec.ts)
+
+PASS: 0 failed
+
+
+exit code: 0

@@ -170,7 +170,7 @@ def script_github_and_model() -> None:
         return [{"number": n, "title": titles[n], "user": {"login": authors[n]},
                  "state": "closed" if n == 9 else "open", "merged_at": "2026-11-10T00:00:00Z" if n == 9 else None,
                  "draft": n == 8, "html_url": f"https://github.com/{repo}/pull/{n}", "head": {"sha": f"{n:07x}abcdef"},
-                 "created_at": "2026-11-01T00:00:00Z", "updated_at": f"2026-11-{10 + n:02d}T00:00:00Z"} for n in range(9, 0, -1)]
+                 "created_at": "2026-11-01T00:00:00Z", "updated_at": f"2026-11-{n:02d}T00:00:00Z"} for n in range(9, 0, -1)]
 
     pull_requests.list_pulls = list_pulls
     analysis._has_key = lambda name: True

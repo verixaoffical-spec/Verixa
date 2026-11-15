@@ -1,0 +1,14 @@
+  /* One card surface for the landing page and the dashboard (T-097): the landing mock's card fill and top highlight,
+     plus layered depth like the reference dashboard. Use the tokens; do not copy the values into component CSS. */
+  :root{
+    --card-fill:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.015));
+    --card-edge:inset 0 1px 0 rgba(255,255,255,.07);
+    --card-depth:0 1px 1px rgba(0,0,0,.35),0 10px 22px -12px rgba(0,0,0,.75),0 28px 56px -30px rgba(0,0,0,.9);
+    --card-depth-hover:0 1px 1px rgba(0,0,0,.35),0 16px 30px -14px rgba(0,0,0,.8),0 40px 70px -32px hsl(249 76% 66%/.22);
+  }
+  :root[data-theme="light"]{
+    --card-fill:#fff;
+    --card-edge:inset 0 1px 0 rgba(255,255,255,.9);
+    --card-depth:0 1px 2px rgba(20,20,50,.05),0 12px 32px -20px rgba(20,20,50,.2),0 30px 60px -36px rgba(20,20,50,.22);
+    --card-depth-hover:0 1px 2px rgba(20,20,50,.06),0 18px 40px -20px rgba(20,20,50,.26),0 40px 70px -36px hsl(249 76% 66%/.25);
+  }

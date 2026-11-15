@@ -74,7 +74,9 @@ CHANGED_LATER = {"requirements.txt": "T-012 adds alembic", "scripts/check_databa
                  **{f: "T-096 multi-line test cells, Overview-scoped test helpers" for f in (
                      "frontend/src/dashboard/Cell.tsx", "frontend/src/dashboard/CollectionTable.tsx",
                      "frontend/src/dashboard/SpecTable.tsx", "frontend/src/dashboard/dashboard.css",
-                     "tests/e2e/agents.spec.ts", "tests/e2e/helpers.ts")}}
+                     "tests/e2e/agents.spec.ts", "tests/e2e/helpers.ts")},
+                 **{f: "T-097 one shared card surface (shared/cards.css) for the landing page and the dashboard" for f in (
+                     "frontend/src/dashboard/main.tsx", "frontend/src/landing/landing.css", "frontend/src/landing/main.tsx")}}
 
 
 def committed_sha(f: str) -> str | None:

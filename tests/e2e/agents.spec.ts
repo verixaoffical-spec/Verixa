@@ -69,7 +69,7 @@ test.describe('showing what the agents saved', () => {
   test('the tiles show the same numbers as the API, with nothing made up', async () => {
     const { counts, items } = await feed(page);
     const tile = (label: string) => page.locator('.risk-stat', { hasText: label }).locator('.risk-stat-value');
-    await expect(tile('Pull requests')).toHaveText(String(counts.total));
+    await expect(tile('Pull Requests')).toHaveText(String(counts.total));
     await expect(tile('High risk')).toHaveText(String(counts.High));
     await expect(tile('Medium risk')).toHaveText(String(counts.Medium));
     await expect(tile('Low risk')).toHaveText(String(counts.Low));

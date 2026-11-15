@@ -28,7 +28,7 @@ interface Props {
 }
 
 const POLL_MS = 4000;
-const TABS: [Tab, string][] = [['prs', 'Pull requests'], ['overview', 'Overview'], ['graph', 'Dependency graph'], ['live', 'Live runs and logs']];
+const TABS: [Tab, string][] = [['prs', 'Pull Requests'], ['overview', 'Overview'], ['graph', 'Dependency graph'], ['live', 'Live runs and logs']];
 const LIVE_KEEP_MS = 2 * 60 * 1000;  // a finished run stays on screen this long
 
 function addLive(runs: LiveRun[], event: LiveEvent): LiveRun[] {
@@ -181,7 +181,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
   // The graph and log follow the opened PR, at its newest analysis (the feed is newest first)
   const latestOpen = items.find(r => r.pr_number === items.find(x => x.id === open)?.pr_number)?.id ?? null;
   const tiles: { key: RiskLabel | 'total'; cls: string; label: string; icon: typeof icons.bolt; sub: string }[] = [
-    { key: 'total', cls: '', label: 'Pull requests', icon: icons.pullRequests, sub: 'seen by the agent' },
+    { key: 'total', cls: '', label: 'Pull Requests', icon: icons.pullRequests, sub: 'seen by the agent' },
     { key: 'High', cls: 'high', label: 'High risk', icon: icons.alert, sub: 'test these first' },
     { key: 'Medium', cls: 'med', label: 'Medium risk', icon: icons.bolt, sub: 'worth a look' },
     { key: 'Low', cls: 'low', label: 'Low risk', icon: icons.library, sub: 'routine change' },
@@ -224,7 +224,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
       </header>
 
       {/* T-096: every view stays mounted, so switching back shows what it already read without asking again */}
-      <div className="rpanel" role="tabpanel" aria-label="Pull requests" hidden={tab !== 'prs'}>
+      <div className="rpanel" role="tabpanel" aria-label="Pull Requests" hidden={tab !== 'prs'}>
         <PullRequests active={!hidden && tab === 'prs'} items={items} live={liveRuns}
                       onGo={(next, id) => { if (id) setOpen(id); go(next); }} />
       </div>
@@ -277,8 +277,8 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
         {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
 
-        <section className="rcard rtable" aria-label="Pull requests">
-          <h2 className="rcard-title">Pull requests</h2>
+        <section className="rcard rtable" aria-label="Pull Requests">
+          <h2 className="rcard-title">Pull Requests</h2>
         {!feed ? (
           <div className="empty"><b>Loading</b>Reading the agent's assessments.</div>
         ) : !items.length ? (
@@ -294,7 +294,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
                   <th>Pull request</th>
                   <th>Risk</th>
                   <th className="rscore">Score</th>
-                  <th>State</th>
+                  <th>Status</th>
                   <th className="ract">Analysed</th>
                 </tr>
               </thead>

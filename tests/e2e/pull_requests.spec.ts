@@ -10,7 +10,7 @@ import { closePages, openRisk, rowOf, signIn } from './helpers';
 test.afterEach(closePages);
 
 const SECRET = 'e2e-only-webhook-secret-0123456789';
-const section = (page: Page) => page.getByRole('tabpanel', { name: 'Pull requests' });
+const section = (page: Page) => page.getByRole('tabpanel', { name: 'Pull Requests' });
 const prRow = (page: Page, n: number) => section(page).locator('tr.risk-row').filter({ has: page.locator(`.rpr-title b:text-is("#${n}")`) });
 
 function count(page: Page, pattern: RegExp, method = 'GET') {
@@ -22,12 +22,12 @@ function count(page: Page, pattern: RegExp, method = 'GET') {
 test('every pull request is listed first with its author from GitHub, saved, searchable and expandable', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'demo@verixa.dev', baseURL!);
   const syncs = count(page, /\/api\/analysis\/repo-pulls\/sync/, 'POST');
-  await openRisk(page, 'Pull requests');
-  await expect(page.locator('.rnav').getByRole('tab').first()).toHaveText('Pull requests');
+  await openRisk(page, 'Pull Requests');
+  await expect(page.locator('.rnav').getByRole('tab').first()).toHaveText('Pull Requests');
 
   const rows = section(page).locator('tr.risk-row');
   await expect(rows).toHaveCount(9);
-  await expect(section(page).locator('thead th')).toHaveText(['Pull request', 'Author', 'State', 'Risk', 'Updated']);
+  await expect(section(page).locator('thead th')).toHaveText(['Pull request', 'Author', 'Risk', 'Status', 'Updated']);
   await expect(prRow(page, 8)).toContainText('grace-long');
   await expect(prRow(page, 8)).toContainText('Not analysed');
   await expect(prRow(page, 9)).toContainText('Merged');
@@ -69,14 +69,14 @@ test('switching views and reloading never reads the graph or the log again', asy
   const graph = page.getByRole('tabpanel', { name: 'Dependency graph' });
   const files = count(page, /\/files$/);
   const logs = count(page, /\/log$/);
-  await openRisk(page, 'Pull requests');
+  await openRisk(page, 'Pull Requests');
   expect(files.length + logs.length).toBe(0);  // hidden views read nothing until they are opened
 
   await page.getByRole('tab', { name: 'Dependency graph' }).click();
   await expect(graph.locator('.node')).toHaveCount(1);
   await page.getByRole('tab', { name: 'Live runs and logs' }).click();
   await expect(page.locator('.stepper .step')).toHaveCount(8);
-  for (const view of ['Overview', 'Dependency graph', 'Pull requests', 'Live runs and logs', 'Dependency graph']) {
+  for (const view of ['Overview', 'Dependency graph', 'Pull Requests', 'Live runs and logs', 'Dependency graph']) {
     await page.getByRole('tab', { name: view, exact: true }).click();
   }
   await expect(graph.locator('.node')).toHaveCount(1);
@@ -93,7 +93,7 @@ test('switching views and reloading never reads the graph or the log again', asy
 
 test('a pull request being analysed shows the processing view with the real agent steps, then its result', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'demo@verixa.dev', baseURL!);
-  await openRisk(page, 'Pull requests');
+  await openRisk(page, 'Pull Requests');
   await expect(section(page).locator('tr.risk-row')).toHaveCount(9);
 
   // PR 106: every scripted model hangs, so the run stays in progress long enough to watch (tests/e2e/server.py)
@@ -112,20 +112,20 @@ test('a pull request being analysed shows the processing view with the real agen
   const proc = page.getByRole('region', { name: 'Verixa is analysing pull request 106' });
   await expect(proc).toBeVisible({ timeout: 15_000 });
   await expect(proc).toContainText('Every model hangs');
-  await expect(proc.getByRole('list', { name: 'What the agents are doing' }).locator('li')).not.toHaveCount(0);
+  await expect(proc.getByRole('list', { name: 'Agent activity' }).locator('li')).not.toHaveCount(0);
   await expect(proc).toContainText(/Analysis agent|GitHub|rules|Received/i);  // a real step text from backend/live.py
   // the delivery saved the pull request with its author before the agents finished
   await expect(prRow(page, 106)).toContainText('webhook-author');
   // a reload mid-run brings the processing view back: the server replays the run's steps to a new connection
   await page.reload();
   await expect(proc).toBeVisible({ timeout: 15_000 });
-  await expect(proc.getByRole('list', { name: 'What the agents are doing' }).locator('li')).not.toHaveCount(0);
+  await expect(proc.getByRole('list', { name: 'Agent activity' }).locator('li')).not.toHaveCount(0);
   expect(problems).toEqual([]);
 });
 
 test('negative: an account with no pull requests gets the empty list, no processing view and no GitHub read', async ({ browser, baseURL }) => {
   const { page, problems } = await signIn(browser, 'other@verixa.dev', baseURL!);
-  await openRisk(page, 'Pull requests');
+  await openRisk(page, 'Pull Requests');
   await expect(section(page).getByText('No pull requests yet')).toBeVisible();
   await expect(page.locator('.proc')).toHaveCount(0);
   expect(problems).toEqual([]);

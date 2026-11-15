@@ -17,7 +17,7 @@ test('tabs sit at the top, the overview is cards in order, and the numbers are t
   await openRisk(page);
 
   const nav = page.locator('section.workspace.risk > .rnav');
-  await expect(nav.getByRole('tab')).toHaveText(['Pull requests', 'Overview', 'Dependency graph', 'Live runs and logs']);
+  await expect(nav.getByRole('tab')).toHaveText(['Pull Requests', 'Overview', 'Dependency graph', 'Live runs and logs']);
   await expect(nav.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
 
   // order on the page: tabs, title, KPI cards, Analyse card, charts, pull request table
@@ -44,7 +44,7 @@ test('tabs sit at the top, the overview is cards in order, and the numbers are t
   await expect(page.getByRole('tabpanel', { name: 'Overview' })).toHaveCount(0);
   await nav.getByRole('tab', { name: 'Live runs and logs' }).focus();
   await page.keyboard.press('Home');  // keyboard: Home goes to the first view, Pull requests
-  await expect(nav.getByRole('tab', { name: 'Pull requests' })).toBeFocused();
+  await expect(nav.getByRole('tab', { name: 'Pull Requests' })).toBeFocused();
   await page.keyboard.press('ArrowRight');  // and the arrow to the next one
   await expect(nav.getByRole('tab', { name: 'Overview' })).toBeFocused();
   await expect(nav.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');

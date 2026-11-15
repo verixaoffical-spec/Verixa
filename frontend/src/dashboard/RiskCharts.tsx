@@ -2,7 +2,7 @@
  * invented. Design follows the approved prototype: risk shapes (triangle, diamond, circle) plus words, never colour
  * alone; each chart has a legend, hover/focus details, and the per-day chart can be read as a table.
  */
-import { useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import type { Assessment, RiskFeed, RiskLabel } from './api';
 
 export const RISKS: RiskLabel[] = ['High', 'Medium', 'Low'];
@@ -91,91 +91,140 @@ function Donut({ parts, unit, label }: { parts: { name: string; value: number; c
   );
 }
 
-export function RiskCharts({ items, counts }: { items: Assessment[]; counts: RiskFeed['counts'] }) {
-  const [asTable, setAsTable] = useState(false);
+type Day = ReturnType<typeof perDay>[number];
+const OPEN_MS = 320;  // matches the expand / collapse animation in risk.css
+
+/** T-097: Analyses per day as its own full-width section: grouped bars per day (High, Medium, Low, not scored) on a
+ * scale with gridlines, and View as table expanding the section into the full table under a smaller chart. */
+function PerDay({ days }: { days: Day[] }) {
+  const [table, setTable] = useState<'closed' | 'open' | 'closing'>('closed');
   const [tip, setTip] = useState<number | null>(null);
+  const timer = useRef<number>();
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  const toggle = () => {
+    window.clearTimeout(timer.current);
+    if (table === 'open') {  // play the collapse, then take the table out
+      setTable('closing');
+      timer.current = window.setTimeout(() => setTable('closed'), matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : OPEN_MS);
+    } else setTable('open');
+  };
+  const max = Math.ceil(Math.max(3, ...days.flatMap(d => [d.High, d.Medium, d.Low, d.none])) / 3) * 3;  // even, whole ticks
+  const ticks = [max, max * 2 / 3, max / 3, 0];
+  const total = (d: Day) => d.High + d.Medium + d.Low + d.none;
+  const sum = (k: 'High' | 'Medium' | 'Low' | 'none') => days.reduce((n, d) => n + d[k], 0);
+  const all = days.reduce((n, d) => n + total(d), 0);
+  const open = table !== 'closed';
+
+  return (
+    <section className={'rchart rday' + (table === 'open' ? ' expanded' : '')} aria-label="Analyses per day">
+      <header>
+        <div>
+          <h2>Analyses per day</h2>
+          <span>one per analysed commit, last {days.length} days · {all} in all</span>
+        </div>
+        <div className="rday-tools">
+          <div className="clegend row">
+            {RISKS.map(k => <span key={k}><Glyph label={k} />{k}</span>)}
+            <span><i className="rdot none" aria-hidden="true"></i>Not scored</span>
+          </div>
+          <button className="btn ghost sm" onClick={toggle} aria-expanded={table === 'open'} aria-controls={open ? 'rday-table' : undefined}>
+            {table === 'open' ? 'View as chart' : 'View as table'}
+          </button>
+        </div>
+      </header>
+
+      <div className="rday-plot">
+        <div className="rday-axis" aria-hidden="true">{ticks.map((t, i) => <span key={i}>{t}</span>)}</div>
+        <div className="rbars" onMouseLeave={() => setTip(null)}>
+          <span className="rday-gridlines" aria-hidden="true">
+            {ticks.map((_, i) => <i key={i} className={'rday-grid' + (i === ticks.length - 1 ? ' base' : '')}
+                                    style={{ bottom: `${(1 - i / (ticks.length - 1)) * 100}%` }}></i>)}
+          </span>
+          {days.map((d, i) => (
+            <button key={d.key} className="rbar" onMouseEnter={() => setTip(i)} onFocus={() => setTip(i)} onBlur={() => setTip(null)}
+                    aria-label={`${d.full}: ${d.High} High, ${d.Medium} Medium, ${d.Low} Low, ${d.none} not scored`}>
+              <span className="rbar-group">
+                {(['High', 'Medium', 'Low', 'none'] as const).map(k => (
+                  <span key={k} className={'rbar-col ' + k.toLowerCase() + (d[k] ? '' : ' zero')}
+                        style={{ height: `${(d[k] / max) * 100}%`, ...(k === 'none' ? {} : { '--c': FILL[k] }) } as CSSProperties}></span>
+                ))}
+              </span>
+              <span className="rbar-x">{d.day}</span>
+              {tip === i && (
+                <span className="rtip" role="tooltip">
+                  <b>{d.full}</b>
+                  {RISKS.map(k => <span key={k}><Glyph label={k} />{k}<em>{d[k]}</em></span>)}
+                  {d.none > 0 && <span>Not scored<em>{d.none}</em></span>}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {open && (
+        <div id="rday-table" className={'rday-more' + (table === 'closing' ? ' closing' : '')}>
+          <div className="rday-more-in">
+            <div className="tablewrap"><table className="grid rday-table">
+              <thead><tr><th>Day</th><th className="num">High</th><th className="num">Medium</th><th className="num">Low</th>
+                <th className="num">Not scored</th><th className="num">Total</th></tr></thead>
+              <tbody>{days.map(d => (
+                <tr key={d.key}><td>{d.full}</td><td className="num">{d.High}</td><td className="num">{d.Medium}</td><td className="num">{d.Low}</td>
+                  <td className="num">{d.none}</td><td className="num"><b>{total(d)}</b></td></tr>
+              ))}</tbody>
+              <tfoot><tr><td>All {days.length} days</td><td className="num">{sum('High')}</td><td className="num">{sum('Medium')}</td>
+                <td className="num">{sum('Low')}</td><td className="num">{sum('none')}</td><td className="num"><b>{all}</b></td></tr></tfoot>
+            </table></div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+export function RiskCharts({ items, counts }: { items: Assessment[]; counts: RiskFeed['counts'] }) {
   const latest = latestPerPr(items);
-  const days = perDay(items);
-  const max = Math.max(3, ...days.map(d => d.High + d.Medium + d.Low + d.none));
   const issues = issueTypes(latest);
   const imax = Math.max(1, ...issues.map(i => i.High + i.Medium + i.Low));
 
   return (
-    <div className="rcharts" aria-label="Risk charts">
-      <section className="rchart">
-        <header><h2>Risk distribution</h2><span>latest result per PR</span></header>
-        <Donut label="Risk distribution" unit="pull requests"
-               parts={RISKS.map(k => ({ name: k, value: counts[k] ?? 0, color: FILL[k], risk: k }))} />
-      </section>
+    <div className="rcharts-all" aria-label="Risk charts">
+      <div className="rcharts">
+        <section className="rchart">
+          <header><h2>Risk distribution</h2><span>latest result per PR</span></header>
+          <Donut label="Risk distribution" unit="pull requests"
+                 parts={RISKS.map(k => ({ name: k, value: counts[k] ?? 0, color: FILL[k], risk: k }))} />
+        </section>
 
-      <section className="rchart">
-        <header><h2>Analysis status</h2><span>where each PR stands</span></header>
-        <Donut label="Analysis status" unit="pull requests"
-               parts={[{ name: 'Scored', value: counts.scored ?? 0, color: '#31c47f' },  // all from the API's counts
-                       { name: 'Needs review', value: counts.needs_review ?? 0, color: '#fab219' },
-                       { name: 'Running', value: counts.pending ?? 0, color: 'hsl(var(--accent))' },
-                       { name: 'Failed', value: counts.failed ?? 0, color: '#d03b3b' }]} />
-      </section>
+        <section className="rchart">
+          <header><h2>Analysis status</h2><span>where each PR stands</span></header>
+          <Donut label="Analysis status" unit="pull requests"
+                 parts={[{ name: 'Scored', value: counts.scored ?? 0, color: '#31c47f' },  // all from the API's counts
+                         { name: 'Needs review', value: counts.needs_review ?? 0, color: '#fab219' },
+                         { name: 'Running', value: counts.pending ?? 0, color: 'hsl(var(--accent))' },
+                         { name: 'Failed', value: counts.failed ?? 0, color: '#d03b3b' }]} />
+        </section>
 
-      <section className="rchart wide">
-        <header>
-          <h2>Analyses per day</h2>
-          <button className="btn ghost sm" onClick={() => setAsTable(!asTable)} aria-pressed={asTable}>
-            {asTable ? 'View as chart' : 'View as table'}
-          </button>
-        </header>
-        {asTable ? (
-          <div className="tablewrap"><table className="grid">
-            <thead><tr><th>Day</th><th className="num">High</th><th className="num">Medium</th><th className="num">Low</th><th className="num">Not scored</th></tr></thead>
-            <tbody>{days.map(d => (
-              <tr key={d.key}><td>{d.full}</td><td className="num">{d.High}</td><td className="num">{d.Medium}</td><td className="num">{d.Low}</td><td className="num">{d.none}</td></tr>
-            ))}</tbody>
-          </table></div>
-        ) : (
-          <div className="rbars" onMouseLeave={() => setTip(null)}>
-            {days.map((d, i) => {
-              const total = d.High + d.Medium + d.Low + d.none;
-              return (
-                <button key={d.key} className="rbar" onMouseEnter={() => setTip(i)} onFocus={() => setTip(i)} onBlur={() => setTip(null)}
-                        aria-label={`${d.full}: ${d.High} High, ${d.Medium} Medium, ${d.Low} Low, ${d.none} not scored`}>
-                  <span className="rbar-stack" style={{ height: `${(total / max) * 100}%` }}>
-                    {(['none', 'Low', 'Medium', 'High'] as const).map(k => d[k] ? (
-                      <span key={k} style={{ flex: d[k], background: k === 'none' ? 'var(--hair)' : FILL[k] }}></span>
-                    ) : null)}
+        <section className="rchart wide">
+          <header><h2>Issues by type</h2><span>PRs showing each issue, split by their label</span></header>
+          {issues.length ? (
+            <div className="rissues">
+              {issues.map(row => (
+                <div key={row.name} className="rissue" title={`${row.name}: ${row.High} High, ${row.Medium} Medium, ${row.Low} Low`}>
+                  <span>{row.name}</span>
+                  <span className="rissue-track">
+                    {RISKS.map(k => row[k] ? <span key={k} style={{ width: `${(row[k] / imax) * 100}%`, background: FILL[k] }}></span> : null)}
                   </span>
-                  <span className="rbar-x">{d.day}</span>
-                  {tip === i && (
-                    <span className="rtip" role="tooltip">
-                      <b>{d.full}</b>
-                      {RISKS.map(k => <span key={k}><Glyph label={k} />{k}<em>{d[k]}</em></span>)}
-                      {d.none > 0 && <span>Not scored<em>{d.none}</em></span>}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        )}
-        <div className="clegend row">{RISKS.map(k => <span key={k}><Glyph label={k} />{k}</span>)}</div>
-      </section>
+                  <b>{row.High + row.Medium + row.Low}</b>
+                </div>
+              ))}
+            </div>
+          ) : <p className="muted">No issues recorded in the latest results yet.</p>}
+          {issues.length > 0 && <div className="clegend row">{RISKS.map(k => <span key={k}><Glyph label={k} />{k} PRs</span>)}</div>}
+        </section>
+      </div>
 
-      <section className="rchart wide2">
-        <header><h2>Issues by type</h2><span>PRs showing each issue, split by their label</span></header>
-        {issues.length ? (
-          <div className="rissues">
-            {issues.map(row => (
-              <div key={row.name} className="rissue" title={`${row.name}: ${row.High} High, ${row.Medium} Medium, ${row.Low} Low`}>
-                <span>{row.name}</span>
-                <span className="rissue-track">
-                  {RISKS.map(k => row[k] ? <span key={k} style={{ width: `${(row[k] / imax) * 100}%`, background: FILL[k] }}></span> : null)}
-                </span>
-                <b>{row.High + row.Medium + row.Low}</b>
-              </div>
-            ))}
-          </div>
-        ) : <p className="muted">No issues recorded in the latest results yet.</p>}
-        {issues.length > 0 && <div className="clegend row">{RISKS.map(k => <span key={k}><Glyph label={k} />{k} PRs</span>)}</div>}
-      </section>
+      <PerDay days={perDay(items)} />
     </div>
   );
 }
