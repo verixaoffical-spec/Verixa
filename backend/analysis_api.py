@@ -161,17 +161,20 @@ class AnalyseIn(BaseModel):
 
 
 @router.get("/repo-pulls")
-def repo_pull_list(user: User = Depends(current_user), db: Session = Depends(get_db)):
+def repo_pull_list(branch: str | None = Query(None, max_length=255), user: User = Depends(current_user),
+                   db: Session = Depends(get_db)):
     """T-096: every saved pull request of the connected repository with its author, newest activity first. Reads the
-    database only; `stale` tells the screen to ask for a refresh (POST /repo-pulls/sync) in the background."""
+    database only; `stale` tells the screen to ask for a refresh (POST /repo-pulls/sync) in the background.
+    T-099: `branch` keeps only the pull requests coming from or going into that branch."""
     project = project_of(db, user)
     if not project:
-        return {"listed_at": None, "stale": False, "items": []}
-    return repo_pulls.rows_json(db, project)
+        return {"listed_at": None, "stale": False, "branch": branch or None, "branches": [], "items": []}
+    return repo_pulls.rows_json(db, project, branch)
 
 
 @router.post("/repo-pulls/sync")
-async def repo_pull_sync(request: Request, force: bool = Query(False), user: User = Depends(current_user),
+async def repo_pull_sync(request: Request, force: bool = Query(False), branch: str | None = Query(None, max_length=255),
+                         user: User = Depends(current_user),
                          db: Session = Depends(get_db)):
     """Reads GitHub's pull request list and saves it, unless the saved one is still fresh and no refresh was forced."""
     _check_origin(request)
@@ -179,7 +182,7 @@ async def repo_pull_sync(request: Request, force: bool = Query(False), user: Use
     if not project:
         raise HTTPException(409, "Connect a repository first")
     if not force and not repo_pulls.is_stale(db, project):
-        return repo_pulls.rows_json(db, project)
+        return repo_pulls.rows_json(db, project, branch)
     if force:
         if wait := forced_lists.retry_after(str(user.id)):
             raise HTTPException(429, f"Refreshed too often. Try again in {wait} seconds")
@@ -198,7 +201,7 @@ async def repo_pull_sync(request: Request, force: bool = Query(False), user: Use
     except httpx.HTTPError:
         db.rollback()
         raise HTTPException(502, "Could not reach GitHub")
-    return repo_pulls.rows_json(db, project)
+    return repo_pulls.rows_json(db, project, branch)
 
 
 @router.post("/analyse")

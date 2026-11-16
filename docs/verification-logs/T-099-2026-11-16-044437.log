@@ -1,0 +1,38 @@
+$ D:\verixa-merging\Verixa\.venv\Scripts\python.exe D:\verixa-merging\Verixa\scripts\verify\T-099.py
+     Ran 7 tests in 9.895s |  | OK
+FAIL backend: branches saved and filtered, defect history apart from the run state (8 tests) - art_from_the_run_state (tests.test_branches_history.BranchesTest.test_defect_history_is_reported_apart_from_the_run_state) ... ok
+test_a_new_module_reports_no_defect_history_instead_of_leaving_the_stage_waiting (tests.test_branches_history.HistoryStageTest.test_a_new_module_reports_no_defect_history_instead_of_leaving_the_stage_waiting) ... ok
+test_a_root_change_also_reports_no_defect_history (tests.test_branches_history.HistoryStageTest.test_a_root_change_also_reports_no_defect_history) ... ok
+test_negative_a_module_with_history_is_looked_up_and_not_reported_as_none (tests.test_branches_history.HistoryStageTest.test_negative_a_module_with_history_is_looked_up_and_not_reported_as_none) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 9.895s
+
+OK
+
+ok   backend: the T-096 pull request tests still pass
+ok   Neon: Alembic is at 0005 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: pull_requests has head_ref, base_ref and their indexes
+ok   frontend type-checks and builds (tsc && vite build)
+     3 passed (38.1s)
+ok   defect history and branch filter in the browser (branches_history.spec.ts)
+     5 passed (53.6s)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     5 passed (42.7s)
+ok   tab indicator and live layout still pass (refinements.spec.ts)
+     4 passed (44.0s)
+ok   UI consistency still passes (ui_consistency.spec.ts)
+     3 passed (37.7s)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (40.3s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (33.9s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     33 passed (3.8m)
+ok   the Risk screen's agent browser tests still pass (agents.spec.ts)
+
+FAIL: 1 failed (backend: branches saved and filtered, defect history apart from the run state (8 tests))
+
+
+exit code: 1

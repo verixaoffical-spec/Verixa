@@ -60,6 +60,7 @@ export interface Assessment {
   files_changed: number | null;
   lines_changed: number | null;
   past_defects: number | null;
+  defect_history: 'found' | 'none' | 'unknown' | 'pending';  // T-099: apart from the run's status
   sensitivity: string | null;
   scoring_basis: string | null;
   risk_factors: string[];           // the rule trace, one line per factor
@@ -109,11 +110,16 @@ export interface RepoPull {
   draft: boolean;
   url: string | null;
   head_sha: string | null;
+  head_ref: string | null;  // T-099: source branch, null until GitHub's list is read again
+  base_ref: string | null;  // T-099: target branch
   created_at: string | null;
   updated_at: string | null;
   analysis_id: number | null;
 }
-export interface RepoPulls { listed_at: string | null; stale: boolean; items: RepoPull[] }
+export interface RepoPulls {
+  listed_at: string | null; stale: boolean; items: RepoPull[];
+  branch: string | null; branches: { name: string; pulls: number }[];  // T-099: every branch, whatever is selected
+}
 
 export class ApiError extends Error {
   constructor(message: string, public status: number, public detail: any) {
@@ -157,9 +163,11 @@ export const api = {
   analysePr: (prNumber: number) => request<Assessment>('/api/analysis/analyse', { pr_number: prNumber }),
   prFiles: (id: number) => request<PrFiles>(`/api/analysis/pull-requests/${id}/files`),
   prLog: (id: number) => request<{ runs: PastRun[] }>(`/api/analysis/pull-requests/${id}/log`),
-  repoPulls: () => request<RepoPulls>('/api/analysis/repo-pulls'),
+  // T-099: with a branch, only the pull requests coming from or going into it
+  repoPulls: (branch = '') => request<RepoPulls>(`/api/analysis/repo-pulls${branch ? `?branch=${encodeURIComponent(branch)}` : ''}`),
   // Reads GitHub's list again when the saved one is stale, or always with force
-  syncPulls: (force = false) => request<RepoPulls>(`/api/analysis/repo-pulls/sync${force ? '?force=true' : ''}`, {}),
+  syncPulls: (force = false, branch = '') => request<RepoPulls>(`/api/analysis/repo-pulls/sync?${new URLSearchParams({
+    ...(force ? { force: 'true' } : {}), ...(branch ? { branch } : {}) })}`, {}),
 
   // Two-step verification. Changing it asks for the password again, and turning it off also asks for a code.
   twoFactor: () => request<TwoFactorStatus>('/auth/2fa'),

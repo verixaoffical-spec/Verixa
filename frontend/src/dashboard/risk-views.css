@@ -92,6 +92,12 @@
 .step .n{font-size:12.5px;font-weight:500;}
 .step .t{font:11px 'JetBrains Mono',monospace;color:hsl(var(--muted-foreground));}
 .step.w .n{color:hsl(var(--muted-foreground));}
+/* T-099: the defect history result, a small chip under the stage's own status */
+.step .h{font-size:11px;font-weight:500;max-width:100%;overflow-wrap:anywhere;padding:2px 8px;border-radius:999px;line-height:1.4;border:1px solid hsl(var(--foreground)/.12);background:hsl(var(--foreground)/.05);color:hsl(var(--muted-foreground));}
+.step .h.found{color:var(--g-med);border-color:currentColor;background:transparent;}
+.step .h.none{color:var(--g-low);border-color:currentColor;background:transparent;}
+:root[data-theme="light"] .step .h.found{color:#8a5a00;}
+:root[data-theme="light"] .step .h.none{color:#17734a;}
 @keyframes rpulse{50%{opacity:.3;}}
 /* T-098: log beside its checks at one height, then result beside tests: no column left hanging over empty space */
 .livegrid{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:12px;align-items:stretch;}

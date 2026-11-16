@@ -2,6 +2,7 @@
 Newest first. Format: date, task ID, what changed, who.
 
 ## Unreleased
+- 2026-11-16 T-099 Defect history shown as "No defect history" instead of "waiting", kept apart from the run status; source and target branch of every pull request saved in Neon (migration 0005), Pull Requests filtered by branch in the API and the UI (D-015) (Farheen, via Claude)
 - 2026-11-15 T-098 Frosted glass sliding indicator on the Risk view tabs; Live runs and logs laid out without empty space (result beside tests); run status dot fixed (Farheen, via Claude)
 - 2026-11-15 T-097 Landing page wording on the dashboard, one shared card surface with 3D depth (shared/cards.css), Analyses per day as its own section with an expanding table view (Farheen, via Claude)
 - 2026-11-15 T-096 Pull Requests section with every PR and its author saved in Neon (migration 0004), live processing view from real agent steps, Risk views cached and kept mounted, multi-line test cells and Tests chips fixed, card transitions (D-014) (Farheen, via Claude)

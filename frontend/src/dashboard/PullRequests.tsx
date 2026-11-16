@@ -59,17 +59,36 @@ interface Props {
   onGo: (tab: Tab, analysisId?: number) => void;
 }
 
+// T-099: each branch's list is kept apart in the tab's cache, so switching back to a branch shows it at once
+const cacheKey = (branch: string) => (branch ? `pulls:${branch}` : 'pulls');
+
 export default function PullRequests({ active, items, live, onGo }: Props) {
   const [data, setData] = useState<RepoPulls | null>(() => peek<RepoPulls>('pulls') ?? null);
   const [error, setError] = useState('');
   const [syncing, setSyncing] = useState(false);
   const [q, setQ] = useState('');
   const [open, setOpen] = useState<number | null>(null);
+  const [branch, setBranch] = useState('');
+  const branchNow = useRef('');  // the selection an answer must match, so a slow answer for another branch is not shown
+  const [branches, setBranches] = useState<RepoPulls['branches']>(() => data?.branches ?? []);
 
-  const save = (next: RepoPulls) => { setData(keep('pulls', next)); setError(''); return next; };
+  const save = (next: RepoPulls) => {
+    keep(cacheKey(next.branch ?? ''), next);
+    setBranches(next.branches);
+    if ((next.branch ?? '') === branchNow.current) { setData(next); setError(''); }
+    return next;
+  };
+  function pickBranch(next: string) {
+    branchNow.current = next;
+    setBranch(next);
+    setOpen(null);
+    setData(peek<RepoPulls>(cacheKey(next)) ?? null);
+    api.repoPulls(next).then(save)
+      .catch(e => { if (branchNow.current === next) setError(e instanceof ApiError ? e.message : 'Could not load the pull requests'); });
+  }
   async function refresh(force: boolean) {
     setSyncing(true);
-    try { save(await api.syncPulls(force)); }
+    try { save(await api.syncPulls(force, branchNow.current)); }
     catch (e) { setError(e instanceof ApiError ? e.message : 'Could not read the pull requests from GitHub'); }
     finally { setSyncing(false); }
   }
@@ -79,7 +98,7 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
   useEffect(() => {
     if (!active || started.current) return;
     started.current = true;
-    api.repoPulls().then(next => { save(next); if (next.stale) refresh(false); })
+    api.repoPulls(branchNow.current).then(next => { save(next); if (next.stale) refresh(false); })
       .catch(e => setError(e instanceof ApiError ? e.message : 'Could not load the pull requests'));
   }, [active]);  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -89,7 +108,7 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
   useEffect(() => {
     if (!started.current || runKey === seenRuns.current) return;
     seenRuns.current = runKey;
-    api.repoPulls().then(save).catch(() => {});
+    api.repoPulls(branchNow.current).then(save).catch(() => {});
   }, [runKey]);  // eslint-disable-line react-hooks/exhaustive-deps
 
   // the newest analysis per pull request (the feed is newest first, and a Map keeps the last value set)
@@ -111,6 +130,10 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
         <div className="prs-head">
           <h2 className="rcard-title">Pull Requests</h2>
           <div className="prs-tools">
+            <select className="rg-select prs-branch-pick" aria-label="Branch" value={branch} onChange={e => pickBranch(e.target.value)}>
+              <option value="">All branches</option>
+              {branches.map(b => <option key={b.name} value={b.name}>{b.name} · {b.pulls} PR{b.pulls === 1 ? '' : 's'}</option>)}
+            </select>
             <input type="search" className="prs-search" value={q} onChange={e => setQ(e.target.value)}
                    placeholder="Search by number, title or author" aria-label="Search pull requests" />
             <button className="btn ghost sm" onClick={() => refresh(true)} disabled={syncing}>
@@ -123,8 +146,10 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
         </div>
         {error && <div className="warnbox prs-warn" role="alert">{error}</div>}
 
-        {!data ? (
+        {!data && error ? null : !data ? (
           <div className="empty"><b>Loading</b>Reading the saved pull requests.</div>
+        ) : !data.items.length && branch ? (
+          <div className="empty"><b>No pull requests on {branch}</b>No saved pull request comes from or goes into this branch.</div>
         ) : !data.items.length ? (
           <div className="empty"><b>No pull requests yet</b>{syncing ? 'Reading them from GitHub.' : 'Open one on GitHub and it appears here.'}</div>
         ) : !rows.length ? (
@@ -145,7 +170,16 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
                         onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen(isOpen ? null : p.number); } }}>
                       <td>
                         <div className="rpr-title"><b>#{p.number}</b>{p.title || 'Untitled pull request'}</div>
-                        <div className="rpr-meta">{p.draft ? 'draft · ' : ''}{p.head_sha ? <code>{p.head_sha.slice(0, 7)}</code> : null}</div>
+                        <div className="rpr-meta">
+                          {p.draft ? 'draft · ' : ''}{p.head_sha ? <code>{p.head_sha.slice(0, 7)}</code> : null}
+                          {p.head_ref && p.base_ref && (
+                            <span className="prs-branches" aria-label={`from branch ${p.head_ref} into ${p.base_ref}`}>
+                              <code className={'prs-ref' + (p.head_ref === branch ? ' on' : '')} title="Source branch">{p.head_ref}</code>
+                              <span aria-hidden="true">→</span>
+                              <code className={'prs-ref' + (p.base_ref === branch ? ' on' : '')} title="Target branch">{p.base_ref}</code>
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td><div className="rpr"><Avatar pull={p} /><span className="prs-author">{p.author ?? 'unknown'}</span></div></td>
                       <td>{a ? <RiskBadge label={a.risk_label} /> : <span className="muted">Not analysed</span>}</td>

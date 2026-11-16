@@ -137,6 +137,8 @@ def score_pr(pr_id: str, refresh: bool = False, token: str | None = None) -> dic
                 notes.append(f"{label} lookup failed: {mask(str(e))[:60]}")
                 trace("github.defects_failed", pr_id, source=label, searched=arg, error=str(e)[:300])
         defects = max(found, default=0)
+    else:  # T-099: say why there is nothing to look up, so the run's history stage reports instead of staying open
+        trace("github.defects_none", pr_id, reason="new module" if new_module else "root", module=module)
 
     # A failed lookup is not evidence of a clean history. It is only "known" if at least one lookup answered.
     history_known = module == "root" or new_module or bool(found)

@@ -100,3 +100,8 @@
   - rows_json reads all of a project's analyses to find the latest per PR; fine at FYP size, a DISTINCT ON query later.
 - Owner: Farheen
 
+### D-015 Defect history apart from run status; branch filter matches source or target (2026-11-16)
+- Context: Farheen's prompt: new pull requests showed "Waiting" under Defect history, and Pull Requests should be viewable by branch with source and target saved in Neon.
+- Decision: T-099. When a change has nothing to look up (a new module or a root change), the Analysis agent logs github.defects_none, so the history stage reports. The result is a separate field (defect_history: none, found, unknown, pending), shown as a chip under the stage; "waiting" is shown only while a run is going. A failed lookup stays "unknown", never "none". pull_requests gets head_ref and base_ref (migration 0005, a shared schema change: Arisha must be told). A branch filter matches a pull request coming from or going into the branch, compared exactly. Analyses, logs and graphs stay keyed by pull request, so a branch view never mixes them.
+- Consequences: rows saved before 0005 have no branch until the next list read (within 5 minutes of opening Pull Requests) or delivery, and appear only under All branches until then. The branch list is computed from the saved rows on each read; fine at FYP size.
+- Owner: Farheen

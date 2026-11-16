@@ -211,6 +211,11 @@
   .prs-tools{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px;margin-left:auto;flex:1 1 320px;}
   .prs-search{height:34px;flex:0 1 280px;min-width:0;padding:0 12px;border-radius:10px;border:1px solid var(--hair);background:var(--soft);color:inherit;font:inherit;font-size:13px;}
   .prs-search:focus{outline:none;border-color:hsl(var(--accent));box-shadow:0 0 0 3px hsl(var(--accent)/.2);}
+  /* T-099: source → target branch of each pull request; the selected branch is highlighted */
+  .prs-branch-pick{flex:0 1 220px;min-width:0;}
+  .prs-branches{display:inline-flex;align-items:center;gap:5px;margin-left:8px;color:#6b7280;}
+  .prs-ref{display:inline-block;vertical-align:middle;padding:1px 7px;border-radius:999px;border:1px solid var(--hair);background:var(--soft);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .prs-ref.on{border-color:hsl(var(--accent)/.6);background:hsl(var(--accent)/.14);color:hsl(var(--foreground));}
   .prs-sub{flex-basis:100%;margin:0;font-size:12px;}
   .prs-warn{margin:0 18px 14px;}
   .prs-author{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}

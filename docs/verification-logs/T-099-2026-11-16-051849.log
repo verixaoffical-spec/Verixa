@@ -1,0 +1,29 @@
+$ D:\verixa-merging\Verixa\.venv\Scripts\python.exe D:\verixa-merging\Verixa\scripts\verify\T-099.py
+     Ran 7 tests in 8.654s |  | OK
+ok   backend: branches saved and filtered, defect history apart from the run state (7 tests)
+ok   backend: the T-096 pull request tests still pass
+ok   Neon: Alembic is at 0005 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: pull_requests has head_ref, base_ref and their indexes
+ok   frontend type-checks and builds (tsc && vite build)
+     3 passed (32.9s)
+ok   defect history and branch filter in the browser (branches_history.spec.ts)
+     5 passed (56.9s)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     5 passed (43.4s)
+ok   tab indicator and live layout still pass (refinements.spec.ts)
+     4 passed (43.7s)
+ok   UI consistency still passes (ui_consistency.spec.ts)
+     3 passed (35.4s)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (38.9s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (34.0s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     33 passed (3.7m)
+ok   the Risk screen's agent browser tests still pass (agents.spec.ts)
+
+PASS: 0 failed
+
+
+exit code: 0

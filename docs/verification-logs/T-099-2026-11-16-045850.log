@@ -1,0 +1,45 @@
+$ D:\verixa-merging\Verixa\.venv\Scripts\python.exe D:\verixa-merging\Verixa\scripts\verify\T-099.py
+     Ran 7 tests in 9.561s |  | OK
+ok   backend: branches saved and filtered, defect history apart from the run state (7 tests)
+ok   backend: the T-096 pull request tests still pass
+ok   Neon: Alembic is at 0005 (head)
+ok   Neon: alembic check finds no difference from the models
+ok   Neon: pull_requests has head_ref, base_ref and their indexes
+ok   frontend type-checks and builds (tsc && vite build)
+     3 passed (35.0s)
+ok   defect history and branch filter in the browser (branches_history.spec.ts)
+     5 passed (51.9s)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     1 failed | 4 passed (43.6s)
+FAIL tab indicator and live layout still pass (refinements.spec.ts) - ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+
+  1 failed
+    [refine] â€º refinements.spec.ts:104:5 â€º negative: on a narrow screen the live view stacks into one column, with no sideways scroll 
+  4 passed (43.6s)
+npm notice run npx
+npm notice run playwright test --project=refine --reporter=line
+[WebServer] App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "D:\verixa-merging\Verixa\agents", which implies app name "agents".
+
+     1 failed | 3 passed (48.9s)
+FAIL UI consistency still passes (ui_consistency.spec.ts) - nsistency.spec.ts:91:5 â€º with reduced motion the table opens and closes at once, with no animation
+[4/4] [ui] â€º ui_consistency.spec.ts:102:5 â€º negative: an account with nothing analysed gets no Analyses per day section and no charts
+  1 failed
+    [ui] â€º ui_consistency.spec.ts:52:5 â€º Analyses per day is its own full-width section, and View as table expands it into the full table and back 
+  3 passed (48.9s)
+npm notice run npx
+npm notice run playwright test --project=ui --reporter=line
+
+     3 passed (35.8s)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (40.6s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (35.3s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     33 passed (3.6m)
+ok   the Risk screen's agent browser tests still pass (agents.spec.ts)
+
+FAIL: 2 failed (tab indicator and live layout still pass (refinements.spec.ts), UI consistency still passes (ui_consistency.spec.ts))
+
+
+exit code: 1

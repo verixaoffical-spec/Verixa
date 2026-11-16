@@ -138,7 +138,9 @@ class PullRequest(AgentBase):
     screen reads the database and GitHub is only asked again when the list is stale."""
     __tablename__ = "pull_requests"
     __table_args__ = (UniqueConstraint("project_id", "number", name="uq_pull_requests_project_number"),
-                      Index("ix_pull_requests_feed", "project_id", "gh_updated_at"))
+                      Index("ix_pull_requests_feed", "project_id", "gh_updated_at"),
+                      Index("ix_pull_requests_head", "project_id", "head_ref"),
+                      Index("ix_pull_requests_base", "project_id", "base_ref"))
 
     id: Mapped[int] = mapped_column(primary_key=True)
     project_id: Mapped[int] = mapped_column(ForeignKey(PROJECT_ID, ondelete="CASCADE"))
@@ -150,6 +152,8 @@ class PullRequest(AgentBase):
     draft: Mapped[bool] = mapped_column(default=False)
     html_url: Mapped[str | None] = mapped_column(String(500))
     head_sha: Mapped[str | None] = mapped_column(String(64))
+    head_ref: Mapped[str | None] = mapped_column(String(255))         # T-099: source branch (None until read again)
+    base_ref: Mapped[str | None] = mapped_column(String(255))         # T-099: target branch
     gh_created_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     gh_updated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     synced_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=now, onupdate=now)
@@ -191,6 +195,18 @@ def _iso(at: datetime | None) -> str | None:
     return (at if at.tzinfo else at.replace(tzinfo=timezone.utc)).isoformat()
 
 
+def defect_history(state: str, past_defects: int | None) -> str:
+    """T-099: what is known about the module's past defects, apart from how the run went.
+    "pending" while the analysis is queued or running (a re-run keeps the old count, which is not this run's yet);
+    a new module or root change saves 0, so it reads "none"; None after a finished run means every lookup failed,
+    which is "unknown", never "none"."""
+    if state in ("queued", "running"):
+        return "pending"
+    if past_defects is None:
+        return "unknown"
+    return "found" if past_defects > 0 else "none"
+
+
 def to_json(row: RiskAssessment) -> dict:
     """The shape the dashboard reads. Keys are snake_case, like the rest of the API."""
     return {
@@ -210,6 +226,7 @@ def to_json(row: RiskAssessment) -> dict:
         "files_changed": row.files_changed,
         "lines_changed": row.lines_changed,
         "past_defects": row.past_defects,
+        "defect_history": defect_history(row.state, row.past_defects),
         "sensitivity": row.sensitivity,
         "scoring_basis": row.scoring_basis,
         "risk_factors": _load(row.risk_factors, []),

@@ -51,6 +51,9 @@ def describe(line: dict) -> dict | None:
         text, level = "Analysis agent could not read the pull request from GitHub", "error"
     elif e == "github.defects_read":
         text = f"Analysis agent checked past bug fixes in {f.get('source')}: {f.get('found')} found"
+    elif e == "github.defects_none":  # T-099: nothing to look up, which is not a failure and not a wait
+        text = ("Analysis agent found no defect history: every changed file is new" if f.get("reason") == "new module"
+                else "Analysis agent found no defect history: the change is at the repository root")
     elif e == "github.defects_failed":
         text, level = f"Analysis agent could not check past bug fixes in {f.get('source')}", "warn"
     elif e == "github.ci_read":

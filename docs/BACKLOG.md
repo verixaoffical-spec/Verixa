@@ -189,6 +189,7 @@ per-task verification scripts (`scripts/verify/T-030.py` and friends) have not b
 | T-096 | Pull Requests section first (every repo PR, author from GitHub saved in Neon via pull_requests table, search, expand), central live processing view from real agent events, tab data kept and cached (no refetch on tab switch or reload), multi-line test cells and Tests chips fixed, card transitions (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-095 | DONE |
 | T-097 | UI consistency: landing page wording on dashboard cards, one shared card surface (landing + dashboard) with 3D depth like the reference screenshot, Analyses per day as its own full-width section with an expanding View as table, smooth chart/table transitions (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-096 | DONE |
 | T-098 | Frontend refinements: frosted glass sliding indicator on the Risk view tabs; Live runs and logs Results and Tests laid out without empty space (Farheen's prompt, 2026-11-15) | Farheen | Arisha | T-097 | DONE |
+| T-099 | Defect history shown as "No defect history" (not "Waiting") when a module has none, kept apart from the agent's run status; source and target branch of every pull request saved in Neon (pull_requests), Pull Requests filtered by branch in the API and the UI (Farheen's prompt, 2026-11-16) | Farheen | Arisha | T-098 | DONE |
 | T-093 | Weekly Friday review of STATUS and RISKS | Both | | | RECURRING |
 
 ## FYP-II (LOCKED until FYP-1 IS COMPLETED, version 1.0)

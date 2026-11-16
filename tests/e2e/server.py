@@ -134,7 +134,7 @@ def script_github_and_model() -> None:
             raise RuntimeError("Client error '404 Not Found'")
         title, files = prs[number][:2] if number in prs else (f"Webhook pull request {number}", [pay])
         head = moved.get(number, f"{number:07x}" + "a" * 33)
-        return {"title": title, "head": {"sha": moved.get(f"push-{number}", head)}, "base": {"sha": "b" * 40, "repo": {"id": 1}},
+        return {"title": title, "head": {"sha": moved.get(f"push-{number}", head)}, "base": {"sha": "b" * 40, "repo": {"id": 1}, "ref": "main"},
                 "html_url": f"https://github.com/{repo}/pull/{number}", "state": "open", "updated_at": "2026-11-06T00:00:00Z",
                 "user": {"login": f"author-{number}"},
                 "changed_files": 3500 if number == 111 else len(files)}, files
@@ -164,12 +164,17 @@ def script_github_and_model() -> None:
               5: "Could not be analysed", 6: seed_demo.XSS, 7: "Add refund endpoint", 9: "Merge the old cart",
               8: "Rework the checkout flow so that a declined card, a timeout and a duplicate click each show their own clear message"}
 
+    # T-099: each pull request's source branch; #7 and #9 go into develop, the rest into main
+    heads = {1: "feature/checkout", 2: "fix/profile", 3: "fix/footer-typo", 4: "security/keys", 5: "ops/deploy",
+             6: "feature/search", 7: "feature/refunds", 8: "feature/checkout", 9: "legacy/cart"}
+
     def list_pulls(repo, token=None):
         if repo != "demo/shop":
             return []
         return [{"number": n, "title": titles[n], "user": {"login": authors[n]},
                  "state": "closed" if n == 9 else "open", "merged_at": "2026-11-10T00:00:00Z" if n == 9 else None,
-                 "draft": n == 8, "html_url": f"https://github.com/{repo}/pull/{n}", "head": {"sha": f"{n:07x}abcdef"},
+                 "draft": n == 8, "html_url": f"https://github.com/{repo}/pull/{n}", "head": {"sha": f"{n:07x}abcdef", "ref": heads[n]},
+                 "base": {"ref": "develop" if n in (7, 9) else "main"},
                  "created_at": "2026-11-01T00:00:00Z", "updated_at": f"2026-11-{n:02d}T00:00:00Z"} for n in range(9, 0, -1)]
 
     pull_requests.list_pulls = list_pulls

@@ -37,7 +37,9 @@ database in .env (D-009). These are mid's eight tables, unchanged; the planned t
 | pr_file_snapshots | backend/agent_db.py | added by migration 0003 (T-094): one per analysed commit (unique assessment_id, cascades), the Dependency graph's files, risks and imports as JSON with a rules version; read from GitHub once |
 | agent_steps | backend/agent_db.py | added by migration 0003 (T-094): every run step the live view shows, written from the trace by backend/model_calls.py (record_step); index ix_agent_steps_pr (repo, pr_number, at) |
 
-| pull_requests | backend/agent_db.py | added by migration 0004 (T-096): every pull request of the connected repository, analysed or not, with its author (GitHub login), state, link and head sha; unique (project_id, number), cascades with the project; filled from GitHub's list (backend/pull_requests.py, re-read when older than 5 minutes) and from each webhook delivery. Analyses with no author get it from here. Index ix_pull_requests_feed (project_id, gh_updated_at) |
+| pull_requests | backend/agent_db.py | added by migration 0004 (T-096): every pull request of the connected repository, analysed or not, with its author (GitHub login), state, link and head sha; unique (project_id, number), cascades with the project; filled from GitHub's list (backend/pull_requests.py, re-read when older than 5 minutes) and from each webhook delivery. Analyses with no author get it from here. Index ix_pull_requests_feed (project_id, gh_updated_at). Migration 0005 (T-099) adds head_ref (source branch) and base_ref (target branch), from the same list and webhook payloads, with indexes ix_pull_requests_head and ix_pull_requests_base; rows saved before it get them on the next list read or delivery |
+
+risk_assessments.past_defects (T-099): 0 means the module has no defect history (also saved for a new module or a root change), a number means that many, NULL after a finished run means every lookup failed. The API returns it as defect_history: none, found, unknown, or pending while the run is going.
 
 Migration 0003 also adds `ix_risk_feed` on risk_assessments (project_id, repo, created_at), the Risk feed's query (D-013).
 

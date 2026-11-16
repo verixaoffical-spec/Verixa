@@ -14,6 +14,15 @@ const GROUPS: Record<string, Stage[] | null> = { All: null, GitHub: ['received',
   Model: ['model'], Manager: ['manager', 'saved'] };
 const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString(undefined, { hour12: false }) : '');
 
+/** T-099: what the saved analysis knows about the module's past defects. Kept apart from the stage's run status:
+ * a pull request with no history is a result ("No defect history"), not a stage that is still waiting. */
+function historyOf(a: Assessment): string | null {
+  if (a.defect_history === 'found') return `${a.past_defects} past defect${a.past_defects === 1 ? '' : 's'}`;
+  if (a.defect_history === 'none') return 'No defect history';
+  if (a.defect_history === 'unknown') return 'History unknown';
+  return null;  // still being analysed
+}
+
 export default function RiskLive({ items, live, pick, active }: { items: Assessment[]; live: { pr: number; messages: LiveEvent[]; done: boolean }[]; pick: number | null; active: boolean }) {
   const prs = useMemo(() => latestPerPr(items), [items]);
   const [id, setId] = useState<number | null>(pick ?? prs[0]?.id ?? null);
@@ -61,6 +70,7 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
   const rules = !!seen.rules || ((!run || run.done) && !!row?.risk_factors.length);  // a saved result has its checks even when its log is gone
   const list = shown.filter(m => !GROUPS[filter] || GROUPS[filter]!.includes(m.stage));
   const errorsMsg = row?.errors.join(' · ');
+  const history = row && (!run || run.done) ? historyOf(row) : null;  // during a run the saved row is the previous one
 
   return (
     <div className="rlive">
@@ -86,10 +96,16 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
         <ol className="stepper">
           {STAGES.map(([name, key]) => {
             const cls = key === now ? 'c' : key in seen ? 'd' : 'w';
+            // "waiting" only while a run is going; a finished run that has no step for a stage simply did not log one
+            const status = key in seen ? time(seen[key]!) : run && !run.done ? 'waiting' : 'not logged';
             return (
               <li key={key} className={'step ' + cls} aria-current={cls === 'c' ? 'step' : undefined}>
                 <span className="b">{cls === 'd' && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>}</span>
-                <span className="n">{name}</span><span className="t">{key in seen ? time(seen[key]!) : 'waiting'}</span>
+                <span className="n">{name}</span><span className="t">{status}</span>
+                {key === 'history' && history && (
+                  <span className={'h ' + row!.defect_history} title={row!.module ? `Module: ${row!.module}` : undefined}
+                        aria-label={`Defect history: ${history}${row!.defect_history === 'found' && row!.module ? ` in ${row!.module}` : ''}`}>{history}</span>
+                )}
               </li>
             );
           })}

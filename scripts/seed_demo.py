@@ -51,7 +51,7 @@ def main() -> None:
                        test_areas=dump(["charge succeeds with a valid card", "expired card is declined", "a declined card after a timeout and a duplicate click shows exactly one clear error message and never charges the customer twice"]), model_used="demo", attempts=1),
             assessment(project, 2, "scored", "Medium", "Update profile page", score=5, files_changed=2, lines_changed=40,
                        module="profile", risk_factors=dump(["size: 2 file(s), 40 lines changed (2 pts)"]), attempts=1),
-            assessment(project, 3, "scored", "Low", "Fix a typo in the footer", score=2, files_changed=1, lines_changed=2,
+            assessment(project, 3, "scored", "Low", "Fix a typo in the footer", score=2, files_changed=1, lines_changed=2, past_defects=0,
                        module="root", attempts=1),
             assessment(project, 4, "needs_human_review", "High", "Rotate signing keys", score=8, attempts=3,
                        errors=dump(["reasoning must be 2-3 sentences."])),

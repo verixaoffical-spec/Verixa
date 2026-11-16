@@ -6,7 +6,7 @@ screen open. Each webhook delivery also writes its pull request, so a new one sh
 from datetime import datetime, timedelta
 
 import httpx
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -38,6 +38,7 @@ def facts_of(pr: dict) -> dict | None:
         return None
     user: dict = pr["user"] if isinstance(pr.get("user"), dict) else {}
     head: dict = pr["head"] if isinstance(pr.get("head"), dict) else {}
+    base: dict = pr["base"] if isinstance(pr.get("base"), dict) else {}
     url = _text(pr.get("html_url"), 500)
     return {
         "number": number,
@@ -47,6 +48,8 @@ def facts_of(pr: dict) -> dict | None:
         "draft": pr.get("draft") is True,
         "html_url": url if url and url.startswith(GITHUB_URL) else None,  # the screen makes it a link, so never javascript:
         "head_sha": _text(head.get("sha"), 64),
+        "head_ref": _text(head.get("ref"), 255),  # T-099: source branch
+        "base_ref": _text(base.get("ref"), 255),  # T-099: target branch
         "gh_created_at": _when(pr.get("created_at")),
         "gh_updated_at": _when(pr.get("updated_at")),
     }
@@ -73,6 +76,8 @@ def save(db: Session, project: Project, prs: list[dict], listed: bool) -> int:
         if row is None:
             continue
         for key, value in facts.items():
+            if value is None and key in ("head_ref", "base_ref"):
+                continue  # a payload without its branches never erases the saved ones
             setattr(row, key, value)
         if listed:
             row.listed_at = stamp
@@ -119,10 +124,24 @@ def sync(db: Session, project: Project, token: str | None) -> int:
     return written
 
 
-def rows_json(db: Session, project: Project) -> dict:
-    """The saved pull requests, newest activity first, each with its latest analysis if it has one."""
-    prs = db.scalars(select(PullRequest).where(PullRequest.project_id == project.id)
-                     .order_by(PullRequest.gh_updated_at.desc(), PullRequest.number.desc())).all()
+def branches(db: Session, project: Project) -> list[dict]:
+    """T-099: every branch a saved pull request comes from or goes into, with how many pull requests touch it,
+    busiest first. Always for the whole repository, so the screen can offer every branch while one is selected."""
+    count: dict[str, int] = {}
+    for head, base in db.execute(select(PullRequest.head_ref, PullRequest.base_ref).where(PullRequest.project_id == project.id)):
+        for name in {head, base}:
+            if name:
+                count[name] = count.get(name, 0) + 1
+    return [{"name": n, "pulls": c} for n, c in sorted(count.items(), key=lambda kv: (-kv[1], kv[0]))]
+
+
+def rows_json(db: Session, project: Project, branch: str | None = None) -> dict:
+    """The saved pull requests, newest activity first, each with its latest analysis if it has one. With `branch`,
+    only the pull requests coming from or going into that branch (T-099)."""
+    query = select(PullRequest).where(PullRequest.project_id == project.id)
+    if branch:
+        query = query.where(or_(PullRequest.head_ref == branch, PullRequest.base_ref == branch))
+    prs = db.scalars(query.order_by(PullRequest.gh_updated_at.desc(), PullRequest.number.desc())).all()
     latest: dict[int, RiskAssessment] = {}
     for a in db.scalars(select(RiskAssessment).where(RiskAssessment.project_id == project.id, RiskAssessment.repo == project.repo)
                         .order_by(RiskAssessment.created_at.desc(), RiskAssessment.id.desc())):
@@ -130,9 +149,11 @@ def rows_json(db: Session, project: Project) -> dict:
     return {
         "listed_at": _iso(listed_at(db, project)),
         "stale": is_stale(db, project),
+        "branch": branch or None,
+        "branches": branches(db, project),
         "items": [{
             "number": p.number, "title": p.title, "author": p.author, "state": p.state,
-            "draft": p.draft, "url": p.html_url, "head_sha": p.head_sha, "created_at": _iso(p.gh_created_at),
+            "draft": p.draft, "url": p.html_url, "head_sha": p.head_sha, "head_ref": p.head_ref, "base_ref": p.base_ref, "created_at": _iso(p.gh_created_at),
             "updated_at": _iso(p.gh_updated_at),
             "analysis_id": latest[p.number].id if p.number in latest else None,
         } for p in prs],
