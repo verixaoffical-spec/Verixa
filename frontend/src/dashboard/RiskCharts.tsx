@@ -56,40 +56,121 @@ export function issueTypes(latest: Assessment[]) {
   }).filter(r => r.High + r.Medium + r.Low > 0);
 }
 
-function Donut({ parts, unit, label }: { parts: { name: string; value: number; color: string; risk?: RiskLabel }[]; unit: string; label: string }) {
+const pctOf = (v: number, total: number) => (total ? Math.round((v / total) * 100) : 0);
+
+/** T-089: hover, focus or touch a slice or its legend row to read it: it grows, the others fade, the centre shows it. */
+function Donut({ parts, unit, label }: { parts: Part[]; unit: string; label: string }) {
+  const [on, setOn] = useState<number | null>(null);
   const total = parts.reduce((s, p) => s + p.value, 0);
   const r = 54, C = 2 * Math.PI * r, gap = total > 1 ? 2.5 : 0;
+  const pick = on !== null ? parts[on] : null;
   let off = 0;
   return (
-    <div className="donut-wrap">
+    <div className={'donut-wrap' + (on !== null ? ' focus' : '')} onMouseLeave={() => setOn(null)}>
       <svg width="140" height="140" viewBox="0 0 140 140" role="img"
            aria-label={`${label}: ${parts.map(p => `${p.value} ${p.name}`).join(', ')}`}>
         <circle cx="70" cy="70" r={r} fill="none" stroke="var(--soft)" strokeWidth="16" />
-        {total > 0 && parts.map(p => {
+        {total > 0 && parts.map((p, i) => {
           const len = (p.value / total) * C;
+          // the picked slice slides out along its own middle, like a slice lifted from the pie (not when it is the only one)
+          const mid = ((off + len / 2) / C) * 2 * Math.PI - Math.PI / 2;
+          const lift = on === i && parts.filter(x => x.value).length > 1 ? 7 : 0;
           const el = p.value ? (
-            <circle key={p.name} cx="70" cy="70" r={r} fill="none" stroke={p.color} strokeWidth="16"
-                    strokeDasharray={`${Math.max(len - gap, 0)} ${C}`} strokeDashoffset={-off} transform="rotate(-90 70 70)">
-              <title>{`${p.name}: ${p.value} ${unit}`}</title>
-            </circle>
+            <circle key={p.name} className={'dseg' + (on === i ? ' on' : on !== null ? ' dim' : '')} cx="70" cy="70" r={r} fill="none"
+                    stroke={p.color} strokeWidth="16" strokeDasharray={`${Math.max(len - gap, 0)} ${C}`} strokeDashoffset={-off}
+                    style={{ transform: `translate(${Math.cos(mid) * lift}px, ${Math.sin(mid) * lift}px) rotate(-90deg)` }}
+                    onMouseEnter={() => setOn(i)} onClick={() => setOn(on === i ? null : i)} />
           ) : null;
           off += len;
           return el;
         })}
-        <text x="70" y="68" textAnchor="middle" className="donut-n">{total}</text>
-        <text x="70" y="88" textAnchor="middle" className="donut-u">{unit}</text>
+        {pick ? (
+          // a picked slice: its count and its share; its name lights up in the legend beside, so it is never cut short
+          <g key={'p' + on} className="dswap">
+            <text x="70" y="68" textAnchor="middle" className="donut-n">{pick.value}</text>
+            <text x="70" y="88" textAnchor="middle" className="donut-u donut-pct">{pctOf(pick.value, total)}% of {total}</text>
+          </g>
+        ) : (
+          <g key="all" className="dswap">
+            <text x="70" y="68" textAnchor="middle" className="donut-n">{total}</text>
+            <text x="70" y="88" textAnchor="middle" className="donut-u">{unit}</text>
+          </g>
+        )}
       </svg>
       <ul className="clegend">
-        {parts.map(p => (
-          <li key={p.name}>
+        {parts.map((p, i) => (
+          <li key={p.name} className={on === i ? 'on' : on !== null ? 'dim' : ''} tabIndex={0}
+              onMouseEnter={() => setOn(i)} onFocus={() => setOn(i)} onBlur={() => setOn(null)}>
             {p.risk ? <Glyph label={p.risk} /> : <i className="rdot" style={{ background: p.color }} aria-hidden="true"></i>}
-            <span>{p.name}</span><b>{p.value}</b><em>{total ? Math.round((p.value / total) * 100) : 0}%</em>
+            <span>{p.name}</span><b>{p.value}</b><em>{pctOf(p.value, total)}%</em>
           </li>
         ))}
       </ul>
     </div>
   );
 }
+
+type Part = { name: string; value: number; color: string; risk?: RiskLabel };
+
+/** T-089: the same parts as horizontal bars. Hover, focus or touch a row: it lights up, the others fade, a tip reads it. */
+function PartBars({ parts, unit, label }: { parts: Part[]; unit: string; label: string }) {
+  const [on, setOn] = useState<number | null>(null);
+  const total = parts.reduce((s, p) => s + p.value, 0);
+  const max = Math.max(1, ...parts.map(p => p.value));
+  return (
+    <ul className={'pbars' + (on !== null ? ' focus' : '')} aria-label={`${label}: ${parts.map(p => `${p.value} ${p.name}`).join(', ')}`}
+        onMouseLeave={() => setOn(null)}>
+      {parts.map((p, i) => (
+        <li key={p.name} className={on === i ? 'on' : on !== null ? 'dim' : ''} tabIndex={0}
+            onMouseEnter={() => setOn(i)} onFocus={() => setOn(i)} onBlur={() => setOn(null)} onClick={() => setOn(on === i ? null : i)}>
+          <span className="pbars-n">{p.risk ? <Glyph label={p.risk} /> : <i className="rdot" style={{ background: p.color }} aria-hidden="true"></i>}{p.name}</span>
+          <span className="pbars-track">
+            <i style={{ width: `${(p.value / max) * 100}%`, background: p.color, animationDelay: `${i * 70}ms` }}></i>
+            {on === i && (
+              <span className="pbars-tip" role="status" style={{ left: `${Math.max(6, (p.value / max) * 100)}%` }}>
+                <b>{p.name}</b><span>{p.value} {unit} · {pctOf(p.value, total)}%</span>
+              </span>
+            )}
+          </span>
+          <b>{p.value}</b><em>{pctOf(p.value, total)}%</em>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+type Kind = 'pie' | 'bar';
+/** Pie or bar, picked by the viewer and remembered in this browser only (a convenience, never needed to read the page). */
+function useKind(key: string, start: Kind): [Kind, (k: Kind) => void] {
+  const [kind, setKind] = useState<Kind>(() => {
+    try { const v = localStorage.getItem('verixa.chart.' + key); return v === 'pie' || v === 'bar' ? v : start; } catch { return start; }
+  });
+  return [kind, (k: Kind) => { setKind(k); try { localStorage.setItem('verixa.chart.' + key, k); } catch { /* storage blocked: the choice lasts this visit */ } }];
+}
+
+function KindSwitch({ kind, set, label }: { kind: Kind; set: (k: Kind) => void; label: string }) {
+  return (
+    <div className="seg ckind" role="group" aria-label={`${label}: chart type`}>
+      <button aria-pressed={kind === 'pie'} onClick={() => set('pie')}>Pie</button>
+      <button aria-pressed={kind === 'bar'} onClick={() => set('bar')}>Bar</button>
+    </div>
+  );
+}
+
+/** A chart of parts the viewer can show as a pie (donut) or as bars. */
+function PartsChart({ id, title, sub, parts, unit, start = 'pie' }: { id: string; title: string; sub: string; parts: Part[]; unit: string; start?: Kind }) {
+  const [kind, setKind] = useKind(id, start);
+  return (
+    <>
+      <header><div className="chead"><h2>{title}</h2><span>{sub}</span></div><KindSwitch kind={kind} set={setKind} label={title} /></header>
+      <div key={kind} className="ckind-body">
+        {kind === 'pie' ? <Donut label={title} unit={unit} parts={parts} /> : <PartBars label={title} unit={unit} parts={parts} />}
+      </div>
+    </>
+  );
+}
+
+const ISSUE_COLORS = ['#7A66EA', '#2EC2B3', '#fab219', '#d03b3b', '#5FA8F5', '#E07BC6', '#31c47f', '#B9AFFF', '#9CA3AF'];
 
 type Day = ReturnType<typeof perDay>[number];
 const OPEN_MS = 320;  // matches the expand / collapse animation in risk.css
@@ -186,28 +267,33 @@ export function RiskCharts({ items, counts }: { items: Assessment[]; counts: Ris
   const latest = latestPerPr(items);
   const issues = issueTypes(latest);
   const imax = Math.max(1, ...issues.map(i => i.High + i.Medium + i.Low));
+  const [issueKind, setIssueKind] = useKind('issues', 'bar');
 
   return (
     <div className="rcharts-all" aria-label="Risk charts">
       <div className="rcharts">
         <section className="rchart">
-          <header><h2>Risk distribution</h2><span>latest result per PR</span></header>
-          <Donut label="Risk distribution" unit="pull requests"
-                 parts={RISKS.map(k => ({ name: k, value: counts[k] ?? 0, color: FILL[k], risk: k }))} />
+          <PartsChart id="risk" title="Risk distribution" sub="latest result per PR" unit="pull requests"
+                      parts={RISKS.map(k => ({ name: k, value: counts[k] ?? 0, color: FILL[k], risk: k }))} />
         </section>
 
         <section className="rchart">
-          <header><h2>Analysis status</h2><span>where each PR stands</span></header>
-          <Donut label="Analysis status" unit="pull requests"
-                 parts={[{ name: 'Scored', value: counts.scored ?? 0, color: '#31c47f' },  // all from the API's counts
-                         { name: 'Needs review', value: counts.needs_review ?? 0, color: '#fab219' },
-                         { name: 'Running', value: counts.pending ?? 0, color: 'hsl(var(--accent))' },
-                         { name: 'Failed', value: counts.failed ?? 0, color: '#d03b3b' }]} />
+          <PartsChart id="status" title="Analysis status" sub="where each PR stands" unit="pull requests"
+                      parts={[{ name: 'Scored', value: counts.scored ?? 0, color: '#31c47f' },  // all from the API's counts
+                              { name: 'Needs review', value: counts.needs_review ?? 0, color: '#fab219' },
+                              { name: 'Running', value: counts.pending ?? 0, color: 'hsl(var(--accent))' },
+                              { name: 'Failed', value: counts.failed ?? 0, color: '#d03b3b' }]} />
         </section>
 
         <section className="rchart wide">
-          <header><h2>Issues by type</h2><span>PRs showing each issue, split by their label</span></header>
-          {issues.length ? (
+          <header><div className="chead"><h2>Issues by type</h2><span>PRs showing each issue, split by their label</span></div>
+            {issues.length > 0 && <KindSwitch kind={issueKind} set={setIssueKind} label="Issues by type" />}</header>
+          {issues.length && issueKind === 'pie' ? (
+            <div key="pie" className="ckind-body">
+              <Donut label="Issues by type" unit="pull requests"
+                     parts={issues.map((row, i) => ({ name: row.name, value: row.High + row.Medium + row.Low, color: ISSUE_COLORS[i % ISSUE_COLORS.length] }))} />
+            </div>
+          ) : issues.length ? (
             <div className="rissues">
               {issues.map(row => (
                 <div key={row.name} className="rissue" title={`${row.name}: ${row.High} High, ${row.Medium} Medium, ${row.Low} Low`}>
@@ -220,7 +306,7 @@ export function RiskCharts({ items, counts }: { items: Assessment[]; counts: Ris
               ))}
             </div>
           ) : <p className="muted">No issues recorded in the latest results yet.</p>}
-          {issues.length > 0 && <div className="clegend row">{RISKS.map(k => <span key={k}><Glyph label={k} />{k} PRs</span>)}</div>}
+          {issues.length > 0 && issueKind === 'bar' && <div className="clegend row">{RISKS.map(k => <span key={k}><Glyph label={k} />{k} PRs</span>)}</div>}
         </section>
       </div>
 

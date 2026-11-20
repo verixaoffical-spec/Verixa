@@ -74,6 +74,11 @@ export default function AccountMenu({ account, unsavedChanges, onIntegrations, o
       {open && (
         <div className="acct" role="menu" aria-label="Account" ref={menuRef} onKeyDown={onKeyDown}>
           <div className="acct-who">
+            {/* T-089: a visible way to close the menu, besides Escape and clicking outside */}
+            <button className="acct-x" type="button" aria-label="Close account menu"
+                    onClick={() => { setOpen(false); avatarRef.current?.focus(); }}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
             <b>{account?.name}</b>
             <small>{account?.email || (account?.github_login ? `@${account.github_login} on GitHub` : '')}</small>
           </div>

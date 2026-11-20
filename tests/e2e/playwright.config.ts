@@ -23,6 +23,7 @@ export default defineConfig({
     { name: 'ui', testMatch: 'ui_consistency.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'refine', testMatch: 'refinements.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
     { name: 'branches', testMatch: 'branches_history.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure' } },
+    { name: 'premium', testMatch: 'premium.spec.ts', use: { baseURL: 'http://localhost:8011', browserName: 'chromium', screenshot: 'only-on-failure', viewport: { width: 1440, height: 900 } } },
   ],
   webServer: {
     command: `"${python}" tests/e2e/server.py${live ? ' --live' : ''}`,

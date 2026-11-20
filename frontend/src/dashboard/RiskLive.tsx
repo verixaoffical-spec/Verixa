@@ -3,15 +3,19 @@
  * GET /api/analysis/pull-requests/{id}/log, which reads the saved trace log. A stage is marked done only when
  * a step of that stage has arrived. Checks, risks and the decision are the saved assessment's own fields.
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { keep, peek } from './cache';
 import { ApiError, api, type Assessment, type LiveEvent, type PastRun, type Stage } from './api';
 import { Glyph, latestPerPr } from './RiskCharts';
+import './premium.css';  // T-089, after risk-views.css (RiskGraph is imported first) so its rules refine those
+import './overview.css';  // T-089, the Overview's reference layout, after premium.css
+import './processing.css';  // T-089, the live processing card, white logs in the light theme; loaded last
 
 const STAGES: [string, Stage][] = [['Received', 'received'], ['Read changes', 'changes'], ['Defect history', 'history'], ['CI', 'ci'],
   ['Rules', 'rules'], ['Model', 'model'], ['Manager', 'manager'], ['Saved', 'saved']];
 const GROUPS: Record<string, Stage[] | null> = { All: null, GitHub: ['received', 'changes', 'history', 'ci'], Rules: ['rules'],
   Model: ['model'], Manager: ['manager', 'saved'] };
+const STAGE_MS = 900;  // T-089: one stage after another, unhurried; matches --stagger in premium.css
 const time = (iso: string | null) => (iso ? new Date(iso).toLocaleTimeString(undefined, { hour12: false }) : '');
 
 /** T-099: what the saved analysis knows about the module's past defects. Kept apart from the stage's run status:
@@ -23,7 +27,7 @@ function historyOf(a: Assessment): string | null {
   return null;  // still being analysed
 }
 
-export default function RiskLive({ items, live, pick, active }: { items: Assessment[]; live: { pr: number; messages: LiveEvent[]; done: boolean }[]; pick: number | null; active: boolean }) {
+export default function RiskLive({ items, live, pick, active }: { items: Assessment[]; live: { pr: number; messages: LiveEvent[]; done: boolean; startedAt: number }[]; pick: number | null; active: boolean }) {
   const prs = useMemo(() => latestPerPr(items), [items]);
   const [id, setId] = useState<number | null>(pick ?? prs[0]?.id ?? null);
   const [past, setPast] = useState<PastRun[] | null>(null);
@@ -36,9 +40,24 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
   useEffect(() => { if (pick) setId(pick); }, [pick]);
   // T-096: the view is mounted before the feed arrives, so pick the newest pull request once there is one
   useEffect(() => { if (id === null && prs.length) setId(prs[0].id); }, [id, prs]);
+  // T-089: a run that starts on the live socket is followed once, so its stages fill in as the steps arrive.
+  // Picking another pull request afterwards is kept; the same run never takes the view back.
+  const followed = useRef(new Set<string>());
+  useEffect(() => {
+    for (const r of live) {
+      const k = `${r.pr}:${r.startedAt}`;
+      if (r.done || followed.current.has(k)) continue;
+      const target = prs.find(p => p.pr_number === r.pr);
+      if (!target) continue;  // its row comes with the next feed read, and this runs again then
+      followed.current.add(k);
+      setId(target.id);
+      setRunIx(0);
+    }
+  }, [live, prs]);
   // T-096: the saved log is read when the view is first shown for this analysis, then kept. It is read again only when
   // a run of this pull request finishes, quietly, with the kept log on screen meanwhile.
   const read = useRef('');
+  const [pastFor, setPastFor] = useState('');  // T-089: which read the saved log on screen answers
   useEffect(() => {
     if (!id || !active) return;
     const key = `${id}:${current?.done ? 'after-run' : ''}`;
@@ -49,15 +68,29 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
     if (first) { setError(''); setRunIx(0); setPast(hit ?? null); }
     if (hit && first && !current?.done) return;
     let on = true;
-    api.prLog(id).then(d => on && setPast(keep(`log:${id}`, d.runs)))
+    api.prLog(id).then(d => { if (on) { setPast(keep(`log:${id}`, d.runs)); setPastFor(key); } })
       .catch(e => on && setError(e instanceof ApiError ? e.message : 'Could not read the saved log'));
     return () => { on = false; };
   }, [id, active, current?.done]);
+  // T-089: a run that just finished on the socket stays on screen, at the same place, until the saved log includes it
+  const justDone = !!current?.done && pastFor !== `${id}:after-run`;
+  const [intro, setIntro] = useState(true);  // the stages fill in one after another when a run is first shown
+
+  // the sequence plays again each time the tab is opened, and for each pull request or run picked
+  const [opened, setOpened] = useState(0);
+  useEffect(() => { if (active) setOpened(n => n + 1); }, [active]);
+  const runKey = `${id}:${Math.min(runIx, Math.max((past?.length ?? 0) - 1, 0))}:${opened}`;
+  useEffect(() => {
+    setIntro(true);
+    const t = window.setTimeout(() => setIntro(false), STAGES.length * STAGE_MS + 900);
+    return () => window.clearTimeout(t);
+  }, [runKey]);
 
   if (!prs.length) return <div className="empty"><b>No pull requests analysed yet</b>Runs and their logs show here once a pull request is analysed.</div>;
 
   const runs: { label: string; messages: LiveEvent[]; done: boolean; id: string | null }[] = [
-    ...(current && !current.done ? [{ label: 'current run', messages: current.messages, done: false, id: current.messages[0]?.run_id ?? null }] : []),
+    ...(current && (!current.done || justDone) ? [{ label: current.done ? 'latest run' : 'current run', messages: current.messages, done: current.done,
+                                                    id: current.messages.find(m => m.run_id)?.run_id ?? null }] : []),
     ...(past ?? []).map(r => ({ label: `run ${(r.run_id ?? '').slice(0, 4) || '—'} · ${r.started ? new Date(r.started).toLocaleString() : ''}`,
                                 messages: r.messages, done: true, id: r.run_id })),
   ];
@@ -65,12 +98,36 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
   const shown = run?.messages ?? [];
   const seen: Partial<Record<Stage, string>> = {};
   shown.forEach(m => { if (m.stage && !(m.stage in seen)) seen[m.stage] = m.at; });
+  // T-089: a run that has any step was received. A saved run can lack its delivery step (the delivery is logged before the
+  // run has an id), so Received takes the run's first step and its time instead of showing "not logged".
+  if (shown.length && !seen.received) seen.received = shown[0].at;
   const last = shown[shown.length - 1];
   const now = run && !run.done ? last?.stage : null;
   const rules = !!seen.rules || ((!run || run.done) && !!row?.risk_factors.length);  // a saved result has its checks even when its log is gone
   const list = shown.filter(m => !GROUPS[filter] || GROUPS[filter]!.includes(m.stage));
   const errorsMsg = row?.errors.join(' · ');
   const history = row && (!run || run.done) ? historyOf(row) : null;  // during a run the saved row is the previous one
+  // T-089: how far the run has got, for the track: the furthest stage that has a step (or is running now)
+  const reach = Math.max(0, ...STAGES.map(([, key], i) => (key in seen || key === now ? i : 0)));
+  // Defect history and CI count as covered only when their step found something to read: past fixes, or CI checks.
+  // A step that says there was nothing (no history, no checks, the lookup failed) leaves the stage grey.
+  const covered = (key: Stage) => {
+    const steps = shown.filter(m => m.stage === key);
+    if (key === 'history') return steps.some(m => m.event === 'github.defects_read' && !/: 0 found$/.test(m.text));
+    if (key === 'ci') return steps.some(m => m.event.startsWith('ci.') ||
+                                         (m.event === 'github.ci_read' && !/no checks run|still running/.test(m.text)));
+    return true;
+  };
+  const view = STAGES.map(([name, key], i) => {
+    const cls = key === now ? 'c' : key in seen ? 'd' : 'w';
+    // Defect history and CI are grey when not covered: they reported nothing to read, or the run went past them
+    // (or finished) without a step from them at all. Other stages keep "waiting" / "not logged".
+    const skipped = cls === 'w' && (key === 'history' || key === 'ci') && !!run && shown.length > 0 && (run.done || reach > i);
+    const grey = (cls === 'd' && !covered(key)) || skipped;
+    // "waiting" only while a run is going; a finished run that has no step for a stage simply did not log one
+    const status = grey ? 'not covered' : key in seen ? time(seen[key]!) : run && !run.done ? 'waiting' : 'not logged';
+    return { name, key, i, cls, skipped, grey, status };
+  });
 
   return (
     <div className="rlive">
@@ -92,15 +149,26 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
       </div>
 
       <section className="rchart">
-        <header><h2>Analysis stages</h2><span>a stage completes only when its step arrives from the server</span></header>
-        <ol className="stepper">
-          {STAGES.map(([name, key]) => {
-            const cls = key === now ? 'c' : key in seen ? 'd' : 'w';
-            // "waiting" only while a run is going; a finished run that has no step for a stage simply did not log one
-            const status = key in seen ? time(seen[key]!) : run && !run.done ? 'waiting' : 'not logged';
+        <header><h2>Analysis stages</h2><span>{run && !run.done ? 'live from the server: each stage turns green as its step arrives'
+                                                                 : 'a stage completes only when its step arrives from the server'}</span></header>
+        {/* T-089: one stage after another: the line runs to the next stage, then that stage turns green. A line into or
+            out of a stage that was not covered (Defect history, CI) is grey. */}
+        <div className={'stepper-wrap' + (run && !run.done ? ' running' : '') + (intro ? ' intro' : '')}>
+          <span key={'segs:' + runKey} className="stepper-segs" aria-hidden="true">
+            {view.slice(1).map(v => (
+              <i key={v.key} className={'stepper-seg' + (v.cls !== 'w' || v.skipped ? ' on' : '') + (view[v.i - 1].grey || v.grey ? ' grey' : '')}
+                 style={{ '--i': v.i - 1, left: `${((v.i - 0.5) / STAGES.length) * 100}%`, width: `${100 / STAGES.length}%` } as CSSProperties}><b></b></i>
+            ))}
+          </span>
+        <ol key={'steps:' + runKey} className="stepper">
+          {view.map(({ name, key, i, cls, skipped, grey, status }) => {
             return (
-              <li key={key} className={'step ' + cls} aria-current={cls === 'c' ? 'step' : undefined}>
-                <span className="b">{cls === 'd' && <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>}</span>
+              <li key={key} className={'step ' + cls + (grey ? ' x' : '')} style={{ '--i': i } as CSSProperties}
+                  aria-current={cls === 'c' ? 'step' : undefined} title={grey ? `${name}: reported, nothing to cover` : undefined}>
+                <span className="b">
+                  {(cls === 'd' || skipped) && (grey ? <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 12h10" /></svg>
+                                        : <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>)}
+                </span>
                 <span className="n">{name}</span><span className="t">{status}</span>
                 {key === 'history' && history && (
                   <span className={'h ' + row!.defect_history} title={row!.module ? `Module: ${row!.module}` : undefined}
@@ -110,6 +178,7 @@ export default function RiskLive({ items, live, pick, active }: { items: Assessm
             );
           })}
         </ol>
+        </div>
       </section>
 
       <div className="livegrid">

@@ -8,16 +8,19 @@
  * reads the risk_assessments rows the agent wrote. A pull request that has not been scored yet
  * shows its real state (queued, running, needs review, failed), never a placeholder label.
  */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { ApiError, api, openLive, type LiveEvent, type RiskFeed, type RiskLabel } from './api';
 import { icons } from './icons';
 import { Chip, hookLabel, type HookState, type Link } from './connection';
 import { useToast } from './Toast';
 import { RiskCharts } from './RiskCharts';
+import RiskTrend from './RiskTrend';
 import RiskGraph from './RiskGraph';
 import RiskLive from './RiskLive';
 import { keep, peek } from './cache';
-import PullRequests, { type LiveRun } from './PullRequests';
+import PullRequests, { Processing, useShownRuns, type LiveRun } from './PullRequests';
+import OverviewTop from './OverviewTop';
+import { agentOf } from './AgentScene';
 import { Detail, RiskBadge, STATE_TEXT, StateBadge, ago, hue, initials, type Tab } from './riskParts';
 
 interface Props {
@@ -36,7 +39,8 @@ function addLive(runs: LiveRun[], event: LiveEvent): LiveRun[] {
   const startsNew = event.event === 'service.delivery' || event.event === 'run.start';
   // A message after a finished run starts a new one, unless it is a replay of what is already shown
   if (!current || (current.done && startsNew && !current.messages.some(m => m.at === event.at && m.event === event.event))) {
-    const fresh = { pr: event.pr, messages: [event], done: event.done, finishedAt: event.done ? Date.now() : 0 };
+    const fresh = { pr: event.pr, messages: [event], done: event.done, finishedAt: event.done ? Date.now() : 0,
+                    startedAt: Date.parse(event.at) || Date.now() };
     return [fresh, ...runs.filter(r => r.pr !== event.pr)];
   }
   if (current.messages.some(m => m.at === event.at && m.event === event.event)) return runs;  // already shown
@@ -148,6 +152,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
   // Live status over the WebSocket: each agent step arrives as it happens, for the connected repository
   const [liveRuns, setLiveRuns] = useState<LiveRun[]>([]);
   const [liveOn, setLiveOn] = useState(false);
+  const shownRuns = useShownRuns(liveRuns);  // T-089: a hook, so above every early return (React keeps hook order)
   const repo = link?.repo;
   useEffect(() => {
     if (!repo) return;
@@ -156,6 +161,9 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
       if (event.repo !== repo) return;
       setLiveRuns(runs => addLive(runs, event));
       if (event.done && !event.replay) load();  // the saved result is in the list now
+      // T-089: a new run's pull request is saved (queued) before the agents start, so read the list again at once.
+      // Live runs and logs can then follow its stages from the socket as they arrive, even for a brand-new pull request.
+      else if (!event.replay && (event.event === 'service.delivery' || event.event === 'run.start')) load();
     }, setLiveOn);
   }, [repo, load]);
 
@@ -216,6 +224,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
   const items = feed?.items ?? [];
   const counts = feed?.counts ?? {};
+  const running = liveRuns.filter(r => !r.done);
   // The graph and log follow the opened PR, at its newest analysis (the feed is newest first)
   const latestOpen = items.find(r => r.pr_number === items.find(x => x.id === open)?.pr_number)?.id ?? null;
   const tiles: { key: RiskLabel | 'total'; cls: string; label: string; icon: typeof icons.bolt; sub: string }[] = [
@@ -271,15 +280,47 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
           </div>
         )}
 
-        <div className="risk-stats">
-          {tiles.map(tile => (
-            <div key={tile.key} className={'risk-stat rcard ' + tile.cls}>
-              <div className="risk-stat-label">{tile.icon}{tile.label}</div>
-              <div className="risk-stat-value">{counts[tile.key] ?? 0}</div>
-              <div className="risk-stat-sub">{tile.sub}</div>
-            </div>
-          ))}
+        {/* T-089: a run going on shows here too, with the working agent's animation, so Analyse now is seen working */}
+        {shownRuns.map(({ run, leaving, hide }) => (
+          <Processing key={run.pr + ':' + run.startedAt} run={run} leaving={leaving} onHide={hide}
+                      result={items.find(r => r.pr_number === run.pr) ?? null} title={items.find(r => r.pr_number === run.pr)?.title ?? null} />
+        ))}
+
+        {/* T-089: the reference's layout: hero and Agents, then goal cards with rings, then the area chart */}
+        <OverviewTop items={items} counts={counts} ready={feed?.agent_available ?? true}
+                     working={running.length ? agentOf(running[0].messages[running[0].messages.length - 1]) : null} />
+
+        <div className="risk-stats goals">
+          {tiles.map(tile => {
+            // a ring with the card's share: of all pull requests for a label, the scored share for the total
+            const all = counts.total ?? 0;
+            const part = tile.key === 'total' ? counts.scored ?? 0 : counts[tile.key] ?? 0;
+            const pct = all ? Math.round((part / all) * 100) : 0;
+            const newest = items.find(r => tile.key === 'total' || r.risk_label === tile.key);
+            return (
+              <div key={tile.key} className={'risk-stat rcard goal ' + tile.cls}>
+                <div className="goal-top">
+                  <span className="goal-ico" aria-hidden="true">{tile.icon}</span>
+                  <span className="goal-chip">{newest ? ago(newest.updated_at) || 'saved' : 'none yet'}</span>
+                </div>
+                <span className="risk-ring big" role="img" style={{ '--p': pct } as CSSProperties}
+                      aria-label={tile.key === 'total' ? `${pct}% scored` : `${pct}% of pull requests`}>
+                  <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" pathLength={100} />{pct > 0 && <circle className="on" cx="22" cy="22" r="18" pathLength={100} />}</svg>
+                  <b>{pct}%</b><small>{tile.key === 'total' ? 'scored' : 'of PRs'}</small>
+                </span>
+                <div className="risk-stat-label">{tile.label}</div>
+                <div className="goal-line">
+                  <b className="risk-stat-value">{counts[tile.key] ?? 0}</b>
+                  {tile.key === 'total' ? ' PRs in all' : ` of ${all} PR${all === 1 ? '' : 's'}`}
+                </div>
+                <div className="risk-stat-sub">{tile.sub}</div>
+                <button className="goal-btn" onClick={() => go('prs')}>View PRs</button>
+              </div>
+            );
+          })}
         </div>
+
+        {feed && items.length > 0 && <RiskTrend items={items} />}
 
         <section className="rcard" aria-label="Analyse a pull request">
           <h2 className="rcard-title">Analyse a pull request</h2>
@@ -297,7 +338,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
           </div>
         </section>
 
-        <LivePanel runs={liveRuns} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
+        <LivePanel runs={liveRuns.filter(r => r.done)} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
 
         {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
 

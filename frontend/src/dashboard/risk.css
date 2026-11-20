@@ -226,24 +226,9 @@
   :root[data-theme="light"] .prs-state.open{color:#15803D;}
 
   /* T-096: the run the agents are on, in the middle of the Pull Requests section. 3D is CSS only. */
-  .proc{display:grid;grid-template-columns:minmax(220px,300px) minmax(0,1fr);gap:26px;align-items:center;padding:24px;
+  .proc{display:grid;grid-template-columns:260px minmax(0,1fr);gap:26px;align-items:center;padding:24px;
         background:radial-gradient(120% 140% at 0% 50%,hsl(var(--accent)/.14),transparent 60%),var(--soft);border-color:hsl(var(--accent)/.3);}
-  .proc-stage{display:grid;place-items:center;height:230px;perspective:700px;}
-  .proc-scene{position:relative;width:120px;height:120px;transform-style:preserve-3d;animation:proc-tilt 9s ease-in-out infinite;}
-  .proc-cube{position:absolute;inset:30px;transform-style:preserve-3d;animation:proc-spin 6s linear infinite;}
-  .proc-face{position:absolute;inset:0;border:1.5px solid hsl(var(--accent)/.85);background:hsl(var(--accent)/.12);box-shadow:0 0 18px hsl(var(--accent)/.35) inset;}
-  .proc-face.f{transform:translateZ(30px);} .proc-face.b{transform:rotateY(180deg) translateZ(30px);}
-  .proc-face.l{transform:rotateY(-90deg) translateZ(30px);} .proc-face.r{transform:rotateY(90deg) translateZ(30px);}
-  .proc-face.t{transform:rotateX(90deg) translateZ(30px);} .proc-face.d{transform:rotateX(-90deg) translateZ(30px);}
-  .proc-ring{position:absolute;inset:-22px;border-radius:50%;border:1.5px solid hsl(var(--accent-2)/.55);border-top-color:transparent;border-bottom-color:transparent;}
-  .proc-ring.r1{animation:proc-ring1 3.2s linear infinite;}
-  .proc-ring.r2{inset:-38px;border-color:hsl(var(--accent)/.4);border-left-color:transparent;animation:proc-ring2 4.6s linear infinite;}
-  .proc-ring.r3{inset:-8px;border-color:hsl(var(--success)/.45);border-right-color:transparent;animation:proc-ring3 2.6s linear infinite;}
-  @keyframes proc-spin{to{transform:rotateX(360deg) rotateY(720deg);}}
-  @keyframes proc-tilt{0%,100%{transform:rotateX(14deg) rotateY(-18deg);}50%{transform:rotateX(-10deg) rotateY(22deg);}}
-  @keyframes proc-ring1{from{transform:rotateX(70deg) rotateZ(0);}to{transform:rotateX(70deg) rotateZ(360deg);}}
-  @keyframes proc-ring2{from{transform:rotateY(64deg) rotateZ(360deg);}to{transform:rotateY(64deg) rotateZ(0);}}
-  @keyframes proc-ring3{from{transform:rotateX(-40deg) rotateY(30deg) rotateZ(0);}to{transform:rotateX(-40deg) rotateY(30deg) rotateZ(360deg);}}
+  .proc-agent{display:grid;place-items:center;height:240px;perspective:800px;}  /* T-089: the working agent's own animation, premium.css */
   .proc-kicker{display:flex;align-items:center;gap:8px;margin:0;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--accent));}
   .proc-title{margin:6px 0 4px;font-size:20px;font-weight:600;letter-spacing:-.3px;overflow-wrap:anywhere;}
   .proc-now{margin:0 0 12px;color:hsl(var(--muted-foreground));font-size:13.5px;}
@@ -256,7 +241,7 @@
   .proc-log li.ok span{color:#5FD199;} .proc-log li.warn span{color:var(--warn);} .proc-log li.error span{color:var(--bad);}
   .proc-log li.current span{color:#fff;}
   :root[data-theme="light"] .proc-log{background:#0B0B14;}
-  @media (max-width:760px){.proc{grid-template-columns:1fr;}.proc-stage{height:180px;}}
+  @media (max-width:760px){.proc{grid-template-columns:1fr;}.proc-agent{height:220px;}}
 
   /* T-096: cards come in with a short tilt and fade each time their view is shown (display:none -> shown restarts
      a CSS animation), the lower ones as they scroll into view where the browser supports scroll timelines */
