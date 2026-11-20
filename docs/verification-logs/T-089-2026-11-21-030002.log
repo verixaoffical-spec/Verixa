@@ -1,0 +1,23 @@
+$ C:\Users\hp\Desktop\verixa-startup\Verixa\.venv\Scripts\python.exe C:\Users\hp\Desktop\verixa-startup\Verixa\scripts\verify\T-089.py
+ok   frontend type-checks and builds (tsc && vite build)
+     4 passed (56.5s)
+ok   trend chart, rings, light theme surfaces, agent scenes and live stages (premium.spec.ts)
+     5 passed (50.2s)
+ok   glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts)
+     4 passed (1.2m)
+ok   UI consistency still passes (ui_consistency.spec.ts)
+     5 passed (2.2m)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     3 passed (1.1m)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (1.5m)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (56.8s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     3 passed (1.1m)
+ok   defect history and branches still pass (branches_history.spec.ts)
+
+PASS: 0 failed
+
+
+exit code: 0
