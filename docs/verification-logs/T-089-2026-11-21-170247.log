@@ -1,0 +1,28 @@
+$ C:\Users\hp\Desktop\verixa-startup\Verixa\.venv\Scripts\python.exe C:\Users\hp\Desktop\verixa-startup\Verixa\scripts\verify\T-089.py
+ok   frontend type-checks and builds (tsc && vite build)
+     5 passed (52.4s)
+ok   trend chart, rings, light theme surfaces, agent scenes and live stages (premium.spec.ts)
+     test-results\refinements-Live-runs-and--e03e4-eside-tests-nothing-removed-refine\test-failed-1.png | test-results\refinements-negative-on-a--aaf75-umn-with-no-sideways-scroll-refine\test-failed-1.png | 2 failed | 3 passed (39.8s)
+FAIL glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts) - env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:28216) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] App name mismatch detected. The runner is configured with app name "verixa", but the root agent was loaded from "C:\Users\hp\Desktop\verixa-startup\Verixa\agents", which implies app name "agents".
+
+     4 passed (35.7s)
+ok   UI consistency still passes (ui_consistency.spec.ts)
+     5 passed (40.5s)
+ok   Pull Requests section still passes (pull_requests.spec.ts)
+     3 passed (31.5s)
+ok   page layout still passes (risk_layout.spec.ts)
+     4 passed (30.6s)
+ok   graph and live views still pass (risk_views.spec.ts)
+     2 passed (46.9s)
+ok   risk charts still pass (risk_charts.spec.ts)
+     3 passed (46.1s)
+ok   defect history and branches still pass (branches_history.spec.ts)
+
+FAIL: 1 failed (glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts))
+
+
+exit code: 1

@@ -149,6 +149,28 @@ td.rdetail h4{margin-bottom:9px;}
 /* the Overview donuts: the centre stays inside the ring, legend names stay on one line */
 .donut-u.donut-pct{font-weight:600;fill:hsl(var(--foreground));}
 .rcharts .donut-wrap{gap:16px;}
-.rcharts .clegend{min-width:0;}
+.rcharts .donut-wrap{justify-content:center;}
+.rcharts .clegend{min-width:190px;}  /* too narrow beside the pie: the legend moves under it, full width, instead of cutting names */
 .rcharts .clegend li{grid-template-columns:auto minmax(0,1fr) auto 36px;gap:8px;}
 .rcharts .clegend li span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* T-089 skeleton loading: rows in the shape of what is coming, with a slow sheen */
+.skel{display:flex;flex-direction:column;gap:2px;padding:8px 0;}
+.skel-row{display:grid;grid-template-columns:minmax(0,2.4fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.7fr) minmax(0,.5fr);gap:20px;align-items:center;
+          padding:14px 16px;border-bottom:1px solid var(--hair);animation:skel-in .6s cubic-bezier(.22,1,.36,1) both;}
+.skel-row i{display:block;height:11px;border-radius:999px;background:linear-gradient(90deg,hsl(var(--foreground)/.06) 25%,hsl(var(--foreground)/.13) 50%,hsl(var(--foreground)/.06) 75%);
+            background-size:300% 100%;animation:skel-sheen 1.8s ease-in-out infinite;}
+.skel-row .skel-a{width:78%;} .skel-row .skel-b{width:60%;} .skel-row .skel-c{width:52px;height:20px;} .skel-row .skel-d{width:46px;justify-self:end;}
+@keyframes skel-sheen{from{background-position:100% 0;}to{background-position:0 0;}}
+@keyframes skel-in{from{opacity:0;}}
+
+/* T-089 commits GitHub has that never reached Verixa: an amber notice with a direct way out */
+.prs-missed{display:flex;align-items:center;gap:14px;margin:0 16px 12px;padding:12px 14px;border-radius:12px;font-size:13px;
+            border:1px solid rgba(250,178,25,.38);background:linear-gradient(90deg,rgba(250,178,25,.1),rgba(250,178,25,.03));animation:skel-in .5s ease both;}
+.prs-missed > div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.prs-missed b{color:var(--warn);font-weight:600;}
+.prs-missed span{color:hsl(var(--muted-foreground));line-height:1.45;}
+.prs-missed-ico{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font:800 13px Inter,sans-serif;color:#1d1300 !important;background:#fab219;}
+.prs-missed .btn{flex:none;}
+@media (max-width:760px){.prs-missed{flex-wrap:wrap;}}
+@media (prefers-reduced-motion:reduce){.skel-row,.skel-row i,.prs-missed{animation:none;}}

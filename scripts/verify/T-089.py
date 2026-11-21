@@ -18,6 +18,7 @@ Asserts:
 """
 import os, re, shutil, subprocess, sys
 
+sys.stdout.reconfigure(encoding="ascii", errors="replace")  # run.py decodes this output with the Windows code page; tool output has ✓ and ›
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 E2E = os.path.join(ROOT, "tests", "e2e")
 fails: list[str] = []

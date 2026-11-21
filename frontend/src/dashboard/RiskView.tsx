@@ -18,7 +18,7 @@ import RiskTrend from './RiskTrend';
 import RiskGraph from './RiskGraph';
 import RiskLive from './RiskLive';
 import { keep, peek } from './cache';
-import PullRequests, { Processing, useShownRuns, type LiveRun } from './PullRequests';
+import PullRequests, { Processing, Skeleton, useShownRuns, type LiveRun } from './PullRequests';
 import OverviewTop from './OverviewTop';
 import { agentOf } from './AgentScene';
 import { Detail, RiskBadge, STATE_TEXT, StateBadge, ago, hue, initials, type Tab } from './riskParts';
@@ -125,6 +125,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
   const [open, setOpen] = useState<number | null>(null);
   const [prNumber, setPrNumber] = useState('');
   const [busy, setBusy] = useState(false);
+  const asking = useRef(false);  // T-089: an Analyse now from this page is waiting for its answer
   const [tab, setTab] = useState<Tab>(() => peek<Tab>('tab') ?? 'prs');
   const go = (next: Tab) => setTab(keep('tab', next));  // a reload comes back to the same view
 
@@ -160,7 +161,15 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
     return openLive(event => {
       if (event.repo !== repo) return;
       setLiveRuns(runs => addLive(runs, event));
-      if (event.done && !event.replay) load();  // the saved result is in the list now
+      if (event.done && !event.replay) {  // the saved result is in the list now
+        if (asking.current) { load(); return; }  // Analyse now on this page already says how it went
+        load().then(next => {
+          // T-089: say so, wherever in the app the person is, with a way to the pull request
+          const row = next?.items.find(r => r.pr_number === event.pr);
+          toast(row?.state === 'scored' && row.risk_label ? `PR #${event.pr} analysed: ${row.risk_label} risk` : `PR #${event.pr}: ${event.text}`,
+                { label: 'View', run: () => { setTab(keep('tab', 'prs')); location.hash = 'risk'; } });  // App follows the hash
+        });
+      }
       // T-089: a new run's pull request is saved (queued) before the agents start, so read the list again at once.
       // Live runs and logs can then follow its stages from the socket as they arrive, even for a brand-new pull request.
       else if (!event.replay && (event.event === 'service.delivery' || event.event === 'run.start')) load();
@@ -204,6 +213,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
       return;
     }
     setBusy(true);
+    asking.current = true;
     try {
       const row = await api.analysePr(number);
       await load();
@@ -219,6 +229,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
       toast(message.slice(0, 200));
     } finally {
       setBusy(false);
+      asking.current = false;
     }
   }
 
@@ -248,7 +259,9 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
           </p>
         </div>
         <div className="chips">
-          <Chip on={hook === 'ok'}>{hookLabel(hook)}</Chip>
+          <span title={items[0]?.created_at ? `Last analysis ${ago(items[0].created_at) || 'just now'}` : undefined}>
+            <Chip on={hook === 'ok'}>{hookLabel(hook)}{items[0]?.created_at ? ` · ${ago(items[0].created_at) || 'just now'}` : ''}</Chip>
+          </span>
           <Chip on={liveOn}>{liveOn ? 'Live updates on' : 'Live updates connecting'}</Chip>
           {feed && <Chip on={false}>Jira {link.jiraKey}</Chip>}
           {(counts.needs_review ?? 0) > 0 && <Chip on={false}>{counts.needs_review} need review</Chip>}
@@ -345,7 +358,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         <section className="rcard rtable" aria-label="Pull Requests">
           <h2 className="rcard-title">Pull Requests</h2>
         {!feed ? (
-          <div className="empty"><b>Loading</b>Reading the agent's assessments.</div>
+          <Skeleton rows={5} label="Reading the agent's assessments" />
         ) : !items.length ? (
           <div className="empty">
             <b>No pull requests analysed yet</b>

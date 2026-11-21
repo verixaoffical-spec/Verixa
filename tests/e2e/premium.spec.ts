@@ -165,7 +165,7 @@ test('a live run: each agent has its own scene, Live runs follows it, stages fil
   const rising = counts.filter(n => n > 0 && n < 8);
   expect(rising.length, `green stage counts seen: ${counts.join(',')}`).toBeGreaterThanOrEqual(2);
   // finished: seven stages reported (history among them, grey); CI sent no step here (AGENT_CI_CHECK=0), so it is skipped
-  expect(counts[counts.length - 1]).toBe(7);
+  await expect(live.locator('.stepper .step.d')).toHaveCount(7);
 
   // finished: history and CI grey "not covered", every other stage green with its time, the track full
   const step = (name: string) => live.locator('.stepper .step', { hasText: name });
@@ -196,5 +196,44 @@ test('negative: a pull request with no saved steps has no green or grey stage an
   await expect(live.locator('.stepper .step.x')).toHaveCount(0);
   await expect(live.locator('.stepper')).not.toContainText('not covered');
   await expect(live.locator('.stepper-seg.on')).toHaveCount(0);
+  expect(problems).toEqual([]);
+});
+
+test('follow-up: Analyse now inside a pull request, the last run on the webhook chip, day bars, skeleton loading', async ({ browser, baseURL }) => {
+  const { page, problems } = await signIn(browser, 'demo@verixa.dev', baseURL!);
+  // skeleton while the saved lists are read (the answer is held back a moment so it can be seen)
+  let held = false;  // only the first read is held back
+  await page.route('**/api/analysis/pull-requests?limit=200', async route => {
+    if (!held) { held = true; await new Promise(r => setTimeout(r, 1500)); }
+    await route.continue();
+  });
+  await page.goto('/verixa_prototype.html#risk');
+  await expect(page.getByRole('heading', { name: 'Risk Analysis' })).toBeVisible({ timeout: 15_000 });
+  await page.getByRole('tab', { name: 'Overview', exact: true }).click();
+  await expect(page.getByRole('status', { name: "Reading the agent's assessments" })).toBeVisible();
+  await expect(page.getByRole('status', { name: "Reading the agent's assessments" }).locator('.skel-row')).toHaveCount(5);
+
+  // the webhook chip says when the newest analysis ran
+  const feed = await (await page.request.get('/api/analysis/pull-requests?limit=200')).json();
+  await expect(page.locator('.rpage-head .chip').first()).toContainText(/Webhook verified · (just now|\d+[mhd] ago)/);
+
+  // the hero shows the last 7 days while fewer than two weeks have analyses (the seed's are all recent)
+  const hero = page.getByRole('region', { name: 'Analyses' });
+  await expect(hero.locator('.ov-kicker').nth(1)).toHaveText('Analyses per day, last 7 days');
+  await expect(hero.locator('.ov-bar')).toHaveCount(7);
+  const today = await page.evaluate(items => items.filter((r: { created_at: string | null }) =>
+    r.created_at && new Date(r.created_at).toDateString() === new Date().toDateString()).length, feed.items);
+  await expect(hero.locator('.ov-bar.now .ov-bar-n')).toHaveText(String(today));
+
+  // a pull request Verixa never analysed has Analyse now inside it
+  await page.getByRole('tab', { name: 'Pull Requests', exact: true }).click();
+  const section = page.getByRole('tabpanel', { name: 'Pull Requests' });
+  const row = section.locator('tr.risk-row', { hasText: 'Not analysed' }).first();
+  await row.click();
+  await expect(section.locator('td.rdetail').getByRole('button', { name: 'Analyse now' })).toBeEnabled();
+  await expect(section.locator('td.rdetail')).toContainText('or right here');
+
+  // negative: the seed's pull requests were all updated days ago, so no "commits Verixa did not receive" notice
+  await expect(section.locator('.prs-missed')).toHaveCount(0);
   expect(problems).toEqual([]);
 });

@@ -25,14 +25,33 @@ export function perWeek(items: Assessment[], weeks = 6, now = new Date()) {
   return out;
 }
 
+/** Analyses per local day for the last `days` days, oldest first: the hero's bars while there is little history. */
+export function perDayBars(items: Assessment[], days = 7, now = new Date()) {
+  const out = Array.from({ length: days }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1 - i));
+    return { key: d.toDateString(), label: d.toLocaleDateString(undefined, { weekday: 'short' }),
+             full: d.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'short' }), n: 0 };
+  });
+  for (const row of items) {
+    if (!row.created_at) continue;
+    const slot = out.find(d => d.key === new Date(row.created_at as string).toDateString());
+    if (slot) slot.n += 1;
+  }
+  return out;
+}
+
 function lastDays(items: Assessment[], from: number, to: number, now = Date.now()) {
   return items.filter(r => r.created_at && now - new Date(r.created_at).getTime() >= from * DAY
                                          && now - new Date(r.created_at).getTime() < to * DAY).length;
 }
 
 function Hero({ items, counts }: { items: Assessment[]; counts: RiskFeed['counts'] }) {
-  const weeks = perWeek(items);
-  const max = Math.max(1, ...weeks.map(w => w.n));
+  // T-089: weeks once there are two or more weeks with analyses; until then the last 7 days, so the bars are not mostly empty
+  const byWeek = perWeek(items);
+  const daily = byWeek.filter(w => w.n > 0).length < 2;
+  const bars = daily ? perDayBars(items).map(d => ({ key: d.key, label: d.label, title: `${d.full}: ${d.n} analyses`, n: d.n }))
+                     : byWeek.map(w => ({ key: w.label, label: w.label, title: `Week of ${w.label}: ${w.n} analyses`, n: w.n }));
+  const max = Math.max(1, ...bars.map(w => w.n));
   const week = lastDays(items, 0, 7), before = lastDays(items, 7, 14);
   const change = before ? Math.round(((week - before) / before) * 100) : null;
   const total = counts.total ?? 0, scored = counts.scored ?? 0;
@@ -52,11 +71,11 @@ function Hero({ items, counts }: { items: Assessment[]; counts: RiskFeed['counts
         </div>
         <p className="ov-progress-cap muted">{pct}% of {total} pull request{total === 1 ? '' : 's'} scored</p>
       </div>
-      <div className="ov-weeks" aria-label="Analyses per week">
-        <p className="ov-kicker">Analyses per week</p>
-        <div className="ov-bars">
-          {weeks.map((w, i) => (
-            <div key={w.label} className={'ov-bar' + (i === weeks.length - 1 ? ' now' : '')} title={`Week of ${w.label}: ${w.n} analyses`}>
+      <div className="ov-weeks" aria-label={daily ? 'Analyses per day' : 'Analyses per week'}>
+        <p className="ov-kicker">{daily ? 'Analyses per day, last 7 days' : 'Analyses per week'}</p>
+        <div className="ov-bars" style={{ gridTemplateColumns: `repeat(${bars.length}, minmax(0,1fr))` }}>
+          {bars.map((w, i) => (
+            <div key={w.key} className={'ov-bar' + (i === bars.length - 1 ? ' now' : '')} title={w.title}>
               <span className="ov-bar-n">{w.n}</span>
               <span className="ov-cap" style={{ '--k': Math.max(0.07, w.n / max), '--d': `${i * 70}ms` } as CSSProperties}></span>
               <span className="ov-bar-x">{w.label}</span>

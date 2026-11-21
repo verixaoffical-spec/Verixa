@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ApiError, api, type Assessment, type LiveEvent, type RepoPull, type RepoPulls, type Stage } from './api';
 import { keep, peek } from './cache';
 import { Detail, RiskBadge, ago, hue, initials, type Tab } from './riskParts';
+import { useToast } from './Toast';
 import AgentScene, { AgentStrip, agentOf, type AgentName } from './AgentScene';
 
 // startedAt: when the run's first step happened. Fixed for the run's life (the kept messages are capped at 30, so the first
@@ -119,6 +120,19 @@ export function Processing({ run, title, result, leaving = false, onHide }:
   );
 }
 
+/** T-089: a calm shimmer in the shape of the rows to come, instead of a bare "Loading". */
+export function Skeleton({ rows = 4, label }: { rows?: number; label: string }) {
+  return (
+    <div className="skel" role="status" aria-label={label}>
+      {Array.from({ length: rows }, (_, i) => (
+        <div key={i} className="skel-row" style={{ animationDelay: `${i * 90}ms` }}>
+          <i className="skel-a"></i><i className="skel-b"></i><i className="skel-c"></i><i className="skel-d"></i>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 interface Props {
   active: boolean;
   items: Assessment[];
@@ -138,6 +152,19 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
   const [branch, setBranch] = useState('');
   const branchNow = useRef('');  // the selection an answer must match, so a slow answer for another branch is not shown
   const [branches, setBranches] = useState<RepoPulls['branches']>(() => data?.branches ?? []);
+  const toast = useToast();
+  const [analysing, setAnalysing] = useState<number | null>(null);  // T-089: Analyse now from inside a pull request
+  // T-089: score one pull request now, the same as Analyse now on the Overview; the live card shows the run as it goes
+  async function analyseNow(number: number) {
+    setAnalysing(number);
+    try {
+      await api.analysePr(number);  // the run-finished toast (RiskView) says how it went
+    } catch (e) {
+      toast((e instanceof ApiError ? e.message : 'The analysis could not be started').slice(0, 200));
+    } finally {
+      setAnalysing(null);
+    }
+  }
 
   const save = (next: RepoPulls) => {
     keep(cacheKey(next.branch ?? ''), next);
@@ -186,6 +213,13 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
     return words ? all.filter(p => `${p.number} ${p.title ?? ''} ${p.author ?? ''}`.toLowerCase().includes(words)) : all;
   }, [data, q]);
   const shown = useShownRuns(live);  // T-089: a finished run stays a moment with its result, then folds away
+  // T-089: open pull requests whose newest commit (from GitHub's list) Verixa never analysed, pushed between 3 minutes and a
+  // day ago. A delivery is analysed within seconds, so these mean GitHub's deliveries are not reaching this server.
+  const missed = useMemo(() => (data?.items ?? []).filter(p => {
+    const age = p.updated_at ? Date.now() - Date.parse(p.updated_at) : NaN;
+    return p.state === 'open' && !!p.head_sha && age > 3 * 60_000 && age < 86_400_000
+      && !items.some(a => a.pr_number === p.number && a.head_sha === p.head_sha) && !live.some(r => r.pr === p.number && !r.done);
+  }), [data, items, live]);
 
   return (
     <div className="rgrid">
@@ -213,9 +247,22 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
           </p>
         </div>
         {error && <div className="warnbox prs-warn" role="alert">{error}</div>}
+        {missed.length > 0 && (
+          <div className="prs-missed" role="status">
+            <span className="prs-missed-ico" aria-hidden="true">!</span>
+            <div>
+              <b>GitHub has {missed.length === 1 ? 'a commit' : `${missed.length} commits`} Verixa did not receive</b>
+              <span>{missed.slice(0, 3).map(p => `#${p.number}`).join(', ')}{missed.length > 3 ? ' and more' : ''}: pushed on GitHub, never
+                analysed here. The webhook may be sending to an old address. Reconnect the repository in Integrations, or analyse it now.</span>
+            </div>
+            <button className="btn sm" disabled={analysing !== null} onClick={() => analyseNow(missed[0].number)}>
+              {analysing === missed[0].number ? 'Analysing…' : `Analyse #${missed[0].number}`}
+            </button>
+          </div>
+        )}
 
         {!data && error ? null : !data ? (
-          <div className="empty"><b>Loading</b>Reading the saved pull requests.</div>
+          <Skeleton rows={5} label="Reading the saved pull requests" />
         ) : !data.items.length && branch ? (
           <div className="empty"><b>No pull requests on {branch}</b>No saved pull request comes from or goes into this branch.</div>
         ) : !data.items.length ? (
@@ -256,8 +303,11 @@ export default function PullRequests({ active, items, live, onGo }: Props) {
                     </tr>
                     {isOpen && (a ? <Detail row={a} history={items.filter(r => r.pr_number === p.number)} onGo={tab => onGo(tab, a.id)} /> : (
                       <tr><td className="rdetail" colSpan={5}><div className="rdetail-in">
-                        <p className="muted">Verixa has not analysed this pull request. It is analysed when GitHub delivers a push to it, or with Analyse now on the Overview.</p>
+                        <p className="muted">Verixa has not analysed this pull request. It is analysed when GitHub delivers a push to it, or right here.</p>
                         <div className="rmeta">
+                          <button className="btn sm" disabled={analysing !== null} onClick={e => { e.stopPropagation(); analyseNow(p.number); }}>
+                            {analysing === p.number ? 'Analysing…' : 'Analyse now'}
+                          </button>
                           {p.created_at && <span className="muted">opened {ago(p.created_at)} by {p.author ?? 'unknown'}</span>}
                           {p.url && <a className="btn ghost sm" href={p.url} target="_blank" rel="noopener noreferrer">Open on GitHub</a>}
                         </div>
