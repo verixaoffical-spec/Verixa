@@ -5,6 +5,7 @@
  *   Test     — finding defects and executing: test cases run one by one, one fails and a target locks on to it.
  * The agent shown is read from the real event name, never guessed. The Test agent's scene shows once it sends steps.
  */
+import type { CSSProperties } from 'react';
 import type { LiveEvent } from './api';
 
 export type AgentName = 'manager' | 'analysis' | 'test';
@@ -24,14 +25,30 @@ export function agentOf(m: LiveEvent | undefined): AgentName {
   return 'manager';
 }
 
+// The supervisor as a control hub: three workers on a ring report in along their spokes; each report lands as a soft
+// beat from the core (validation); one arc scans the ring. Node i sits at angle -90 + 120*i on radius 78; spokes end at 40, outside the core.
+const HUB = [-90, 30, 150].map(deg => {
+  const a = (deg * Math.PI) / 180;
+  return { x: 100 + 78 * Math.cos(a), y: 100 + 78 * Math.sin(a), dx: -38 * Math.cos(a), dy: -38 * Math.sin(a) };
+});
+
 function Manager() {
   return (
     <>
-      <span className="ag-sweep"></span>
-      <span className="ag-halo"></span>
-      <span className="ag-orbit">
-        {[0, 1, 2].map(i => <span key={i} className={'ag-sat s' + i}><i></i></span>)}
-      </span>
+      <svg className="ag-mgr" viewBox="0 0 200 200">
+        <circle className="ring-o" cx="100" cy="100" r="95" />
+        <circle className="ring-m" cx="100" cy="100" r="78" />
+        <circle className="scan" cx="100" cy="100" r="78" pathLength={100} />
+        <circle className="beat" cx="100" cy="100" r="40" />
+        {HUB.map((n, i) => (
+          <g key={i} className={'hub n' + i}>
+            <line className="spoke" x1={n.x} y1={n.y} x2={n.x + n.dx} y2={n.y + n.dy} />
+            <circle className="pulse" cx={n.x} cy={n.y} r="2.4" style={{ '--dx': `${n.dx}px`, '--dy': `${n.dy}px` } as CSSProperties} />
+            <circle className="node" cx={n.x} cy={n.y} r="8.5" />
+            <circle className="node-in" cx={n.x} cy={n.y} r="3" />
+          </g>
+        ))}
+      </svg>
       <span className="ag-core mgr">
         <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.4-3 8.3-7 9.5C8 19.3 5 15.4 5 11V6z" /><path d="M9 12l2 2 4-4" /></svg>
       </span>

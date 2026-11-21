@@ -147,7 +147,7 @@ test('a live run: each agent has its own scene, Live runs follows it, stages fil
   await expect(proc.locator('.ag-test.on')).toHaveCount(0);          // negative: no Test agent steps exist yet
   // the scenes cross-fade, and each agent's scene moves in its own way
   expect(parseFloat(await style(page, '.ag-scene', 'transition-duration'))).toBeGreaterThan(0);
-  expect(await proc.locator('.ag-sweep').evaluate(el => getComputedStyle(el).animationName)).toBe('ag-turn');
+  expect(await proc.locator('.ag-mgr .scan').evaluate(el => getComputedStyle(el).animationName)).toBe('ag-turn');
   expect(await proc.locator('.ag-dial').evaluate(el => getComputedStyle(el).animationName)).toBe('ag-score');
   expect(await proc.locator('.ag-cases i').first().evaluate(el => getComputedStyle(el).animationName)).toBe('ag-pass');
   const leave = await proc.locator('.ag-manager').evaluate(el => getComputedStyle(el).transform);

@@ -148,19 +148,27 @@
 .ag-test:not(.on){transform:rotateY(80deg) scale(.85);filter:blur(6px);}
 
 /* Manager: a shielded core, its workers in orbit reporting back, a radar sweep over all of it */
-.ag-sweep{width:190px;height:190px;border-radius:50%;border:1px dashed hsl(var(--accent)/.3);
-          background:conic-gradient(from 0deg,transparent 0deg,hsl(var(--accent)/.32) 50deg,transparent 52deg);animation:ag-turn 7s linear infinite;}
-.ag-halo{width:96px;height:96px;border-radius:50%;}
-.ag-halo::before,.ag-halo::after{content:"";position:absolute;inset:0;border-radius:50%;border:1.5px solid hsl(var(--accent)/.55);animation:ag-halo 3.8s cubic-bezier(.22,1,.36,1) infinite;}
-.ag-halo::after{animation-delay:1.9s;}
-.ag-orbit{width:0;height:0;animation:ag-turn 24s linear infinite;}
-.ag-sat{position:absolute;left:0;top:0;width:0;height:0;}
-.ag-sat.s0{transform:rotate(0deg);} .ag-sat.s1{transform:rotate(120deg);} .ag-sat.s2{transform:rotate(240deg);}
-.ag-sat::before{content:"";position:absolute;left:-9px;top:-92px;width:18px;height:18px;border-radius:6px;background:linear-gradient(150deg,hsl(var(--accent-2)),hsl(var(--accent-2)/.6));
-                box-shadow:0 0 14px hsl(var(--accent-2)/.7);}
-.ag-sat i{position:absolute;left:-1px;top:-72px;width:2px;height:36px;background:linear-gradient(hsl(var(--accent-2)/.05),hsl(var(--accent-2)/.55));}
-.ag-sat i::after{content:"";position:absolute;left:-1px;top:0;width:4px;height:9px;border-radius:2px;background:#fff;box-shadow:0 0 8px hsl(var(--accent-2));animation:ag-report 2.8s cubic-bezier(.4,0,.2,1) infinite;}
-.ag-sat.s1 i::after{animation-delay:.93s;} .ag-sat.s2 i::after{animation-delay:1.86s;}
+/* Manager: a control hub. Workers on a ring (Analysis teal, Test green, Report purple) report in along their spokes,
+   each report lands as a soft beat from the core, one arc scans the ring, the outer ring drifts. */
+.ag-mgr{width:210px !important;height:210px !important;overflow:visible;}
+.ag-mgr .ring-o{fill:none;stroke:hsl(var(--accent)/.28);stroke-width:1;stroke-dasharray:1.5 5;transform-origin:100px 100px;animation:ag-turn 60s linear infinite;}
+.ag-mgr .ring-m{fill:none;stroke:hsl(var(--foreground)/.1);stroke-width:1;}
+.ag-mgr .scan{fill:none;stroke:hsl(var(--accent));stroke-width:2;stroke-linecap:round;stroke-dasharray:14 86;transform-origin:100px 100px;
+              filter:drop-shadow(0 0 4px hsl(var(--accent)/.8));animation:ag-turn 8s linear infinite;}
+.ag-mgr .beat{fill:none;stroke:hsl(var(--accent)/.55);stroke-width:1.2;transform-origin:100px 100px;animation:mgr-beat 3s cubic-bezier(.22,1,.36,1) infinite .9s;}
+.ag-mgr .hub{--c:hsl(var(--accent-2));}
+.ag-mgr .hub.n1{--c:hsl(var(--success));}
+.ag-mgr .hub.n2{--c:hsl(var(--accent));}
+.ag-mgr .spoke{stroke:var(--c);stroke-opacity:.35;stroke-width:1;stroke-dasharray:2 3;}
+.ag-mgr .node{fill:#0d0d14;stroke:var(--c);stroke-width:1.5;filter:drop-shadow(0 0 5px var(--c));}
+.ag-mgr .node-in{fill:var(--c);animation:mgr-node 3s ease-in-out infinite;}
+.ag-mgr .pulse{fill:#fff;opacity:0;filter:drop-shadow(0 0 3px var(--c));animation:mgr-pulse 3s cubic-bezier(.4,0,.6,1) infinite;}
+.ag-mgr .hub.n1 .pulse,.ag-mgr .hub.n1 .node-in{animation-delay:1s;}
+.ag-mgr .hub.n2 .pulse,.ag-mgr .hub.n2 .node-in{animation-delay:2s;}
+:root[data-theme="light"] .ag-mgr .node{fill:#fff;}
+@keyframes mgr-pulse{0%{transform:translate(0,0);opacity:0;}15%{opacity:1;}70%{transform:translate(var(--dx),var(--dy));opacity:1;}85%,100%{transform:translate(var(--dx),var(--dy));opacity:0;}}
+@keyframes mgr-beat{0%{transform:scale(1);opacity:0;}8%{opacity:.9;}100%{transform:scale(1.55);opacity:0;}}
+@keyframes mgr-node{0%,100%{opacity:.55;}20%{opacity:1;}}
 .ag-core{display:grid;place-items:center;border-radius:20px;color:#fff;}
 .ag-core.mgr{width:66px;height:66px;background:linear-gradient(150deg,hsl(var(--accent)),hsl(249 60% 42%));
              box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 6px hsl(var(--accent)/.14),0 14px 34px -8px hsl(var(--accent)/.85);animation:ag-breathe 4s ease-in-out infinite;}
@@ -203,8 +211,6 @@
 .ag-core.tst svg{width:15px;height:15px;fill:#fff;stroke:none;margin-left:2px;}
 
 @keyframes ag-turn{to{transform:rotate(360deg);}}
-@keyframes ag-halo{0%{opacity:.8;transform:scale(.7);}100%{opacity:0;transform:scale(1.6);}}
-@keyframes ag-report{0%{top:-4px;opacity:0;}20%{opacity:1;}100%{top:36px;opacity:0;}}
 @keyframes ag-breathe{50%{transform:scale(1.06);}}
 @keyframes ag-score{0%{--ag-fill:21.6deg;}45%{--ag-fill:280.8deg;}70%{--ag-fill:172.8deg;}100%{--ag-fill:252deg;}}
 @keyframes ag-needle{0%{transform:rotate(21.6deg);}45%{transform:rotate(280.8deg);}70%{transform:rotate(172.8deg);}100%{transform:rotate(252deg);}}
@@ -253,3 +259,4 @@
                  background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:ag-sheen 5.5s ease-in-out infinite 1s;}
 @keyframes ag-sheen{0%,70%{left:-60%;}100%{left:130%;}}
 @media (prefers-reduced-motion:reduce){.ag-scene.on,.ag-core::before{animation:none;}}
+:root[data-theme="light"] .ag-mgr .pulse{fill:var(--c);}
