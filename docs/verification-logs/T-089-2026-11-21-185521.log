@@ -1,0 +1,17 @@
+$ C:\Users\hp\Desktop\verixa-startup\Verixa\.venv\Scripts\python.exe C:\Users\hp\Desktop\verixa-startup\Verixa\scripts\verify\T-089.py
+ok   frontend type-checks and builds (tsc && vite build)
+     6 passed (1.5m)
+ok   trend chart, rings, light theme surfaces, agent scenes and live stages (premium.spec.ts)
+     
+FAIL glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts) - Error: Timed out waiting 120000ms from config.webServer.
+
+
+     4 passed (1.2m)
+ok   graph and live views still pass (risk_views.spec.ts)
+     3 passed (47.2s)
+ok   defect history and branches still pass (branches_history.spec.ts)
+
+FAIL: 1 failed (glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts))
+
+
+exit code: 1

@@ -13,8 +13,8 @@ Asserts:
        every other stage is green with its time and the track is full.
      Negative: no Test agent scene is shown (the Test agent sends no steps yet); a pull request with no saved steps
      has no green or grey stage and an empty track.
-  2. The earlier Risk browser tests still pass (refinements, UI consistency, Pull Requests, layout, views, charts,
-     branches and history), and the frontend type-checks and builds. agents.spec.ts is run on its own (see below).
+  2. The Live runs layout, graph and live views, and branches and history tests still pass, and the frontend
+     type-checks and builds. The other Risk suites run in their own tasks' checks (see below).
 """
 import os, re, shutil, subprocess, sys
 
@@ -53,14 +53,11 @@ check("frontend type-checks and builds (tsc && vite build)", r.returncode == 0, 
 # one project at a time: they share the seeded server's data
 for project, label in (("premium", "trend chart, rings, light theme surfaces, agent scenes and live stages (premium.spec.ts)"),
                        ("refine", "glass tab indicator and Live runs and logs layout still pass (refinements.spec.ts)"),
-                       ("ui", "UI consistency still passes (ui_consistency.spec.ts)"),
-                       ("prs", "Pull Requests section still passes (pull_requests.spec.ts)"),
-                       ("layout", "page layout still passes (risk_layout.spec.ts)"),
                        ("views", "graph and live views still pass (risk_views.spec.ts)"),
-                       ("risk", "risk charts still pass (risk_charts.spec.ts)"),
                        ("branches", "defect history and branches still pass (branches_history.spec.ts)")):
-    # agents.spec.ts (the `controlled` project, 4-7 minutes) is left out: with it the run passes the runner's 900 s limit.
-    # It was run on its own for this task (33 passed) and stays in the earlier tasks' checks.
+    # Trimmed to fit run.py's 900 s on this machine (agreed with the user, 2026-11-21): agents.spec.ts (controlled),
+    # ui_consistency, pull_requests, risk_layout and risk_charts are left out here. They keep their own checks
+    # (T-095..T-098, agents in T-035/T-096) and all passed on this branch on 2026-11-21 (agents 33/33).
     r = subprocess.run([npx, "playwright", "test", f"--project={project}", "--reporter=line"], cwd=E2E,
                        capture_output=True, text=True, timeout=900, env=env)
     out = r.stdout + r.stderr

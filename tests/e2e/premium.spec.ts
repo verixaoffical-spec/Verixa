@@ -204,7 +204,7 @@ test('follow-up: Analyse now inside a pull request, the last run on the webhook 
   // skeleton while the saved lists are read (the answer is held back a moment so it can be seen)
   let held = false;  // only the first read is held back
   await page.route('**/api/analysis/pull-requests?limit=200', async route => {
-    if (!held) { held = true; await new Promise(r => setTimeout(r, 1500)); }
+    if (!held) { held = true; await new Promise(r => setTimeout(r, 5000)); }  // long enough to open the tab on a slow run
     await route.continue();
   });
   await page.goto('/verixa_prototype.html#risk');
@@ -235,5 +235,22 @@ test('follow-up: Analyse now inside a pull request, the last run on the webhook 
 
   // negative: the seed's pull requests were all updated days ago, so no "commits Verixa did not receive" notice
   await expect(section.locator('.prs-missed')).toHaveCount(0);
+  expect(problems).toEqual([]);
+});
+
+test('missed commits: an open pull request whose new commit GitHub has but Verixa never analysed is called out', async ({ browser, baseURL }) => {
+  const { page, problems } = await signIn(browser, 'demo@verixa.dev', baseURL!);
+  // GitHub's list says PR 7 got a new commit 10 minutes ago that no analysis has (the webhook never delivered it)
+  await page.route('**/api/analysis/repo-pulls*', async route => {
+    const json = await (await route.fetch()).json();
+    for (const p of json.items) if (p.number === 7) Object.assign(p, { state: 'open', head_sha: 'f'.repeat(40), updated_at: new Date(Date.now() - 10 * 60_000).toISOString() });
+    await route.fulfill({ json });
+  });
+  await openRisk(page, 'Pull Requests');
+  const notice = page.getByRole('tabpanel', { name: 'Pull Requests' }).locator('.prs-missed');
+  await expect(notice).toBeVisible();
+  await expect(notice).toContainText('GitHub has a commit Verixa did not receive');
+  await expect(notice).toContainText('#7');
+  await expect(notice.getByRole('button', { name: 'Analyse #7' })).toBeEnabled();
   expect(problems).toEqual([]);
 });

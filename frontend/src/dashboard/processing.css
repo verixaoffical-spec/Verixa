@@ -174,3 +174,8 @@ td.rdetail h4{margin-bottom:9px;}
 .prs-missed .btn{flex:none;}
 @media (max-width:760px){.prs-missed{flex-wrap:wrap;}}
 @media (prefers-reduced-motion:reduce){.skel-row,.skel-row i,.prs-missed{animation:none;}}
+
+/* Pull Requests toolbar: branch, search and refresh share one height and centre line (risk.css loads after, hence .prs-head) */
+.prs-head .prs-tools{align-items:center;}
+.prs-head .prs-tools > *{height:36px;box-sizing:border-box;margin:0;}
+.prs-head .prs-tools > .btn{display:inline-flex;align-items:center;padding-top:0;padding-bottom:0;}
