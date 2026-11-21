@@ -123,3 +123,5 @@ Latest row per task counts. A task is verified only if the latest row is PASS an
 | T-089 | 2026-11-21 | auto | scripts\verify\T-089.py | FAIL | docs/verification-logs/T-089-2026-11-21-183015.log | 63ab92e389d324b3f48e94c7cae4158d7514b18cbfa5d81aa52ed2eaed7d9d67 |
 | T-089 | 2026-11-21 | auto | scripts\verify\T-089.py | FAIL | docs/verification-logs/T-089-2026-11-21-185521.log | 0e7f01a0304d0998f7f13e4ea23c69e67a51c6d5dd378989b7dc14194bae3b0b |
 | T-089 | 2026-11-21 | auto | scripts\verify\T-089.py | PASS | docs/verification-logs/T-089-2026-11-21-190231.log | 1664cfceac3e7883e6ea0aa9b207532019cb9a0cada5f1905fff9a703ea3e907 |
+| T-089 | 2026-11-21 | auto | scripts\verify\T-089.py | PASS | docs/verification-logs/T-089-2026-11-21-200226.log | 0214537d8f47a95801b094a2f13415c7917b384ebfd8a15319ce749e7b3ef5db |
+| T-089 | 2026-11-21 | auto | scripts\verify\T-089.py | PASS | docs/verification-logs/T-089-2026-11-21-201350.log | 0604e15ccf3491a595304e4184e872ec063cb78b0c34063646a167733825768c |

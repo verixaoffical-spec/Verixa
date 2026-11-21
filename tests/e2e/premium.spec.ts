@@ -52,7 +52,7 @@ test('Overview: the trend chart counts the saved analyses, compares a day on hov
   await expect(chart.locator('.rtrend-sum')).toContainText(`${expected.d14.flagged} flagged`);
   await expect(chart.locator('.rtrend-line')).toHaveCount(2);
   await expect(chart.locator('.rtrend-area')).toHaveCount(2);
-  expect((await chart.locator('svg.rtrend-svg').boundingBox())!.width).toBeGreaterThan(600);  // not the 16px icon size
+  expect((await chart.locator('svg.rtrend-svg').boundingBox())!.width).toBeGreaterThan(400);  // not the 16px icon size (half width now)
 
   // hover the last day (today): the guide and the tooltip compare both series
   const plot = chart.locator('.rtrend-plot');

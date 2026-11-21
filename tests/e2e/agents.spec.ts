@@ -118,6 +118,7 @@ test.describe('showing what the agents saved', () => {
 
 test.describe('running the agents from the Analyse now box', () => {
   test('only whole numbers can be entered', async () => {
+    await page.getByRole('tab', { name: 'Pull Requests', exact: true }).click();  // Analyse now lives there (T-089)
     const box = page.getByLabel('Pull request number');
     await expect(page.getByRole('button', { name: 'Analyse now' })).toBeDisabled();
     await box.pressSequentially('abc-1.5e');
@@ -142,7 +143,7 @@ test.describe('running the agents from the Analyse now box', () => {
   });
 
   test('the screen shows it is working, and blocks a second click', async () => {
-    await analyse(page, 112);
+    await analyse(page, 112, true);  // stay on the Pull Requests tab, where the box and its hint are
     await expect(page.getByRole('button', { name: 'Analysing…' })).toBeDisabled();
     await expect(page.getByText('The agent is reading the diff')).toBeVisible();
     await expect(page.getByText('#112 scored High')).toBeVisible({ timeout: 20_000 });
@@ -208,7 +209,7 @@ test.describe('running the agents from the Analyse now box', () => {
   });
 
   test('AT-18 a pull request GitHub cannot serve gives a message and no row', async () => {
-    await analyse(page, 109);
+    await analyse(page, 109, true);  // stay with the Analyse now box (Pull Requests tab) to see it enabled again
     await expect(page.getByText('404 Not Found', { exact: false })).toBeVisible({ timeout: 20_000 });
     await expect(rowOf(page, 109)).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Analyse now' })).toBeEnabled();

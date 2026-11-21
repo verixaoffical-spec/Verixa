@@ -271,6 +271,22 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
 
       {/* T-096: every view stays mounted, so switching back shows what it already read without asking again */}
       <div className="rpanel" role="tabpanel" aria-label="Pull Requests" hidden={tab !== 'prs'}>
+        {/* T-089: Analyse now lives with the pull requests it scores (it was on the Overview) */}
+          <section className="rcard" aria-label="Analyse a pull request">
+            <h2 className="rcard-title">Analyse a pull request</h2>
+            <div className="risk-ask">
+              <input value={prNumber} onChange={e => setPrNumber(e.target.value.replace(/\D/g, '').slice(0, 7))}
+                     onKeyDown={e => { if (e.key === 'Enter' && !busy) analyse(); }}
+                     placeholder="PR #" aria-label="Pull request number" inputMode="numeric" disabled={busy} />
+              <button className="btn" onClick={analyse} disabled={busy || !prNumber.trim()}>
+                {busy ? 'Analysing…' : 'Analyse now'}
+              </button>
+              <span className="hint">
+                {busy ? 'The agent is reading the diff and scoring it. This takes a few seconds.'
+                      : 'Scores a pull request without waiting for a webhook delivery.'}
+              </span>
+            </div>
+          </section>
         <PullRequests active={!hidden && tab === 'prs'} items={items} live={liveRuns}
                       onGo={(next, id) => { if (id) setOpen(id); go(next); }} />
       </div>
@@ -284,7 +300,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         {hook !== 'ok' && (
           <div className="warnbox">
             GitHub has not delivered anything to this webhook yet, so nothing will arrive on its own.
-            Check Integrations, or score a pull request by number below.
+            Check Integrations, or score a pull request by number on the Pull Requests tab.
           </div>
         )}
         {failed && (
@@ -333,27 +349,11 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
           })}
         </div>
 
-        {feed && items.length > 0 && <RiskTrend items={items} />}
 
-        <section className="rcard" aria-label="Analyse a pull request">
-          <h2 className="rcard-title">Analyse a pull request</h2>
-          <div className="risk-ask">
-            <input value={prNumber} onChange={e => setPrNumber(e.target.value.replace(/\D/g, '').slice(0, 7))}
-                   onKeyDown={e => { if (e.key === 'Enter' && !busy) analyse(); }}
-                   placeholder="PR #" aria-label="Pull request number" inputMode="numeric" disabled={busy} />
-            <button className="btn" onClick={analyse} disabled={busy || !prNumber.trim()}>
-              {busy ? 'Analysing…' : 'Analyse now'}
-            </button>
-            <span className="hint">
-              {busy ? 'The agent is reading the diff and scoring it. This takes a few seconds.'
-                    : 'Scores a pull request without waiting for a webhook delivery.'}
-            </span>
-          </div>
-        </section>
 
         <LivePanel runs={liveRuns.filter(r => r.done)} onClose={pr => setLiveRuns(runs => runs.filter(r => r.pr !== pr))} />
 
-        {feed && items.length > 0 && <RiskCharts items={items} counts={counts} />}
+        {feed && items.length > 0 && <RiskCharts items={items} counts={counts} trend={<RiskTrend items={items} />} />}
 
         <section className="rcard rtable" aria-label="Pull Requests">
           <h2 className="rcard-title">Pull Requests</h2>
@@ -362,7 +362,7 @@ export default function RiskView({ hidden, link, hook, onGoConnect }: Props) {
         ) : !items.length ? (
           <div className="empty">
             <b>No pull requests analysed yet</b>
-            Open or push to a pull request on {link.repo}, or enter its number above and press Analyse now.
+            Open or push to a pull request on {link.repo}, or score it by number on the Pull Requests tab.
           </div>
         ) : (
           <div className="tablewrap">

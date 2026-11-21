@@ -100,13 +100,14 @@ function Agents({ ready, working }: { ready: boolean; working: AgentName | null 
   const on = (k: AgentName) => k === 'manager' || (k === 'analysis' && ready);  // the Test agent is not built yet
   return (
     <section className="rcard ov-agents" aria-label="Agents">
-      <header><h2>Agents</h2><span className="ov-on">{AGENT_ROWS.filter(a => on(a.key)).length} on</span></header>
+      <header><h2>Agents</h2><span className="ov-on">{AGENT_ROWS.filter(a => on(a.key)).length} active</span></header>
       <ul>
         {AGENT_ROWS.map(a => (
           <li key={a.key} className={a.key + (working === a.key ? ' working' : '')}>
             <span className="ov-ico" aria-hidden="true">{a.icon}</span>
             <span className="ov-txt"><b>{a.name}{working === a.key && <em>working</em>}</b><small>{a.what}</small></span>
-            <span className={'ov-switch' + (on(a.key) ? ' on' : '')} role="img" aria-label={on(a.key) ? 'On' : 'Off'}><i></i></span>
+            {/* a status, not a control: nothing here turns an agent on or off */}
+            <span className={'ov-state' + (on(a.key) ? ' on' : '')}>{on(a.key) ? 'Active' : 'Not built yet'}</span>
           </li>
         ))}
       </ul>

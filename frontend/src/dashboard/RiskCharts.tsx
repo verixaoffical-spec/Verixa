@@ -2,7 +2,7 @@
  * invented. Design follows the approved prototype: risk shapes (triangle, diamond, circle) plus words, never colour
  * alone; each chart has a legend, hover/focus details, and the per-day chart can be read as a table.
  */
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Assessment, RiskFeed, RiskLabel } from './api';
 
 export const RISKS: RiskLabel[] = ['High', 'Medium', 'Low'];
@@ -263,7 +263,7 @@ function PerDay({ days }: { days: Day[] }) {
   );
 }
 
-export function RiskCharts({ items, counts }: { items: Assessment[]; counts: RiskFeed['counts'] }) {
+export function RiskCharts({ items, counts, trend }: { items: Assessment[]; counts: RiskFeed['counts']; trend?: ReactNode }) {
   const latest = latestPerPr(items);
   const issues = issueTypes(latest);
   const imax = Math.max(1, ...issues.map(i => i.High + i.Medium + i.Low));
@@ -310,7 +310,11 @@ export function RiskCharts({ items, counts }: { items: Assessment[]; counts: Ris
         </section>
       </div>
 
-      <PerDay days={perDay(items)} />
+      {/* T-089: the two charts over time side by side, one even row, under the three part charts */}
+      <div className="rcharts-pair">
+        {trend}
+        <PerDay days={perDay(items)} />
+      </div>
     </div>
   );
 }

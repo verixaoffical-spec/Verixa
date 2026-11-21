@@ -179,3 +179,22 @@ td.rdetail h4{margin-bottom:9px;}
 .prs-head .prs-tools{align-items:center;}
 .prs-head .prs-tools > *{height:36px;box-sizing:border-box;margin:0;}
 .prs-head .prs-tools > .btn{display:inline-flex;align-items:center;padding-top:0;padding-bottom:0;}
+
+/* Agents card: a status pill per agent (the old switch looked clickable but did nothing) */
+.ov-state{flex:none;display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap;
+          color:hsl(var(--muted-foreground));background:hsl(var(--foreground)/.06);border:1px solid var(--hair);}
+.ov-state::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;opacity:.6;}
+.ov-state.on{color:#5FD199;background:hsl(var(--success)/.12);border-color:hsl(var(--success)/.3);}
+.ov-state.on::before{opacity:1;box-shadow:0 0 6px currentColor;}
+:root[data-theme="light"] .ov-state.on{color:#15803D;}
+/* Analyse a pull request, now at the top of the Pull Requests tab */
+.rpanel > section[aria-label="Analyse a pull request"]{margin-bottom:16px;}
+
+/* T-089 Overview charts in an even grid: three part charts of one size, then the two charts over time side by side */
+.rgrid .rcharts{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;}
+.rcharts > .rchart.wide{grid-column:auto;}
+.rcharts > .rchart > .ckind-body,.rcharts > .rchart > .rissues{flex:1;display:flex;flex-direction:column;justify-content:center;}
+.rcharts-pair{display:grid;grid-template-columns:minmax(0,1fr);gap:16px;min-width:0;}  /* both full width, together (T-097 keeps Analyses per day full width) */
+.rcharts-pair > .rchart{min-width:0;}
+.rcharts-pair .rday .rbars{gap:clamp(4px,1vw,14px);}
+@media (max-width:1100px){.rgrid .rcharts,.rcharts-pair{grid-template-columns:1fr;}}

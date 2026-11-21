@@ -22,7 +22,7 @@ test('tabs sit at the top, the overview is cards in order, and the numbers are t
 
   // order on the page: tabs, title, KPI cards, Analyse card, charts, pull request table
   const ys = [await top(page, '.rnav'), await top(page, '.rpage-head h1'), await top(page, '.risk-stats'),
-              await top(page, '[aria-label="Analyse a pull request"]'), await top(page, '[aria-label="Risk charts"]'),
+              await top(page, '[aria-label="Risk charts"]'),  // T-089: Analyse a pull request moved to the Pull Requests tab
               await top(page, '[aria-label="Overview"] section.rtable')];
   expect(ys).toEqual([...ys].sort((a, b) => a - b));
   expect(ys[0]).toBeLessThan(80);

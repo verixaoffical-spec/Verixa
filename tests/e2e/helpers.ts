@@ -69,9 +69,12 @@ export const rowOf = (page: Page, number: number) => overview(page).locator(row(
 export const detailOf = (page: Page, number: number) =>
   overview(page).locator('tbody', { has: row(page, number) }).locator('.rdetail');
 
-export async function analyse(page: Page, number: number) {
+/** Analyse now sits on the Pull Requests tab (T-089). Unless asked to stay, it goes back to the Overview after, where most checks read. */
+export async function analyse(page: Page, number: number, stay = false) {
+  await page.getByRole('tab', { name: 'Pull Requests', exact: true }).click();
   await page.getByLabel('Pull request number').fill(String(number));
-  await page.getByRole('button', { name: 'Analyse now' }).click();
+  await page.getByRole('button', { name: 'Analyse now', exact: true }).first().click();
+  if (!stay) await page.getByRole('tab', { name: 'Overview', exact: true }).click();
 }
 
 export async function feed(page: Page) {
